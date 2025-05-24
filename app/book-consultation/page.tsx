@@ -37,6 +37,7 @@ export default function BookConsultationPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [isLoadingSlots, setIsLoadingSlots] = useState(false)
 
   // Load coaches on component mount
   useEffect(() => {
@@ -67,15 +68,22 @@ export default function BookConsultationPage() {
   useEffect(() => {
     if (selectedCoach && selectedDate) {
       loadAvailableSlots()
+    } else {
+      setAvailableSlots([])
+      setSelectedTime("")
     }
   }, [selectedCoach, selectedDate])
 
   const loadAvailableSlots = async () => {
+    setIsLoadingSlots(true)
+    setError(null)
+
     try {
       const response = await fetch(`/api/consultations/availability?coach_id=${selectedCoach}&date=${selectedDate}`)
 
       if (response.ok) {
         const slots = await response.json()
+        console.log("Loaded slots:", slots)
         setAvailableSlots(slots)
       } else {
         // Fallback to mock data for demo
@@ -91,6 +99,17 @@ export default function BookConsultationPage() {
     } catch (error) {
       console.error("Error loading slots:", error)
       setError("Failed to load available time slots")
+      // Fallback to mock data
+      const mockSlots = [
+        { id: "1", start_time: "09:00:00", end_time: "10:00:00" },
+        { id: "2", start_time: "10:00:00", end_time: "11:00:00" },
+        { id: "3", start_time: "14:00:00", end_time: "15:00:00" },
+        { id: "4", start_time: "15:00:00", end_time: "16:00:00" },
+        { id: "5", start_time: "16:00:00", end_time: "17:00:00" },
+      ]
+      setAvailableSlots(mockSlots)
+    } finally {
+      setIsLoadingSlots(false)
     }
   }
 
@@ -165,6 +184,21 @@ export default function BookConsultationPage() {
       minute: "2-digit",
       hour12: true,
     })
+  }
+
+  // Remove duplicates and group by time for "no preference"
+  const getUniqueTimeSlots = () => {
+    if (selectedCoach === "no-preference") {
+      const timeMap = new Map()
+      availableSlots.forEach((slot) => {
+        const timeKey = slot.start_time
+        if (!timeMap.has(timeKey)) {
+          timeMap.set(timeKey, slot)
+        }
+      })
+      return Array.from(timeMap.values()).sort((a, b) => a.start_time.localeCompare(b.start_time))
+    }
+    return availableSlots
   }
 
   if (showSuccess) {
@@ -328,23 +362,40 @@ export default function BookConsultationPage() {
                   {/* Time Selection */}
                   {selectedDate && (
                     <div>
-                      <label className="block text-sm font-medium mb-3">Available Times</label>
-                      <div className="grid grid-cols-2 gap-2">
-                        {availableSlots.map((slot) => (
-                          <button
-                            key={slot.id}
-                            type="button"
-                            onClick={() => setSelectedTime(slot.start_time)}
-                            className={`p-3 rounded-lg border text-sm transition-all ${
-                              selectedTime === slot.start_time
-                                ? "border-white bg-white/10"
-                                : "border-white/20 hover:border-white/40"
-                            }`}
-                          >
-                            {formatTime(slot.start_time)}
-                          </button>
-                        ))}
-                      </div>
+                      <label className="block text-sm font-medium mb-3">
+                        Available Times
+                        {isLoadingSlots && <span className="text-white/60 ml-2">(Loading...)</span>}
+                      </label>
+
+                      {isLoadingSlots ? (
+                        <div className="flex items-center justify-center p-8">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+                        </div>
+                      ) : getUniqueTimeSlots().length > 0 ? (
+                        <div className="grid grid-cols-2 gap-2">
+                          {getUniqueTimeSlots().map((slot) => (
+                            <button
+                              key={`${slot.start_time}-${slot.id}`}
+                              type="button"
+                              onClick={() => setSelectedTime(slot.start_time)}
+                              className={`p-3 rounded-lg border text-sm transition-all ${
+                                selectedTime === slot.start_time
+                                  ? "border-white bg-white/10"
+                                  : "border-white/20 hover:border-white/40"
+                              }`}
+                            >
+                              {formatTime(slot.start_time)}
+                              {selectedCoach === "no-preference" && slot.coach_name && (
+                                <div className="text-xs text-white/60 mt-1">{slot.coach_name}</div>
+                              )}
+                            </button>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center p-8 text-white/60">
+                          No available time slots for this date. Please select another date.
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
