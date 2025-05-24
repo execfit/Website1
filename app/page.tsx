@@ -103,7 +103,7 @@ export default function HomePage() {
     }
   }
 
-  // Enhanced carousel touch handlers
+  // Enhanced carousel touch handlers with immediate visual feedback
   const handleTouchStart = (e: React.TouchEvent) => {
     if (isTransitioning) return
     setTouchStart(e.targetTouches[0].clientX)
@@ -128,24 +128,19 @@ export default function HomePage() {
 
       if (isLeftSwipe) {
         setSwipeDirection("left")
-        // Next coach (with looping)
-        setTimeout(() => {
-          setCurrentCoachIndex((prev) => (prev + 1) % coaches.length)
-          setSwipeDirection(null)
-        }, 150) // Half of transition time
+        // Immediate index change for smoother animation
+        setCurrentCoachIndex((prev) => (prev + 1) % coaches.length)
       } else if (isRightSwipe) {
         setSwipeDirection("right")
-        // Previous coach (with looping)
-        setTimeout(() => {
-          setCurrentCoachIndex((prev) => (prev - 1 + coaches.length) % coaches.length)
-          setSwipeDirection(null)
-        }, 150) // Half of transition time
+        // Immediate index change for smoother animation
+        setCurrentCoachIndex((prev) => (prev - 1 + coaches.length) % coaches.length)
       }
 
-      // Reset transition state after animation completes
+      // Reset states after animation
       setTimeout(() => {
+        setSwipeDirection(null)
         setIsTransitioning(false)
-      }, 400)
+      }, 350)
     }
 
     // Reset touch values
@@ -157,22 +152,22 @@ export default function HomePage() {
     if (isTransitioning) return
     setIsTransitioning(true)
     setSwipeDirection("left")
+    setCurrentCoachIndex((prev) => (prev + 1) % coaches.length)
     setTimeout(() => {
-      setCurrentCoachIndex((prev) => (prev + 1) % coaches.length)
       setSwipeDirection(null)
-    }, 150)
-    setTimeout(() => setIsTransitioning(false), 400)
+      setIsTransitioning(false)
+    }, 350)
   }
 
   const prevCoach = () => {
     if (isTransitioning) return
     setIsTransitioning(true)
     setSwipeDirection("right")
+    setCurrentCoachIndex((prev) => (prev - 1 + coaches.length) % coaches.length)
     setTimeout(() => {
-      setCurrentCoachIndex((prev) => (prev - 1 + coaches.length) % coaches.length)
       setSwipeDirection(null)
-    }, 150)
-    setTimeout(() => setIsTransitioning(false), 400)
+      setIsTransitioning(false)
+    }, 350)
   }
 
   return (
@@ -443,7 +438,7 @@ export default function HomePage() {
                 </div>
               </div>
 
-              {/* Mobile Carousel */}
+              {/* Mobile Carousel - Optimized for 60fps */}
               <div className="mobile-only">
                 <div className="text-center mb-6">
                   <span className="text-white/60 text-sm">← Swipe to explore coaches →</span>
@@ -456,61 +451,87 @@ export default function HomePage() {
                     onTouchStart={handleTouchStart}
                     onTouchMove={handleTouchMove}
                     onTouchEnd={handleTouchEnd}
-                    style={{ perspective: "1000px" }}
+                    style={{
+                      perspective: "1000px",
+                      willChange: "transform",
+                      backfaceVisibility: "hidden",
+                    }}
                   >
                     {coaches.map((coach, index) => {
-                      const isActive = index === currentCoachIndex
-                      const isNext = index === (currentCoachIndex + 1) % coaches.length
-                      const isNextNext = index === (currentCoachIndex + 2) % coaches.length
-                      const isPrev = index === (currentCoachIndex - 1 + coaches.length) % coaches.length
+                      // Calculate positions relative to current index
+                      const relativeIndex = (index - currentCoachIndex + coaches.length) % coaches.length
 
-                      let transform = "translateX(100%) translateY(20px) scale(0.85) rotateY(25deg)"
+                      let transform = ""
                       let zIndex = 1
                       let opacity = 0
+                      let visibility: React.CSSProperties["visibility"] = "hidden"
 
-                      // Handle carousel exit animations
-                      if (isActive && swipeDirection === "left") {
-                        transform = "translateX(-120%) translateY(0px) scale(0.9) rotateY(-15deg)"
-                        zIndex = 15
-                        opacity = 0
-                      } else if (isActive && swipeDirection === "right") {
-                        transform = "translateX(120%) translateY(0px) scale(0.9) rotateY(15deg)"
-                        zIndex = 15
-                        opacity = 0
-                      } else if (isActive) {
-                        transform = "translateX(0%) translateY(0px) scale(1) rotateY(0deg)"
-                        zIndex = 10
-                        opacity = 1
-                      } else if (isNext) {
+                      // Only show cards that are currently visible or transitioning
+                      if (relativeIndex === 0) {
+                        // Current card
+                        if (swipeDirection === "left") {
+                          transform = "translateX(-120%) translateY(0px) scale(0.9) rotateY(-15deg)"
+                          opacity = 0
+                          zIndex = 15
+                        } else if (swipeDirection === "right") {
+                          transform = "translateX(120%) translateY(0px) scale(0.9) rotateY(15deg)"
+                          opacity = 0
+                          zIndex = 15
+                        } else {
+                          transform = "translateX(0%) translateY(0px) scale(1) rotateY(0deg)"
+                          opacity = 1
+                          zIndex = 10
+                        }
+                        visibility = "visible"
+                      } else if (relativeIndex === 1) {
+                        // Next card
                         transform = "translateX(15%) translateY(8px) scale(0.92) rotateY(8deg)"
+                        opacity = 0.9
                         zIndex = 8
-                        opacity = 0.85
-                      } else if (isNextNext) {
-                        transform = "translateX(25%) translateY(16px) scale(0.85) rotateY(15deg)"
-                        zIndex = 6
-                        opacity = 0.7
-                      } else if (isPrev) {
+                        visibility = "visible"
+                      } else if (relativeIndex === 2) {
+                        // Card after next (only show if not transitioning)
+                        if (!isTransitioning) {
+                          transform = "translateX(25%) translateY(16px) scale(0.85) rotateY(15deg)"
+                          opacity = 0.75
+                          zIndex = 6
+                          visibility = "visible"
+                        } else {
+                          // Hide during transition to prevent flicker
+                          transform = "translateX(200%) translateY(30px) scale(0.8) rotateY(30deg)"
+                          opacity = 0
+                          zIndex = 1
+                          visibility = "hidden"
+                        }
+                      } else if (relativeIndex === coaches.length - 1) {
+                        // Previous card (for right swipes)
                         transform = "translateX(-100%) translateY(10px) scale(0.9) rotateY(-15deg)"
+                        opacity = 0
                         zIndex = 5
-                        opacity = 0
+                        visibility = "hidden"
                       } else {
+                        // Hidden cards
                         transform = "translateX(200%) translateY(30px) scale(0.8) rotateY(30deg)"
-                        zIndex = 1
                         opacity = 0
+                        zIndex = 1
+                        visibility = "hidden"
                       }
-
-                      const transitionDuration = isTransitioning ? "300ms" : "500ms"
 
                       return (
                         <div
-                          key={`${coach.id}-${currentCoachIndex}`} // Force re-render on index change
+                          key={coach.id}
                           className="absolute inset-0 cursor-grab active:cursor-grabbing"
                           style={{
                             transform,
                             zIndex,
                             opacity,
+                            visibility: visibility as React.CSSProperties["visibility"],
                             transformStyle: "preserve-3d",
-                            transition: `all ${transitionDuration} cubic-bezier(0.25, 0.46, 0.45, 0.94)`,
+                            transition: isTransitioning
+                              ? "all 350ms cubic-bezier(0.4, 0.0, 0.2, 1)"
+                              : "all 500ms cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+                            willChange: "transform, opacity",
+                            backfaceVisibility: "hidden",
                           }}
                         >
                           <div className="w-full h-full bg-gradient-to-br from-black/80 to-black/60 backdrop-blur-md border border-white/20 rounded-xl p-6 shadow-2xl flex flex-col">
@@ -522,6 +543,7 @@ export default function HomePage() {
                                 width={80}
                                 height={80}
                                 className="w-full h-full object-cover"
+                                priority={relativeIndex <= 1}
                               />
                             </div>
 
@@ -568,11 +590,11 @@ export default function HomePage() {
                           if (!isTransitioning) {
                             setIsTransitioning(true)
                             setSwipeDirection("left")
+                            setCurrentCoachIndex(index)
                             setTimeout(() => {
-                              setCurrentCoachIndex(index)
                               setSwipeDirection(null)
-                            }, 150)
-                            setTimeout(() => setIsTransitioning(false), 400)
+                              setIsTransitioning(false)
+                            }, 350)
                           }
                         }}
                         className={`w-2 h-2 rounded-full transition-all duration-300 ${
