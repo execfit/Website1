@@ -14,6 +14,7 @@ export default function HomePage() {
   const [touchStart, setTouchStart] = useState(0)
   const [touchEnd, setTouchEnd] = useState(0)
   const [isTransitioning, setIsTransitioning] = useState(false)
+  const [swipeDirection, setSwipeDirection] = useState<"left" | "right" | null>(null)
 
   const coaches = [
     {
@@ -102,11 +103,12 @@ export default function HomePage() {
     }
   }
 
-  // Enhanced touch handlers for mobile swipe with looping
+  // Enhanced carousel touch handlers
   const handleTouchStart = (e: React.TouchEvent) => {
     if (isTransitioning) return
     setTouchStart(e.targetTouches[0].clientX)
     setTouchEnd(e.targetTouches[0].clientX)
+    setSwipeDirection(null)
   }
 
   const handleTouchMove = (e: React.TouchEvent) => {
@@ -125,11 +127,19 @@ export default function HomePage() {
       setIsTransitioning(true)
 
       if (isLeftSwipe) {
+        setSwipeDirection("left")
         // Next coach (with looping)
-        setCurrentCoachIndex((prev) => (prev + 1) % coaches.length)
+        setTimeout(() => {
+          setCurrentCoachIndex((prev) => (prev + 1) % coaches.length)
+          setSwipeDirection(null)
+        }, 150) // Half of transition time
       } else if (isRightSwipe) {
+        setSwipeDirection("right")
         // Previous coach (with looping)
-        setCurrentCoachIndex((prev) => (prev - 1 + coaches.length) % coaches.length)
+        setTimeout(() => {
+          setCurrentCoachIndex((prev) => (prev - 1 + coaches.length) % coaches.length)
+          setSwipeDirection(null)
+        }, 150) // Half of transition time
       }
 
       // Reset transition state after animation completes
@@ -146,14 +156,22 @@ export default function HomePage() {
   const nextCoach = () => {
     if (isTransitioning) return
     setIsTransitioning(true)
-    setCurrentCoachIndex((prev) => (prev + 1) % coaches.length)
+    setSwipeDirection("left")
+    setTimeout(() => {
+      setCurrentCoachIndex((prev) => (prev + 1) % coaches.length)
+      setSwipeDirection(null)
+    }, 150)
     setTimeout(() => setIsTransitioning(false), 400)
   }
 
   const prevCoach = () => {
     if (isTransitioning) return
     setIsTransitioning(true)
-    setCurrentCoachIndex((prev) => (prev - 1 + coaches.length) % coaches.length)
+    setSwipeDirection("right")
+    setTimeout(() => {
+      setCurrentCoachIndex((prev) => (prev - 1 + coaches.length) % coaches.length)
+      setSwipeDirection(null)
+    }, 150)
     setTimeout(() => setIsTransitioning(false), 400)
   }
 
@@ -425,14 +443,14 @@ export default function HomePage() {
                 </div>
               </div>
 
-              {/* Mobile Card Deck */}
+              {/* Mobile Carousel */}
               <div className="mobile-only">
                 <div className="text-center mb-6">
                   <span className="text-white/60 text-sm">← Swipe to explore coaches →</span>
                 </div>
 
-                <div className="relative w-full max-w-xs mx-auto h-96 mb-8">
-                  {/* Card Stack Container */}
+                <div className="relative w-full max-w-xs mx-auto h-96 mb-8 overflow-hidden">
+                  {/* Carousel Container */}
                   <div
                     className="relative w-full h-full"
                     onTouchStart={handleTouchStart}
@@ -445,38 +463,47 @@ export default function HomePage() {
                       const isNext = index === (currentCoachIndex + 1) % coaches.length
                       const isNextNext = index === (currentCoachIndex + 2) % coaches.length
                       const isPrev = index === (currentCoachIndex - 1 + coaches.length) % coaches.length
-                      const isHidden = !isActive && !isNext && !isNextNext && !isPrev
 
                       let transform = "translateX(100%) translateY(20px) scale(0.85) rotateY(25deg)"
                       let zIndex = 1
                       let opacity = 0
-                      const transitionDuration = isTransitioning ? "300ms" : "500ms"
 
-                      if (isActive) {
+                      // Handle carousel exit animations
+                      if (isActive && swipeDirection === "left") {
+                        transform = "translateX(-120%) translateY(0px) scale(0.9) rotateY(-15deg)"
+                        zIndex = 15
+                        opacity = 0
+                      } else if (isActive && swipeDirection === "right") {
+                        transform = "translateX(120%) translateY(0px) scale(0.9) rotateY(15deg)"
+                        zIndex = 15
+                        opacity = 0
+                      } else if (isActive) {
                         transform = "translateX(0%) translateY(0px) scale(1) rotateY(0deg)"
                         zIndex = 10
                         opacity = 1
                       } else if (isNext) {
                         transform = "translateX(15%) translateY(8px) scale(0.92) rotateY(8deg)"
                         zIndex = 8
-                        opacity = 0.8
+                        opacity = 0.85
                       } else if (isNextNext) {
                         transform = "translateX(25%) translateY(16px) scale(0.85) rotateY(15deg)"
                         zIndex = 6
-                        opacity = 0.6
+                        opacity = 0.7
                       } else if (isPrev) {
                         transform = "translateX(-100%) translateY(10px) scale(0.9) rotateY(-15deg)"
                         zIndex = 5
                         opacity = 0
-                      } else if (isHidden) {
+                      } else {
                         transform = "translateX(200%) translateY(30px) scale(0.8) rotateY(30deg)"
                         zIndex = 1
                         opacity = 0
                       }
 
+                      const transitionDuration = isTransitioning ? "300ms" : "500ms"
+
                       return (
                         <div
-                          key={coach.id}
+                          key={`${coach.id}-${currentCoachIndex}`} // Force re-render on index change
                           className="absolute inset-0 cursor-grab active:cursor-grabbing"
                           style={{
                             transform,
@@ -540,7 +567,11 @@ export default function HomePage() {
                         onClick={() => {
                           if (!isTransitioning) {
                             setIsTransitioning(true)
-                            setCurrentCoachIndex(index)
+                            setSwipeDirection("left")
+                            setTimeout(() => {
+                              setCurrentCoachIndex(index)
+                              setSwipeDirection(null)
+                            }, 150)
                             setTimeout(() => setIsTransitioning(false), 400)
                           }
                         }}
