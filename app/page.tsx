@@ -123,7 +123,7 @@ export default function HomePage() {
           <div className="logo-inner">
             <div className="logo-circle">
               <Image
-                src="/images/icononly.png"
+                src="/images/icononly.jpg"
                 alt="ExecFit Icon"
                 width={100}
                 height={100}
@@ -396,7 +396,7 @@ export default function HomePage() {
               <div className="execfit-footer-content">
                 <div className="execfit-footer-logo">
                   <Image
-                    src="/images/icononly.png"
+                    src="/images/icononly.jpg"
                     alt="ExecFit Icon"
                     width={48}
                     height={48}
