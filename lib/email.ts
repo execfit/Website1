@@ -19,8 +19,25 @@ export async function sendCookbookEmail({ to, cookbookId, cookbookTitle }: SendC
       throw new Error("RESEND_API_KEY environment variable is not set")
     }
 
+    // Determine the base URL - prioritize deployed domain
+    let baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.VERCEL_URL
+
+    // If we have a Vercel URL but no protocol, add https://
+    if (baseUrl && !baseUrl.startsWith("http")) {
+      baseUrl = `https://${baseUrl}`
+    }
+
+    // Fallback to localhost only in development
+    if (!baseUrl) {
+      baseUrl = "http://localhost:3000"
+      console.warn("⚠️  No deployment URL found, using localhost")
+    }
+
+    // Log the URL being used for debugging
+    console.log("📧 Email download URL will be:", baseUrl)
+
     // Use the simpler download route with query parameters
-    const downloadUrl = `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/download-cookbook?id=${cookbookId}`
+    const downloadUrl = `${baseUrl}/api/download-cookbook?id=${cookbookId}`
 
     console.log("Download URL:", downloadUrl)
     console.log("Sending email via Resend...")

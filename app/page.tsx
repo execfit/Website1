@@ -412,7 +412,7 @@ export default function HomePage() {
                   <span className="text-white/60 text-sm">← Swipe to explore coaches →</span>
                 </div>
 
-                <div className="relative w-full max-w-xs mx-auto h-80 mb-8">
+                <div className="relative w-full max-w-xs mx-auto h-96 mb-8">
                   {/* Card Stack Container */}
                   <div
                     className="relative w-full h-full"
@@ -465,37 +465,43 @@ export default function HomePage() {
                             transformStyle: "preserve-3d",
                           }}
                         >
-                          <div className="w-full h-full bg-gradient-to-br from-black/80 to-black/60 backdrop-blur-md border border-white/20 rounded-xl p-5 shadow-2xl flex flex-col">
+                          <div className="w-full h-full bg-gradient-to-br from-black/80 to-black/60 backdrop-blur-md border border-white/20 rounded-xl p-6 shadow-2xl flex flex-col">
                             {/* Coach Image */}
-                            <div className="w-16 h-16 rounded-full overflow-hidden mx-auto mb-4 border-2 border-white/30 shadow-lg">
+                            <div className="w-20 h-20 rounded-full overflow-hidden mx-auto mb-4 border-2 border-white/30 shadow-lg flex-shrink-0">
                               <Image
                                 src={coach.image || "/placeholder.svg"}
                                 alt={coach.name}
-                                width={64}
-                                height={64}
+                                width={80}
+                                height={80}
                                 className="w-full h-full object-cover"
                               />
                             </div>
 
                             {/* Coach Info */}
-                            <h3 className="text-lg font-bold text-white text-center mb-2 leading-tight">
-                              {coach.name}
-                            </h3>
+                            <div className="flex-1 flex flex-col">
+                              <h3 className="text-xl font-bold text-white text-center mb-3 leading-tight">
+                                {coach.name}
+                              </h3>
 
-                            <p className="text-xs text-white/80 text-center mb-3 leading-relaxed">{coach.specialty}</p>
+                              <p className="text-xs text-white/80 text-center mb-4 leading-relaxed font-medium">
+                                {coach.specialty}
+                              </p>
 
-                            <div className="flex-1 flex items-center">
-                              <p className="text-sm text-white/90 text-center leading-relaxed italic">"{coach.bio}"</p>
-                            </div>
+                              <div className="flex-1 flex items-center justify-center">
+                                <p className="text-sm text-white/90 text-center leading-relaxed italic px-2">
+                                  "{coach.bio}"
+                                </p>
+                              </div>
 
-                            {/* View Profile Link */}
-                            <div className="mt-4 pt-3 border-t border-white/20">
-                              <Link
-                                href={coach.link}
-                                className="block text-center text-white text-sm font-medium hover:text-white/80 transition-colors"
-                              >
-                                View Full Profile →
-                              </Link>
+                              {/* View Profile Link */}
+                              <div className="mt-4 pt-4 border-t border-white/20 flex-shrink-0">
+                                <Link
+                                  href={coach.link}
+                                  className="block text-center text-white text-sm font-medium hover:text-white/80 transition-colors"
+                                >
+                                  View Full Profile →
+                                </Link>
+                              </div>
                             </div>
                           </div>
                         </div>
