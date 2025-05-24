@@ -12,9 +12,9 @@ export default function HomePage() {
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear())
   const [currentCoachIndex, setCurrentCoachIndex] = useState(0)
   const [touchStart, setTouchStart] = useState(0)
-  const [touchEnd, setTouchEnd] = useState(0)
+  const [touchCurrent, setTouchCurrent] = useState(0)
+  const [isDragging, setIsDragging] = useState(false)
   const [isTransitioning, setIsTransitioning] = useState(false)
-  const [swipeDirection, setSwipeDirection] = useState<"left" | "right" | null>(null)
 
   const coaches = [
     {
@@ -103,54 +103,102 @@ export default function HomePage() {
     }
   }
 
-  // Enhanced Tinder-style swipe handlers with smooth card transitions
+  // Enhanced swipe handlers with real-time finger tracking
   const handleTouchStart = (e: React.TouchEvent) => {
     if (isTransitioning) return
-    setTouchStart(e.targetTouches[0].clientX)
-    setTouchEnd(e.targetTouches[0].clientX)
+    const touch = e.targetTouches[0].clientX
+    setTouchStart(touch)
+    setTouchCurrent(touch)
+    setIsDragging(true)
   }
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (isTransitioning) return
-    setTouchEnd(e.targetTouches[0].clientX)
+    if (isTransitioning || !isDragging) return
+    setTouchCurrent(e.targetTouches[0].clientX)
   }
 
   const handleTouchEnd = () => {
-    if (isTransitioning || !touchStart || !touchEnd) return
+    if (isTransitioning || !isDragging) return
 
-    const distance = touchStart - touchEnd
-    const isLeftSwipe = distance > 50
-    const isRightSwipe = distance < -50
+    const distance = touchStart - touchCurrent
+    const threshold = 80 // Minimum distance to trigger swipe
 
-    if (isLeftSwipe || isRightSwipe) {
+    setIsDragging(false)
+
+    if (Math.abs(distance) > threshold) {
       setIsTransitioning(true)
 
-      if (isLeftSwipe) {
-        // Swipe left - show next coach
-        setSwipeDirection("left")
-        setTimeout(() => {
-          setCurrentCoachIndex((prev) => (prev + 1) % coaches.length)
-          setTimeout(() => {
-            setSwipeDirection(null)
-            setIsTransitioning(false)
-          }, 50)
-        }, 300)
-      } else if (isRightSwipe) {
-        // Swipe right - show previous coach
-        setSwipeDirection("right")
-        setTimeout(() => {
-          setCurrentCoachIndex((prev) => (prev - 1 + coaches.length) % coaches.length)
-          setTimeout(() => {
-            setSwipeDirection(null)
-            setIsTransitioning(false)
-          }, 50)
-        }, 300)
+      if (distance > 0) {
+        // Swiped left - show next coach
+        setCurrentCoachIndex((prev) => (prev + 1) % coaches.length)
+      } else {
+        // Swiped right - show previous coach
+        setCurrentCoachIndex((prev) => (prev - 1 + coaches.length) % coaches.length)
       }
-    }
 
-    setTouchStart(0)
-    setTouchEnd(0)
+      // Reset after transition
+      setTimeout(() => {
+        setIsTransitioning(false)
+        setTouchStart(0)
+        setTouchCurrent(0)
+      }, 400)
+    } else {
+      // Snap back to original position
+      setTouchStart(0)
+      setTouchCurrent(0)
+    }
   }
+
+  // Calculate drag offset for real-time movement
+  const getDragOffset = () => {
+    if (!isDragging || touchStart === 0) return 0
+    return touchCurrent - touchStart
+  }
+
+  // Get the coach for a given relative position
+  const getCoachAtPosition = (offset: number) => {
+    if (offset === 0) return coaches[currentCoachIndex]
+    if (offset === 1) return coaches[(currentCoachIndex + 1) % coaches.length]
+    if (offset === -1) return coaches[(currentCoachIndex - 1 + coaches.length) % coaches.length]
+    return coaches[currentCoachIndex]
+  }
+
+  const renderCoachCard = (coach: (typeof coaches)[0], style: React.CSSProperties) => (
+    <div className="w-full h-full bg-gradient-to-br from-black/80 to-black/60 backdrop-blur-md border border-white/20 rounded-xl p-6 shadow-2xl flex flex-col">
+      {/* Coach Image */}
+      <div className="w-20 h-20 rounded-full overflow-hidden mx-auto mb-4 border-2 border-white/30 shadow-lg flex-shrink-0">
+        <Image
+          src={coach.image || "/placeholder.svg"}
+          alt={coach.name}
+          width={80}
+          height={80}
+          className="w-full h-full object-cover"
+          priority
+        />
+      </div>
+
+      {/* Coach Info */}
+      <div className="flex-1 flex flex-col">
+        <h3 className="text-xl font-bold text-white text-center mb-3 leading-tight">{coach.name}</h3>
+
+        <p className="text-xs text-white/80 text-center mb-4 leading-relaxed font-medium">{coach.specialty}</p>
+
+        <div className="flex-1 flex items-center justify-center">
+          <p className="text-sm text-white/90 text-center leading-relaxed italic px-2">"{coach.bio}"</p>
+        </div>
+
+        {/* View Profile Link */}
+        <div className="mt-4 pt-4 border-t border-white/20 flex-shrink-0">
+          <Link
+            href={coach.link}
+            className="block text-center text-white text-sm font-medium hover:text-white/80 transition-colors"
+          >
+            View Full Profile →
+          </Link>
+        </div>
+      </div>
+    </div>
+  )
 
   return (
     <div className="execfit-main">
@@ -420,202 +468,100 @@ export default function HomePage() {
                 </div>
               </div>
 
-              {/* Mobile Enhanced Swipe Cards */}
+              {/* Mobile Real-time Swipe Cards */}
               <div className="mobile-only">
                 <div className="text-center mb-6">
                   <span className="text-white/60 text-sm">← Swipe to explore coaches →</span>
                 </div>
 
                 <div className="relative w-full max-w-xs mx-auto h-96 mb-8 overflow-hidden">
-                  {/* Current Card */}
+                  {/* Card Container */}
                   <div
-                    className="absolute inset-0 cursor-grab active:cursor-grabbing"
+                    className="relative w-full h-full"
                     onTouchStart={handleTouchStart}
                     onTouchMove={handleTouchMove}
                     onTouchEnd={handleTouchEnd}
-                    style={{
-                      transform:
-                        swipeDirection === "left"
-                          ? "translateX(-120%) scale(0.95)"
-                          : swipeDirection === "right"
-                            ? "translateX(120%) scale(0.95)"
-                            : "translateX(0%) scale(1)",
-                      opacity: swipeDirection ? 0 : 1,
-                      transition: isTransitioning ? "all 300ms cubic-bezier(0.4, 0.0, 0.2, 1)" : "none",
-                      willChange: "transform, opacity",
-                      backfaceVisibility: "hidden",
-                      zIndex: 10,
-                    }}
+                    style={{ touchAction: "pan-y" }}
                   >
-                    <div className="w-full h-full bg-gradient-to-br from-black/80 to-black/60 backdrop-blur-md border border-white/20 rounded-xl p-6 shadow-2xl flex flex-col">
-                      {/* Coach Image */}
-                      <div className="w-20 h-20 rounded-full overflow-hidden mx-auto mb-4 border-2 border-white/30 shadow-lg flex-shrink-0">
-                        <Image
-                          src={coaches[currentCoachIndex].image || "/placeholder.svg"}
-                          alt={coaches[currentCoachIndex].name}
-                          width={80}
-                          height={80}
-                          className="w-full h-full object-cover"
-                          priority
-                        />
-                      </div>
-
-                      {/* Coach Info */}
-                      <div className="flex-1 flex flex-col">
-                        <h3 className="text-xl font-bold text-white text-center mb-3 leading-tight">
-                          {coaches[currentCoachIndex].name}
-                        </h3>
-
-                        <p className="text-xs text-white/80 text-center mb-4 leading-relaxed font-medium">
-                          {coaches[currentCoachIndex].specialty}
-                        </p>
-
-                        <div className="flex-1 flex items-center justify-center">
-                          <p className="text-sm text-white/90 text-center leading-relaxed italic px-2">
-                            "{coaches[currentCoachIndex].bio}"
-                          </p>
-                        </div>
-
-                        {/* View Profile Link */}
-                        <div className="mt-4 pt-4 border-t border-white/20 flex-shrink-0">
-                          <Link
-                            href={coaches[currentCoachIndex].link}
-                            className="block text-center text-white text-sm font-medium hover:text-white/80 transition-colors"
-                          >
-                            View Full Profile →
-                          </Link>
-                        </div>
-                      </div>
+                    {/* Current Card */}
+                    <div
+                      className="absolute inset-0 cursor-grab active:cursor-grabbing"
+                      style={{
+                        transform: `translateX(${getDragOffset()}px) scale(${isDragging ? 0.98 : 1})`,
+                        opacity: Math.max(0.3, 1 - Math.abs(getDragOffset()) / 300),
+                        transition: isDragging
+                          ? "none"
+                          : isTransitioning
+                            ? "all 400ms cubic-bezier(0.4, 0.0, 0.2, 1)"
+                            : "transform 200ms ease-out",
+                        willChange: "transform, opacity",
+                        backfaceVisibility: "hidden",
+                        zIndex: 10,
+                      }}
+                    >
+                      {renderCoachCard(getCoachAtPosition(0), {})}
                     </div>
+
+                    {/* Next Card (slides in from right when dragging left) */}
+                    {getDragOffset() < -20 && (
+                      <div
+                        className="absolute inset-0 pointer-events-none"
+                        style={{
+                          transform: `translateX(${300 + getDragOffset()}px) scale(0.95)`,
+                          opacity: Math.min(1, Math.abs(getDragOffset()) / 150),
+                          transition: isDragging ? "none" : "all 400ms cubic-bezier(0.4, 0.0, 0.2, 1)",
+                          willChange: "transform, opacity",
+                          backfaceVisibility: "hidden",
+                          zIndex: 5,
+                        }}
+                      >
+                        {renderCoachCard(getCoachAtPosition(1), {})}
+                      </div>
+                    )}
+
+                    {/* Previous Card (slides in from left when dragging right) */}
+                    {getDragOffset() > 20 && (
+                      <div
+                        className="absolute inset-0 pointer-events-none"
+                        style={{
+                          transform: `translateX(${-300 + getDragOffset()}px) scale(0.95)`,
+                          opacity: Math.min(1, Math.abs(getDragOffset()) / 150),
+                          transition: isDragging ? "none" : "all 400ms cubic-bezier(0.4, 0.0, 0.2, 1)",
+                          willChange: "transform, opacity",
+                          backfaceVisibility: "hidden",
+                          zIndex: 5,
+                        }}
+                      >
+                        {renderCoachCard(getCoachAtPosition(-1), {})}
+                      </div>
+                    )}
+
+                    {/* Subtle Next Card Preview (when not dragging) */}
+                    {!isDragging && !isTransitioning && (
+                      <div
+                        className="absolute inset-0 pointer-events-none"
+                        style={{
+                          transform: "translateX(5%) scale(0.95)",
+                          opacity: 0.2,
+                          zIndex: -1,
+                        }}
+                      >
+                        <div className="w-full h-full bg-gradient-to-br from-black/60 to-black/40 backdrop-blur-sm border border-white/10 rounded-xl shadow-lg">
+                          <div className="w-full h-full flex items-center justify-center">
+                            <div className="w-16 h-16 rounded-full overflow-hidden border border-white/20">
+                              <Image
+                                src={getCoachAtPosition(1).image || "/placeholder.svg"}
+                                alt="Next coach"
+                                width={64}
+                                height={64}
+                                className="w-full h-full object-cover opacity-50"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
-
-                  {/* Next Card (slides in from right when swiping left) */}
-                  {swipeDirection === "left" && (
-                    <div
-                      className="absolute inset-0 pointer-events-none"
-                      style={{
-                        transform: "translateX(0%) scale(1)",
-                        opacity: 1,
-                        transition: "all 300ms cubic-bezier(0.4, 0.0, 0.2, 1)",
-                        willChange: "transform, opacity",
-                        backfaceVisibility: "hidden",
-                        zIndex: 5,
-                      }}
-                    >
-                      <div className="w-full h-full bg-gradient-to-br from-black/80 to-black/60 backdrop-blur-md border border-white/20 rounded-xl p-6 shadow-2xl flex flex-col">
-                        {/* Next Coach Content */}
-                        <div className="w-20 h-20 rounded-full overflow-hidden mx-auto mb-4 border-2 border-white/30 shadow-lg flex-shrink-0">
-                          <Image
-                            src={coaches[(currentCoachIndex + 1) % coaches.length].image || "/placeholder.svg"}
-                            alt={coaches[(currentCoachIndex + 1) % coaches.length].name}
-                            width={80}
-                            height={80}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        <div className="flex-1 flex flex-col">
-                          <h3 className="text-xl font-bold text-white text-center mb-3 leading-tight">
-                            {coaches[(currentCoachIndex + 1) % coaches.length].name}
-                          </h3>
-                          <p className="text-xs text-white/80 text-center mb-4 leading-relaxed font-medium">
-                            {coaches[(currentCoachIndex + 1) % coaches.length].specialty}
-                          </p>
-                          <div className="flex-1 flex items-center justify-center">
-                            <p className="text-sm text-white/90 text-center leading-relaxed italic px-2">
-                              "{coaches[(currentCoachIndex + 1) % coaches.length].bio}"
-                            </p>
-                          </div>
-                          <div className="mt-4 pt-4 border-t border-white/20 flex-shrink-0">
-                            <Link
-                              href={coaches[(currentCoachIndex + 1) % coaches.length].link}
-                              className="block text-center text-white text-sm font-medium hover:text-white/80 transition-colors"
-                            >
-                              View Full Profile →
-                            </Link>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Previous Card (slides in from left when swiping right) */}
-                  {swipeDirection === "right" && (
-                    <div
-                      className="absolute inset-0 pointer-events-none"
-                      style={{
-                        transform: "translateX(0%) scale(1)",
-                        opacity: 1,
-                        transition: "all 300ms cubic-bezier(0.4, 0.0, 0.2, 1)",
-                        willChange: "transform, opacity",
-                        backfaceVisibility: "hidden",
-                        zIndex: 5,
-                      }}
-                    >
-                      <div className="w-full h-full bg-gradient-to-br from-black/80 to-black/60 backdrop-blur-md border border-white/20 rounded-xl p-6 shadow-2xl flex flex-col">
-                        {/* Previous Coach Content */}
-                        <div className="w-20 h-20 rounded-full overflow-hidden mx-auto mb-4 border-2 border-white/30 shadow-lg flex-shrink-0">
-                          <Image
-                            src={
-                              coaches[(currentCoachIndex - 1 + coaches.length) % coaches.length].image ||
-                              "/placeholder.svg" ||
-                              "/placeholder.svg"
-                            }
-                            alt={coaches[(currentCoachIndex - 1 + coaches.length) % coaches.length].name}
-                            width={80}
-                            height={80}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        <div className="flex-1 flex flex-col">
-                          <h3 className="text-xl font-bold text-white text-center mb-3 leading-tight">
-                            {coaches[(currentCoachIndex - 1 + coaches.length) % coaches.length].name}
-                          </h3>
-                          <p className="text-xs text-white/80 text-center mb-4 leading-relaxed font-medium">
-                            {coaches[(currentCoachIndex - 1 + coaches.length) % coaches.length].specialty}
-                          </p>
-                          <div className="flex-1 flex items-center justify-center">
-                            <p className="text-sm text-white/90 text-center leading-relaxed italic px-2">
-                              "{coaches[(currentCoachIndex - 1 + coaches.length) % coaches.length].bio}"
-                            </p>
-                          </div>
-                          <div className="mt-4 pt-4 border-t border-white/20 flex-shrink-0">
-                            <Link
-                              href={coaches[(currentCoachIndex - 1 + coaches.length) % coaches.length].link}
-                              className="block text-center text-white text-sm font-medium hover:text-white/80 transition-colors"
-                            >
-                              View Full Profile →
-                            </Link>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Subtle Next Card Preview (when not transitioning) */}
-                  {!isTransitioning && (
-                    <div
-                      className="absolute inset-0 pointer-events-none"
-                      style={{
-                        transform: "translateX(5%) scale(0.95)",
-                        opacity: 0.2,
-                        zIndex: -1,
-                      }}
-                    >
-                      <div className="w-full h-full bg-gradient-to-br from-black/60 to-black/40 backdrop-blur-sm border border-white/10 rounded-xl shadow-lg">
-                        <div className="w-full h-full flex items-center justify-center">
-                          <div className="w-16 h-16 rounded-full overflow-hidden border border-white/20">
-                            <Image
-                              src={coaches[(currentCoachIndex + 1) % coaches.length].image || "/placeholder.svg"}
-                              alt="Next coach"
-                              width={64}
-                              height={64}
-                              className="w-full h-full object-cover opacity-50"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
                 </div>
 
                 {/* Enhanced Navigation Dots with Glow */}
@@ -625,7 +571,7 @@ export default function HomePage() {
                       <button
                         key={index}
                         onClick={() => {
-                          if (!isTransitioning) {
+                          if (!isTransitioning && !isDragging) {
                             setCurrentCoachIndex(index)
                           }
                         }}
