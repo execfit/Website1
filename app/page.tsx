@@ -11,6 +11,7 @@ export default function HomePage() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear())
   const [currentCoachIndex, setCurrentCoachIndex] = useState(0)
+  const [nextCoachIndex, setNextCoachIndex] = useState(1)
   const [touchStart, setTouchStart] = useState(0)
   const [touchCurrent, setTouchCurrent] = useState(0)
   const [isDragging, setIsDragging] = useState(false)
@@ -89,6 +90,11 @@ export default function HomePage() {
     }
   }, [])
 
+  // Update next coach index when current changes
+  useEffect(() => {
+    setNextCoachIndex((currentCoachIndex + 1) % coaches.length)
+  }, [currentCoachIndex, coaches.length])
+
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId)
     if (element) {
@@ -103,7 +109,7 @@ export default function HomePage() {
     }
   }
 
-  // Enhanced swipe handlers with real-time finger tracking
+  // Enhanced swipe handlers with smooth transitions
   const handleTouchStart = (e: React.TouchEvent) => {
     if (isTransitioning) return
     const touch = e.targetTouches[0].clientX
@@ -121,13 +127,14 @@ export default function HomePage() {
     if (isTransitioning || !isDragging) return
 
     const distance = touchStart - touchCurrent
-    const threshold = 80 // Minimum distance to trigger swipe
+    const threshold = 80
 
     setIsDragging(false)
 
     if (Math.abs(distance) > threshold) {
       setIsTransitioning(true)
 
+      // Immediately update the coach index for smooth transition
       if (distance > 0) {
         // Swiped left - show next coach
         setCurrentCoachIndex((prev) => (prev + 1) % coaches.length)
@@ -136,12 +143,12 @@ export default function HomePage() {
         setCurrentCoachIndex((prev) => (prev - 1 + coaches.length) % coaches.length)
       }
 
-      // Reset after transition
+      // Reset states after animation completes
       setTimeout(() => {
         setIsTransitioning(false)
         setTouchStart(0)
         setTouchCurrent(0)
-      }, 400)
+      }, 350)
     } else {
       // Snap back to original position
       setTouchStart(0)
@@ -163,7 +170,7 @@ export default function HomePage() {
     return coaches[currentCoachIndex]
   }
 
-  const renderCoachCard = (coach: (typeof coaches)[0], style: React.CSSProperties) => (
+  const renderCoachCard = (coach: (typeof coaches)[0]) => (
     <div className="w-full h-full bg-gradient-to-br from-black/80 to-black/60 backdrop-blur-md border border-white/20 rounded-xl p-6 shadow-2xl flex flex-col">
       {/* Coach Image */}
       <div className="w-20 h-20 rounded-full overflow-hidden mx-auto mb-4 border-2 border-white/30 shadow-lg flex-shrink-0">
@@ -468,7 +475,7 @@ export default function HomePage() {
                 </div>
               </div>
 
-              {/* Mobile Real-time Swipe Cards */}
+              {/* Mobile Smooth Swipe Cards */}
               <div className="mobile-only">
                 <div className="text-center mb-6">
                   <span className="text-white/60 text-sm">← Swipe to explore coaches →</span>
@@ -485,54 +492,53 @@ export default function HomePage() {
                   >
                     {/* Current Card */}
                     <div
+                      key={`current-${currentCoachIndex}`}
                       className="absolute inset-0 cursor-grab active:cursor-grabbing"
                       style={{
                         transform: `translateX(${getDragOffset()}px) scale(${isDragging ? 0.98 : 1})`,
                         opacity: Math.max(0.3, 1 - Math.abs(getDragOffset()) / 300),
-                        transition: isDragging
-                          ? "none"
-                          : isTransitioning
-                            ? "all 400ms cubic-bezier(0.4, 0.0, 0.2, 1)"
-                            : "transform 200ms ease-out",
+                        transition: isDragging ? "none" : "all 350ms cubic-bezier(0.25, 0.46, 0.45, 0.94)",
                         willChange: "transform, opacity",
                         backfaceVisibility: "hidden",
                         zIndex: 10,
                       }}
                     >
-                      {renderCoachCard(getCoachAtPosition(0), {})}
+                      {renderCoachCard(getCoachAtPosition(0))}
                     </div>
 
                     {/* Next Card (slides in from right when dragging left) */}
                     {getDragOffset() < -20 && (
                       <div
+                        key={`next-${nextCoachIndex}`}
                         className="absolute inset-0 pointer-events-none"
                         style={{
-                          transform: `translateX(${300 + getDragOffset()}px) scale(0.95)`,
+                          transform: `translateX(${Math.max(300 + getDragOffset(), 0)}px) scale(0.95)`,
                           opacity: Math.min(1, Math.abs(getDragOffset()) / 150),
-                          transition: isDragging ? "none" : "all 400ms cubic-bezier(0.4, 0.0, 0.2, 1)",
+                          transition: isDragging ? "none" : "all 350ms cubic-bezier(0.25, 0.46, 0.45, 0.94)",
                           willChange: "transform, opacity",
                           backfaceVisibility: "hidden",
                           zIndex: 5,
                         }}
                       >
-                        {renderCoachCard(getCoachAtPosition(1), {})}
+                        {renderCoachCard(getCoachAtPosition(1))}
                       </div>
                     )}
 
                     {/* Previous Card (slides in from left when dragging right) */}
                     {getDragOffset() > 20 && (
                       <div
+                        key={`prev-${(currentCoachIndex - 1 + coaches.length) % coaches.length}`}
                         className="absolute inset-0 pointer-events-none"
                         style={{
-                          transform: `translateX(${-300 + getDragOffset()}px) scale(0.95)`,
+                          transform: `translateX(${Math.min(-300 + getDragOffset(), 0)}px) scale(0.95)`,
                           opacity: Math.min(1, Math.abs(getDragOffset()) / 150),
-                          transition: isDragging ? "none" : "all 400ms cubic-bezier(0.4, 0.0, 0.2, 1)",
+                          transition: isDragging ? "none" : "all 350ms cubic-bezier(0.25, 0.46, 0.45, 0.94)",
                           willChange: "transform, opacity",
                           backfaceVisibility: "hidden",
                           zIndex: 5,
                         }}
                       >
-                        {renderCoachCard(getCoachAtPosition(-1), {})}
+                        {renderCoachCard(getCoachAtPosition(-1))}
                       </div>
                     )}
 

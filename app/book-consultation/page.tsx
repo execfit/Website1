@@ -1,31 +1,32 @@
 "use client"
 
 import type React from "react"
-
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import Header from "@/components/header"
-
-interface TimeSlot {
-  time: string
-  available: boolean
-}
 
 interface Coach {
   id: string
   name: string
   specialty: string
   image: string
-  availability: {
-    [date: string]: TimeSlot[]
-  }
+}
+
+interface TimeSlot {
+  id: string
+  start_time: string
+  end_time: string
+  coach_name?: string
+  coach_specialty?: string
 }
 
 export default function BookConsultationPage() {
+  const [coaches, setCoaches] = useState<Coach[]>([])
   const [selectedCoach, setSelectedCoach] = useState<string | null>(null)
   const [selectedDate, setSelectedDate] = useState<string>("")
   const [selectedTime, setSelectedTime] = useState<string>("")
+  const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([])
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -35,146 +36,114 @@ export default function BookConsultationPage() {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  const coaches: Coach[] = [
-    {
-      id: "gabriela",
-      name: "Gabriela Garcia",
-      specialty: "Personal Trainer | Nutrition Coach",
-      image: "/images/coach-gabriela.jpg",
-      availability: {
-        "2025-01-27": [
-          { time: "9:00 AM", available: true },
-          { time: "10:30 AM", available: false },
-          { time: "2:00 PM", available: true },
-          { time: "4:00 PM", available: true },
-        ],
-        "2025-01-28": [
-          { time: "8:00 AM", available: true },
-          { time: "11:00 AM", available: true },
-          { time: "1:00 PM", available: false },
-          { time: "3:30 PM", available: true },
-        ],
-        "2025-01-29": [
-          { time: "9:30 AM", available: true },
-          { time: "12:00 PM", available: true },
-          { time: "2:30 PM", available: true },
-          { time: "5:00 PM", available: false },
-        ],
+  // Load coaches on component mount
+  useEffect(() => {
+    const defaultCoaches = [
+      {
+        id: "gabriela",
+        name: "Gabriela Garcia",
+        specialty: "Personal Trainer | Nutrition Coach",
+        image: "/images/coach-gabriela.jpg",
       },
-    },
-    {
-      id: "maddy",
-      name: "Maddy Gold",
-      specialty: "Certified Personal Trainer | PN1 Nutrition Coach",
-      image: "/images/coach-maddy.jpg",
-      availability: {
-        "2025-01-27": [
-          { time: "8:30 AM", available: true },
-          { time: "10:00 AM", available: true },
-          { time: "1:30 PM", available: false },
-          { time: "3:00 PM", available: true },
-        ],
-        "2025-01-28": [
-          { time: "9:00 AM", available: false },
-          { time: "11:30 AM", available: true },
-          { time: "2:00 PM", available: true },
-          { time: "4:30 PM", available: true },
-        ],
-        "2025-01-29": [
-          { time: "8:00 AM", available: true },
-          { time: "10:30 AM", available: true },
-          { time: "1:00 PM", available: true },
-          { time: "3:30 PM", available: false },
-        ],
+      {
+        id: "maddy",
+        name: "Maddy Gold",
+        specialty: "Certified Personal Trainer | PN1 Nutrition Coach",
+        image: "/images/coach-maddy.jpg",
       },
-    },
-    {
-      id: "yosof",
-      name: "Yosof Abuhasan",
-      specialty: "Physique/Strength Training/Mindset Coaching",
-      image: "/images/coach-yosof.jpg",
-      availability: {
-        "2025-01-27": [
-          { time: "7:00 AM", available: true },
-          { time: "9:30 AM", available: true },
-          { time: "12:30 PM", available: true },
-          { time: "4:30 PM", available: false },
-        ],
-        "2025-01-28": [
-          { time: "7:30 AM", available: false },
-          { time: "10:00 AM", available: true },
-          { time: "1:30 PM", available: true },
-          { time: "3:00 PM", available: true },
-        ],
-        "2025-01-29": [
-          { time: "8:30 AM", available: true },
-          { time: "11:00 AM", available: false },
-          { time: "2:00 PM", available: true },
-          { time: "4:00 PM", available: true },
-        ],
+      {
+        id: "yosof",
+        name: "Yosof Abuhasan",
+        specialty: "Physique/Strength Training/Mindset Coaching",
+        image: "/images/coach-yosof.jpg",
       },
-    },
-  ]
+    ]
+    setCoaches(defaultCoaches)
+  }, [])
 
-  // Get all available time slots across all coaches for "no preference" option
-  const getAllAvailableSlots = () => {
-    const allSlots: { [date: string]: TimeSlot[] } = {}
+  // Load available slots when coach or date changes
+  useEffect(() => {
+    if (selectedCoach && selectedDate) {
+      loadAvailableSlots()
+    }
+  }, [selectedCoach, selectedDate])
 
-    coaches.forEach((coach) => {
-      Object.entries(coach.availability).forEach(([date, slots]) => {
-        if (!allSlots[date]) {
-          allSlots[date] = []
-        }
-        slots.forEach((slot) => {
-          if (slot.available && !allSlots[date].some((s) => s.time === slot.time)) {
-            allSlots[date].push(slot)
-          }
-        })
-      })
-    })
+  const loadAvailableSlots = async () => {
+    try {
+      const response = await fetch(`/api/consultations/availability?coach_id=${selectedCoach}&date=${selectedDate}`)
 
-    // Sort time slots for each date
-    Object.keys(allSlots).forEach((date) => {
-      allSlots[date].sort((a, b) => {
-        const timeA = new Date(`2000-01-01 ${a.time}`)
-        const timeB = new Date(`2000-01-01 ${b.time}`)
-        return timeA.getTime() - timeB.getTime()
-      })
-    })
-
-    return allSlots
+      if (response.ok) {
+        const slots = await response.json()
+        setAvailableSlots(slots)
+      } else {
+        // Fallback to mock data for demo
+        const mockSlots = [
+          { id: "1", start_time: "09:00:00", end_time: "10:00:00" },
+          { id: "2", start_time: "10:00:00", end_time: "11:00:00" },
+          { id: "3", start_time: "14:00:00", end_time: "15:00:00" },
+          { id: "4", start_time: "15:00:00", end_time: "16:00:00" },
+          { id: "5", start_time: "16:00:00", end_time: "17:00:00" },
+        ]
+        setAvailableSlots(mockSlots)
+      }
+    } catch (error) {
+      console.error("Error loading slots:", error)
+      setError("Failed to load available time slots")
+    }
   }
 
   const getAvailableDates = () => {
-    if (selectedCoach === "no-preference") {
-      return Object.keys(getAllAvailableSlots()).sort()
+    const dates = []
+    const today = new Date()
+
+    for (let i = 1; i <= 14; i++) {
+      const date = new Date(today)
+      date.setDate(today.getDate() + i)
+
+      // Skip weekends
+      if (date.getDay() !== 0 && date.getDay() !== 6) {
+        dates.push(date.toISOString().split("T")[0])
+      }
     }
 
-    const coach = coaches.find((c) => c.id === selectedCoach)
-    return coach ? Object.keys(coach.availability).sort() : []
-  }
-
-  const getAvailableTimeSlots = () => {
-    if (!selectedDate) return []
-
-    if (selectedCoach === "no-preference") {
-      return getAllAvailableSlots()[selectedDate] || []
-    }
-
-    const coach = coaches.find((c) => c.id === selectedCoach)
-    return coach?.availability[selectedDate]?.filter((slot) => slot.available) || []
+    return dates
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
+    setError(null)
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2000))
+    try {
+      const response = await fetch("/api/consultations/book", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          coach_id: selectedCoach === "no-preference" ? null : selectedCoach,
+          client_name: formData.name,
+          client_email: formData.email,
+          client_phone: formData.phone,
+          consultation_date: selectedDate,
+          consultation_time: selectedTime,
+          client_goals: formData.goals,
+          client_experience: formData.experience,
+        }),
+      })
 
-    setIsSubmitting(false)
-    setShowSuccess(true)
+      if (response.ok) {
+        setShowSuccess(true)
+      } else {
+        const errorData = await response.json()
+        setError(errorData.error || "Failed to book consultation")
+      }
+    } catch (error) {
+      console.error("Error booking consultation:", error)
+      setError("Failed to book consultation. Please try again.")
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const formatDate = (dateString: string) => {
@@ -184,6 +153,17 @@ export default function BookConsultationPage() {
       year: "numeric",
       month: "long",
       day: "numeric",
+    })
+  }
+
+  const formatTime = (timeString: string) => {
+    const [hours, minutes] = timeString.split(":")
+    const date = new Date()
+    date.setHours(Number.parseInt(hours), Number.parseInt(minutes))
+    return date.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
     })
   }
 
@@ -209,7 +189,7 @@ export default function BookConsultationPage() {
                   <strong>Date:</strong> {selectedDate ? formatDate(selectedDate) : "TBD"}
                 </p>
                 <p>
-                  <strong>Time:</strong> {selectedTime}
+                  <strong>Time:</strong> {formatTime(selectedTime)}
                 </p>
                 <p>
                   <strong>Coach:</strong>{" "}
@@ -246,6 +226,12 @@ export default function BookConsultationPage() {
               just for you.
             </p>
           </div>
+
+          {error && (
+            <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-4 mb-6 text-center">
+              <p className="text-red-200">{error}</p>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-8">
             {/* Coach Selection */}
@@ -344,18 +330,18 @@ export default function BookConsultationPage() {
                     <div>
                       <label className="block text-sm font-medium mb-3">Available Times</label>
                       <div className="grid grid-cols-2 gap-2">
-                        {getAvailableTimeSlots().map((slot) => (
+                        {availableSlots.map((slot) => (
                           <button
-                            key={slot.time}
+                            key={slot.id}
                             type="button"
-                            onClick={() => setSelectedTime(slot.time)}
+                            onClick={() => setSelectedTime(slot.start_time)}
                             className={`p-3 rounded-lg border text-sm transition-all ${
-                              selectedTime === slot.time
+                              selectedTime === slot.start_time
                                 ? "border-white bg-white/10"
                                 : "border-white/20 hover:border-white/40"
                             }`}
                           >
-                            {slot.time}
+                            {formatTime(slot.start_time)}
                           </button>
                         ))}
                       </div>

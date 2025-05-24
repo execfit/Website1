@@ -159,12 +159,11 @@ export default function CookbookDistribution() {
                 onClick={() => handleCookbookSelect(cookbook.id)}
               >
                 <CardHeader className="text-center pb-2">
-                  <div className="mx-auto mb-4 relative">
-                    <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/60 rounded-lg"></div>
+                  <div className="mx-auto mb-4 relative bg-black/20 rounded-lg p-2">
                     <img
                       src={cookbook.image || "/placeholder.svg"}
                       alt={cookbook.title}
-                      className="w-full h-48 object-cover rounded-lg shadow-md"
+                      className="w-full h-48 object-contain rounded-lg"
                     />
                   </div>
                   <CardTitle className="text-lg text-white h-[52px] flex items-center justify-center">
@@ -196,12 +195,11 @@ export default function CookbookDistribution() {
         {selectedCookbook && !hasFollowed && (
           <Card className="max-w-md mx-auto bg-black/40 backdrop-blur-md border-white/10 text-white">
             <CardHeader className="text-center">
-              <div className="mx-auto mb-4 relative">
-                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/60 rounded-lg"></div>
+              <div className="mx-auto mb-4 relative bg-black/20 rounded-lg p-2">
                 <img
                   src={cookbooks.find((c) => c.id === selectedCookbook)?.image || "/placeholder.svg"}
                   alt="Selected cookbook"
-                  className="w-full h-48 object-cover rounded-lg shadow-md"
+                  className="w-full h-48 object-contain rounded-lg"
                 />
               </div>
               <CardTitle className="text-white">{cookbooks.find((c) => c.id === selectedCookbook)?.title}</CardTitle>
@@ -227,12 +225,11 @@ export default function CookbookDistribution() {
         {selectedCookbook && hasFollowed && !emailSent && (
           <Card className="max-w-md mx-auto bg-black/40 backdrop-blur-md border-white/10 text-white">
             <CardHeader className="text-center">
-              <div className="mx-auto mb-4 relative">
-                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/60 rounded-lg"></div>
+              <div className="mx-auto mb-4 relative bg-black/20 rounded-lg p-2">
                 <img
                   src={cookbooks.find((c) => c.id === selectedCookbook)?.image || "/placeholder.svg"}
                   alt="Selected cookbook"
-                  className="w-full h-48 object-cover rounded-lg shadow-md"
+                  className="w-full h-48 object-contain rounded-lg"
                 />
               </div>
               <CardTitle className="text-white">Get Your Cookbook</CardTitle>
