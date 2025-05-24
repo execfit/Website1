@@ -103,7 +103,7 @@ export default function HomePage() {
     }
   }
 
-  // Simple Tinder-style swipe handlers
+  // Enhanced Tinder-style swipe handlers with smooth card transitions
   const handleTouchStart = (e: React.TouchEvent) => {
     if (isTransitioning) return
     setTouchStart(e.targetTouches[0].clientX)
@@ -130,16 +130,20 @@ export default function HomePage() {
         setSwipeDirection("left")
         setTimeout(() => {
           setCurrentCoachIndex((prev) => (prev + 1) % coaches.length)
-          setSwipeDirection(null)
-          setIsTransitioning(false)
+          setTimeout(() => {
+            setSwipeDirection(null)
+            setIsTransitioning(false)
+          }, 50)
         }, 300)
       } else if (isRightSwipe) {
         // Swipe right - show previous coach
         setSwipeDirection("right")
         setTimeout(() => {
           setCurrentCoachIndex((prev) => (prev - 1 + coaches.length) % coaches.length)
-          setSwipeDirection(null)
-          setIsTransitioning(false)
+          setTimeout(() => {
+            setSwipeDirection(null)
+            setIsTransitioning(false)
+          }, 50)
         }, 300)
       }
     }
@@ -416,7 +420,7 @@ export default function HomePage() {
                 </div>
               </div>
 
-              {/* Mobile Tinder-style Swipe Cards */}
+              {/* Mobile Enhanced Swipe Cards */}
               <div className="mobile-only">
                 <div className="text-center mb-6">
                   <span className="text-white/60 text-sm">← Swipe to explore coaches →</span>
@@ -440,6 +444,7 @@ export default function HomePage() {
                       transition: isTransitioning ? "all 300ms cubic-bezier(0.4, 0.0, 0.2, 1)" : "none",
                       willChange: "transform, opacity",
                       backfaceVisibility: "hidden",
+                      zIndex: 10,
                     }}
                   >
                     <div className="w-full h-full bg-gradient-to-br from-black/80 to-black/60 backdrop-blur-md border border-white/20 rounded-xl p-6 shadow-2xl flex flex-col">
@@ -484,13 +489,115 @@ export default function HomePage() {
                     </div>
                   </div>
 
-                  {/* Next Card Preview (subtle background) */}
+                  {/* Next Card (slides in from right when swiping left) */}
+                  {swipeDirection === "left" && (
+                    <div
+                      className="absolute inset-0 pointer-events-none"
+                      style={{
+                        transform: "translateX(0%) scale(1)",
+                        opacity: 1,
+                        transition: "all 300ms cubic-bezier(0.4, 0.0, 0.2, 1)",
+                        willChange: "transform, opacity",
+                        backfaceVisibility: "hidden",
+                        zIndex: 5,
+                      }}
+                    >
+                      <div className="w-full h-full bg-gradient-to-br from-black/80 to-black/60 backdrop-blur-md border border-white/20 rounded-xl p-6 shadow-2xl flex flex-col">
+                        {/* Next Coach Content */}
+                        <div className="w-20 h-20 rounded-full overflow-hidden mx-auto mb-4 border-2 border-white/30 shadow-lg flex-shrink-0">
+                          <Image
+                            src={coaches[(currentCoachIndex + 1) % coaches.length].image || "/placeholder.svg"}
+                            alt={coaches[(currentCoachIndex + 1) % coaches.length].name}
+                            width={80}
+                            height={80}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="flex-1 flex flex-col">
+                          <h3 className="text-xl font-bold text-white text-center mb-3 leading-tight">
+                            {coaches[(currentCoachIndex + 1) % coaches.length].name}
+                          </h3>
+                          <p className="text-xs text-white/80 text-center mb-4 leading-relaxed font-medium">
+                            {coaches[(currentCoachIndex + 1) % coaches.length].specialty}
+                          </p>
+                          <div className="flex-1 flex items-center justify-center">
+                            <p className="text-sm text-white/90 text-center leading-relaxed italic px-2">
+                              "{coaches[(currentCoachIndex + 1) % coaches.length].bio}"
+                            </p>
+                          </div>
+                          <div className="mt-4 pt-4 border-t border-white/20 flex-shrink-0">
+                            <Link
+                              href={coaches[(currentCoachIndex + 1) % coaches.length].link}
+                              className="block text-center text-white text-sm font-medium hover:text-white/80 transition-colors"
+                            >
+                              View Full Profile →
+                            </Link>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Previous Card (slides in from left when swiping right) */}
+                  {swipeDirection === "right" && (
+                    <div
+                      className="absolute inset-0 pointer-events-none"
+                      style={{
+                        transform: "translateX(0%) scale(1)",
+                        opacity: 1,
+                        transition: "all 300ms cubic-bezier(0.4, 0.0, 0.2, 1)",
+                        willChange: "transform, opacity",
+                        backfaceVisibility: "hidden",
+                        zIndex: 5,
+                      }}
+                    >
+                      <div className="w-full h-full bg-gradient-to-br from-black/80 to-black/60 backdrop-blur-md border border-white/20 rounded-xl p-6 shadow-2xl flex flex-col">
+                        {/* Previous Coach Content */}
+                        <div className="w-20 h-20 rounded-full overflow-hidden mx-auto mb-4 border-2 border-white/30 shadow-lg flex-shrink-0">
+                          <Image
+                            src={
+                              coaches[(currentCoachIndex - 1 + coaches.length) % coaches.length].image ||
+                              "/placeholder.svg" ||
+                              "/placeholder.svg"
+                            }
+                            alt={coaches[(currentCoachIndex - 1 + coaches.length) % coaches.length].name}
+                            width={80}
+                            height={80}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="flex-1 flex flex-col">
+                          <h3 className="text-xl font-bold text-white text-center mb-3 leading-tight">
+                            {coaches[(currentCoachIndex - 1 + coaches.length) % coaches.length].name}
+                          </h3>
+                          <p className="text-xs text-white/80 text-center mb-4 leading-relaxed font-medium">
+                            {coaches[(currentCoachIndex - 1 + coaches.length) % coaches.length].specialty}
+                          </p>
+                          <div className="flex-1 flex items-center justify-center">
+                            <p className="text-sm text-white/90 text-center leading-relaxed italic px-2">
+                              "{coaches[(currentCoachIndex - 1 + coaches.length) % coaches.length].bio}"
+                            </p>
+                          </div>
+                          <div className="mt-4 pt-4 border-t border-white/20 flex-shrink-0">
+                            <Link
+                              href={coaches[(currentCoachIndex - 1 + coaches.length) % coaches.length].link}
+                              className="block text-center text-white text-sm font-medium hover:text-white/80 transition-colors"
+                            >
+                              View Full Profile →
+                            </Link>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Subtle Next Card Preview (when not transitioning) */}
                   {!isTransitioning && (
                     <div
                       className="absolute inset-0 pointer-events-none"
                       style={{
                         transform: "translateX(5%) scale(0.95)",
-                        opacity: 0.3,
+                        opacity: 0.2,
                         zIndex: -1,
                       }}
                     >
@@ -511,9 +618,9 @@ export default function HomePage() {
                   )}
                 </div>
 
-                {/* Navigation Dots */}
+                {/* Enhanced Navigation Dots with Glow */}
                 <div className="flex justify-center mb-4">
-                  <div className="flex space-x-2 bg-black/40 backdrop-blur-sm rounded-full px-4 py-2 border border-white/20">
+                  <div className="flex space-x-3 bg-black/40 backdrop-blur-sm rounded-full px-6 py-3 border border-white/20">
                     {coaches.map((_, index) => (
                       <button
                         key={index}
@@ -522,9 +629,17 @@ export default function HomePage() {
                             setCurrentCoachIndex(index)
                           }
                         }}
-                        className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                          index === currentCoachIndex ? "bg-white scale-125" : "bg-white/30 hover:bg-white/50"
+                        className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                          index === currentCoachIndex
+                            ? "bg-white scale-125 shadow-lg"
+                            : "bg-white/30 hover:bg-white/50 scale-100"
                         }`}
+                        style={{
+                          boxShadow:
+                            index === currentCoachIndex
+                              ? "0 0 8px rgba(255, 255, 255, 0.8), 0 0 16px rgba(255, 255, 255, 0.6), 0 0 24px rgba(255, 255, 255, 0.4)"
+                              : "none",
+                        }}
                       />
                     ))}
                   </div>
