@@ -103,12 +103,11 @@ export default function HomePage() {
     }
   }
 
-  // Enhanced carousel touch handlers with immediate visual feedback
+  // Simple Tinder-style swipe handlers
   const handleTouchStart = (e: React.TouchEvent) => {
     if (isTransitioning) return
     setTouchStart(e.targetTouches[0].clientX)
     setTouchEnd(e.targetTouches[0].clientX)
-    setSwipeDirection(null)
   }
 
   const handleTouchMove = (e: React.TouchEvent) => {
@@ -127,47 +126,26 @@ export default function HomePage() {
       setIsTransitioning(true)
 
       if (isLeftSwipe) {
+        // Swipe left - show next coach
         setSwipeDirection("left")
-        // Immediate index change for smoother animation
-        setCurrentCoachIndex((prev) => (prev + 1) % coaches.length)
+        setTimeout(() => {
+          setCurrentCoachIndex((prev) => (prev + 1) % coaches.length)
+          setSwipeDirection(null)
+          setIsTransitioning(false)
+        }, 300)
       } else if (isRightSwipe) {
+        // Swipe right - show previous coach
         setSwipeDirection("right")
-        // Immediate index change for smoother animation
-        setCurrentCoachIndex((prev) => (prev - 1 + coaches.length) % coaches.length)
+        setTimeout(() => {
+          setCurrentCoachIndex((prev) => (prev - 1 + coaches.length) % coaches.length)
+          setSwipeDirection(null)
+          setIsTransitioning(false)
+        }, 300)
       }
-
-      // Reset states after animation
-      setTimeout(() => {
-        setSwipeDirection(null)
-        setIsTransitioning(false)
-      }, 350)
     }
 
-    // Reset touch values
     setTouchStart(0)
     setTouchEnd(0)
-  }
-
-  const nextCoach = () => {
-    if (isTransitioning) return
-    setIsTransitioning(true)
-    setSwipeDirection("left")
-    setCurrentCoachIndex((prev) => (prev + 1) % coaches.length)
-    setTimeout(() => {
-      setSwipeDirection(null)
-      setIsTransitioning(false)
-    }, 350)
-  }
-
-  const prevCoach = () => {
-    if (isTransitioning) return
-    setIsTransitioning(true)
-    setSwipeDirection("right")
-    setCurrentCoachIndex((prev) => (prev - 1 + coaches.length) % coaches.length)
-    setTimeout(() => {
-      setSwipeDirection(null)
-      setIsTransitioning(false)
-    }, 350)
   }
 
   return (
@@ -438,149 +416,102 @@ export default function HomePage() {
                 </div>
               </div>
 
-              {/* Mobile Carousel - Optimized for 60fps */}
+              {/* Mobile Tinder-style Swipe Cards */}
               <div className="mobile-only">
                 <div className="text-center mb-6">
                   <span className="text-white/60 text-sm">← Swipe to explore coaches →</span>
                 </div>
 
                 <div className="relative w-full max-w-xs mx-auto h-96 mb-8 overflow-hidden">
-                  {/* Carousel Container */}
+                  {/* Current Card */}
                   <div
-                    className="relative w-full h-full"
+                    className="absolute inset-0 cursor-grab active:cursor-grabbing"
                     onTouchStart={handleTouchStart}
                     onTouchMove={handleTouchMove}
                     onTouchEnd={handleTouchEnd}
                     style={{
-                      perspective: "1000px",
-                      willChange: "transform",
+                      transform:
+                        swipeDirection === "left"
+                          ? "translateX(-120%) scale(0.95)"
+                          : swipeDirection === "right"
+                            ? "translateX(120%) scale(0.95)"
+                            : "translateX(0%) scale(1)",
+                      opacity: swipeDirection ? 0 : 1,
+                      transition: isTransitioning ? "all 300ms cubic-bezier(0.4, 0.0, 0.2, 1)" : "none",
+                      willChange: "transform, opacity",
                       backfaceVisibility: "hidden",
                     }}
                   >
-                    {coaches.map((coach, index) => {
-                      // Calculate positions relative to current index
-                      const relativeIndex = (index - currentCoachIndex + coaches.length) % coaches.length
+                    <div className="w-full h-full bg-gradient-to-br from-black/80 to-black/60 backdrop-blur-md border border-white/20 rounded-xl p-6 shadow-2xl flex flex-col">
+                      {/* Coach Image */}
+                      <div className="w-20 h-20 rounded-full overflow-hidden mx-auto mb-4 border-2 border-white/30 shadow-lg flex-shrink-0">
+                        <Image
+                          src={coaches[currentCoachIndex].image || "/placeholder.svg"}
+                          alt={coaches[currentCoachIndex].name}
+                          width={80}
+                          height={80}
+                          className="w-full h-full object-cover"
+                          priority
+                        />
+                      </div>
 
-                      let transform = ""
-                      let zIndex = 1
-                      let opacity = 0
-                      let visibility: React.CSSProperties["visibility"] = "hidden"
+                      {/* Coach Info */}
+                      <div className="flex-1 flex flex-col">
+                        <h3 className="text-xl font-bold text-white text-center mb-3 leading-tight">
+                          {coaches[currentCoachIndex].name}
+                        </h3>
 
-                      // Only show cards that are currently visible or transitioning
-                      if (relativeIndex === 0) {
-                        // Current card
-                        if (swipeDirection === "left") {
-                          transform = "translateX(-120%) translateY(0px) scale(0.9) rotateY(-15deg)"
-                          opacity = 0
-                          zIndex = 15
-                        } else if (swipeDirection === "right") {
-                          transform = "translateX(120%) translateY(0px) scale(0.9) rotateY(15deg)"
-                          opacity = 0
-                          zIndex = 15
-                        } else {
-                          transform = "translateX(0%) translateY(0px) scale(1) rotateY(0deg)"
-                          opacity = 1
-                          zIndex = 10
-                        }
-                        visibility = "visible"
-                      } else if (relativeIndex === 1) {
-                        // Next card
-                        transform = "translateX(15%) translateY(8px) scale(0.92) rotateY(8deg)"
-                        opacity = 0.9
-                        zIndex = 8
-                        visibility = "visible"
-                      } else if (relativeIndex === 2) {
-                        // Card after next (only show if not transitioning)
-                        if (!isTransitioning) {
-                          transform = "translateX(25%) translateY(16px) scale(0.85) rotateY(15deg)"
-                          opacity = 0.75
-                          zIndex = 6
-                          visibility = "visible"
-                        } else {
-                          // Hide during transition to prevent flicker
-                          transform = "translateX(200%) translateY(30px) scale(0.8) rotateY(30deg)"
-                          opacity = 0
-                          zIndex = 1
-                          visibility = "hidden"
-                        }
-                      } else if (relativeIndex === coaches.length - 1) {
-                        // Previous card (for right swipes)
-                        transform = "translateX(-100%) translateY(10px) scale(0.9) rotateY(-15deg)"
-                        opacity = 0
-                        zIndex = 5
-                        visibility = "hidden"
-                      } else {
-                        // Hidden cards
-                        transform = "translateX(200%) translateY(30px) scale(0.8) rotateY(30deg)"
-                        opacity = 0
-                        zIndex = 1
-                        visibility = "hidden"
-                      }
+                        <p className="text-xs text-white/80 text-center mb-4 leading-relaxed font-medium">
+                          {coaches[currentCoachIndex].specialty}
+                        </p>
 
-                      return (
-                        <div
-                          key={coach.id}
-                          className="absolute inset-0 cursor-grab active:cursor-grabbing"
-                          style={{
-                            transform,
-                            zIndex,
-                            opacity,
-                            visibility: visibility as React.CSSProperties["visibility"],
-                            transformStyle: "preserve-3d",
-                            transition: isTransitioning
-                              ? "all 350ms cubic-bezier(0.4, 0.0, 0.2, 1)"
-                              : "all 500ms cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-                            willChange: "transform, opacity",
-                            backfaceVisibility: "hidden",
-                          }}
-                        >
-                          <div className="w-full h-full bg-gradient-to-br from-black/80 to-black/60 backdrop-blur-md border border-white/20 rounded-xl p-6 shadow-2xl flex flex-col">
-                            {/* Coach Image */}
-                            <div className="w-20 h-20 rounded-full overflow-hidden mx-auto mb-4 border-2 border-white/30 shadow-lg flex-shrink-0">
-                              <Image
-                                src={coach.image || "/placeholder.svg"}
-                                alt={coach.name}
-                                width={80}
-                                height={80}
-                                className="w-full h-full object-cover"
-                                priority={relativeIndex <= 1}
-                              />
-                            </div>
+                        <div className="flex-1 flex items-center justify-center">
+                          <p className="text-sm text-white/90 text-center leading-relaxed italic px-2">
+                            "{coaches[currentCoachIndex].bio}"
+                          </p>
+                        </div>
 
-                            {/* Coach Info */}
-                            <div className="flex-1 flex flex-col">
-                              <h3 className="text-xl font-bold text-white text-center mb-3 leading-tight">
-                                {coach.name}
-                              </h3>
+                        {/* View Profile Link */}
+                        <div className="mt-4 pt-4 border-t border-white/20 flex-shrink-0">
+                          <Link
+                            href={coaches[currentCoachIndex].link}
+                            className="block text-center text-white text-sm font-medium hover:text-white/80 transition-colors"
+                          >
+                            View Full Profile →
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
 
-                              <p className="text-xs text-white/80 text-center mb-4 leading-relaxed font-medium">
-                                {coach.specialty}
-                              </p>
-
-                              <div className="flex-1 flex items-center justify-center">
-                                <p className="text-sm text-white/90 text-center leading-relaxed italic px-2">
-                                  "{coach.bio}"
-                                </p>
-                              </div>
-
-                              {/* View Profile Link */}
-                              <div className="mt-4 pt-4 border-t border-white/20 flex-shrink-0">
-                                <Link
-                                  href={coach.link}
-                                  className="block text-center text-white text-sm font-medium hover:text-white/80 transition-colors"
-                                >
-                                  View Full Profile →
-                                </Link>
-                              </div>
-                            </div>
+                  {/* Next Card Preview (subtle background) */}
+                  {!isTransitioning && (
+                    <div
+                      className="absolute inset-0 pointer-events-none"
+                      style={{
+                        transform: "translateX(5%) scale(0.95)",
+                        opacity: 0.3,
+                        zIndex: -1,
+                      }}
+                    >
+                      <div className="w-full h-full bg-gradient-to-br from-black/60 to-black/40 backdrop-blur-sm border border-white/10 rounded-xl shadow-lg">
+                        <div className="w-full h-full flex items-center justify-center">
+                          <div className="w-16 h-16 rounded-full overflow-hidden border border-white/20">
+                            <Image
+                              src={coaches[(currentCoachIndex + 1) % coaches.length].image || "/placeholder.svg"}
+                              alt="Next coach"
+                              width={64}
+                              height={64}
+                              className="w-full h-full object-cover opacity-50"
+                            />
                           </div>
                         </div>
-                      )
-                    })}
-                  </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
-                {/* Enhanced Navigation */}
+                {/* Navigation Dots */}
                 <div className="flex justify-center mb-4">
                   <div className="flex space-x-2 bg-black/40 backdrop-blur-sm rounded-full px-4 py-2 border border-white/20">
                     {coaches.map((_, index) => (
@@ -588,13 +519,7 @@ export default function HomePage() {
                         key={index}
                         onClick={() => {
                           if (!isTransitioning) {
-                            setIsTransitioning(true)
-                            setSwipeDirection("left")
                             setCurrentCoachIndex(index)
-                            setTimeout(() => {
-                              setSwipeDirection(null)
-                              setIsTransitioning(false)
-                            }, 350)
                           }
                         }}
                         className={`w-2 h-2 rounded-full transition-all duration-300 ${
