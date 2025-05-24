@@ -301,9 +301,9 @@ export default function HomePage() {
                   <button onClick={() => scrollToSection("coaches")} className="execfit-btn-primary">
                     Meet Our Coaches
                   </button>
-                  <button onClick={() => scrollToSection("about")} className="execfit-btn-secondary">
-                    Our Approach
-                  </button>
+                  <Link href="/book-consultation" className="execfit-btn-secondary">
+                    Book Free Consultation
+                  </Link>
                 </div>
               </div>
             </div>
@@ -380,9 +380,9 @@ export default function HomePage() {
                     ExecFit delivers results through personalized programming, accountability systems, and data-driven
                     progress tracking—all designed to maximize efficiency and effectiveness.
                   </p>
-                  <button onClick={() => scrollToSection("contact")} className="execfit-text-link">
-                    Learn more about our methodology <span className="execfit-arrow">→</span>
-                  </button>
+                  <Link href="/book-consultation" className="execfit-text-link">
+                    Schedule your free consultation <span className="execfit-arrow">→</span>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -623,8 +623,8 @@ export default function HomePage() {
                 <p className="execfit-cta-text">
                   Join the elite professionals who have elevated their performance both in and out of the gym.
                 </p>
-                <Link href="/contact" className="execfit-btn-primary execfit-btn-large">
-                  Schedule a Consultation
+                <Link href="/book-consultation" className="execfit-btn-primary execfit-btn-large">
+                  Schedule a Free Consultation
                 </Link>
               </div>
             </div>
