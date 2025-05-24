@@ -1,11 +1,77 @@
 import { supabase } from "@/lib/supabase"
 import { NextResponse } from "next/server"
 
+export async function GET() {
+  return new Response(
+    `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Initialize Database</title>
+      <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; }
+        button { background: #0070f3; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-size: 16px; }
+        button:hover { background: #0051cc; }
+        .result { margin-top: 20px; padding: 15px; border-radius: 6px; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+      </style>
+    </head>
+    <body>
+      <h1>Initialize ExecFit Database</h1>
+      <p>Click the button below to set up your consultation booking system:</p>
+      <button onclick="initializeDatabase()">Initialize Database</button>
+      <div id="result"></div>
+      
+      <script>
+        async function initializeDatabase() {
+          const button = document.querySelector('button');
+          const result = document.getElementById('result');
+          
+          button.disabled = true;
+          button.textContent = 'Initializing...';
+          result.innerHTML = '';
+          
+          try {
+            const response = await fetch('/api/init-db', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' }
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+              result.className = 'result success';
+              result.innerHTML = '<strong>Success!</strong><br>' + data.message + '<br>Coaches: ' + data.coaches + '<br>Time Slots: ' + data.timeSlots;
+            } else {
+              result.className = 'result error';
+              result.innerHTML = '<strong>Error:</strong><br>' + data.error;
+              if (data.instructions) {
+                result.innerHTML += '<br><br><strong>Instructions:</strong><br>' + data.instructions.join('<br>');
+              }
+            }
+          } catch (error) {
+            result.className = 'result error';
+            result.innerHTML = '<strong>Error:</strong><br>' + error.message;
+          }
+          
+          button.disabled = false;
+          button.textContent = 'Initialize Database';
+        }
+      </script>
+    </body>
+    </html>
+    `,
+    {
+      headers: {
+        "Content-Type": "text/html",
+      },
+    },
+  )
+}
+
 export async function POST() {
   try {
-    // Since we can't create tables directly with the anon key,
-    // let's just insert the coaches data and return success
-
     // Check if coaches already exist
     const { data: existingCoaches, error: checkError } = await supabase.from("coaches").select("email").limit(1)
 
