@@ -48,17 +48,12 @@ ALTER TABLE coaches ENABLE ROW LEVEL SECURITY;
 ALTER TABLE time_slots ENABLE ROW LEVEL SECURITY;
 ALTER TABLE consultations ENABLE ROW LEVEL SECURITY;
 
--- Create policies for public read access to coaches and time_slots
-CREATE POLICY "Allow public read access to coaches" ON coaches
-  FOR SELECT USING (true);
+-- Create permissive policies for all operations
+CREATE POLICY "Allow all operations on coaches" ON coaches
+  FOR ALL USING (true) WITH CHECK (true);
 
-CREATE POLICY "Allow public read access to time_slots" ON time_slots
-  FOR SELECT USING (true);
+CREATE POLICY "Allow all operations on time_slots" ON time_slots
+  FOR ALL USING (true) WITH CHECK (true);
 
--- Create policy for public insert access to consultations
-CREATE POLICY "Allow public insert access to consultations" ON consultations
-  FOR INSERT WITH CHECK (true);
-
--- Create policy for public read access to consultations (optional, for admin)
-CREATE POLICY "Allow public read access to consultations" ON consultations
-  FOR SELECT USING (true);
+CREATE POLICY "Allow all operations on consultations" ON consultations
+  FOR ALL USING (true) WITH CHECK (true);
