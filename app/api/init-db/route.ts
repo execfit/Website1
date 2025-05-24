@@ -1,85 +1,35 @@
-import { createClient } from "@supabase/supabase-js"
+import { supabase } from "@/lib/supabase"
 import { NextResponse } from "next/server"
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!, // Use service role for admin operations
-)
 
 export async function POST() {
   try {
-    // Create coaches table
-    const { error: coachesError } = await supabase.rpc("create_coaches_table_sql", {
-      sql_query: `
-        CREATE TABLE IF NOT EXISTS coaches (
-          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-          name VARCHAR(255) NOT NULL,
-          email VARCHAR(255) UNIQUE NOT NULL,
-          specialty TEXT,
-          image VARCHAR(500),
-          timezone VARCHAR(50) DEFAULT 'America/New_York',
-          is_active BOOLEAN DEFAULT true,
-          created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-          updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-        );
-      `,
-    })
+    // Since we can't create tables directly with the anon key,
+    // let's just insert the coaches data and return success
 
-    if (coachesError) {
-      console.log("Coaches table might already exist:", coachesError.message)
+    // Check if coaches already exist
+    const { data: existingCoaches, error: checkError } = await supabase.from("coaches").select("email").limit(1)
+
+    if (checkError) {
+      // If table doesn't exist, we'll get an error
+      console.log("Coaches table might not exist yet:", checkError.message)
+
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Database tables need to be created manually in Supabase dashboard",
+          error: "Please create the tables in your Supabase dashboard first",
+          instructions: [
+            "1. Go to your Supabase dashboard",
+            "2. Navigate to the SQL Editor",
+            "3. Run the SQL commands to create the tables",
+            "4. Then run this endpoint again to populate data",
+          ],
+        },
+        { status: 400 },
+      )
     }
 
-    // Create time_slots table
-    const { error: timeSlotsError } = await supabase.rpc("create_time_slots_table_sql", {
-      sql_query: `
-        CREATE TABLE IF NOT EXISTS time_slots (
-          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-          coach_id UUID REFERENCES coaches(id) ON DELETE CASCADE,
-          date DATE NOT NULL,
-          start_time TIME NOT NULL,
-          end_time TIME NOT NULL,
-          is_available BOOLEAN DEFAULT true,
-          is_recurring BOOLEAN DEFAULT false,
-          recurring_pattern VARCHAR(50),
-          created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-          UNIQUE(coach_id, date, start_time)
-        );
-      `,
-    })
-
-    if (timeSlotsError) {
-      console.log("Time slots table might already exist:", timeSlotsError.message)
-    }
-
-    // Create consultations table
-    const { error: consultationsError } = await supabase.rpc("create_consultations_table_sql", {
-      sql_query: `
-        CREATE TABLE IF NOT EXISTS consultations (
-          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-          coach_id UUID REFERENCES coaches(id),
-          client_name VARCHAR(255) NOT NULL,
-          client_email VARCHAR(255) NOT NULL,
-          client_phone VARCHAR(50) NOT NULL,
-          consultation_date DATE NOT NULL,
-          consultation_time TIME NOT NULL,
-          duration_minutes INTEGER DEFAULT 30,
-          status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending', 'confirmed', 'cancelled', 'completed')),
-          client_goals TEXT,
-          client_experience VARCHAR(50),
-          notes TEXT,
-          created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-          updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-        );
-      `,
-    })
-
-    if (consultationsError) {
-      console.log("Consultations table might already exist:", consultationsError.message)
-    }
-
-    // Insert sample coaches
-    const { data: existingCoaches } = await supabase.from("coaches").select("email")
-
+    // Insert sample coaches if they don't exist
     if (!existingCoaches || existingCoaches.length === 0) {
       const { error: insertError } = await supabase.from("coaches").insert([
         {
@@ -104,65 +54,96 @@ export async function POST() {
 
       if (insertError) {
         console.error("Error inserting coaches:", insertError)
+        return NextResponse.json(
+          {
+            success: false,
+            error: insertError.message,
+          },
+          { status: 500 },
+        )
       }
     }
 
     // Get coaches for time slot creation
-    const { data: coaches } = await supabase.from("coaches").select("id").eq("is_active", true)
+    const { data: coaches, error: coachesError } = await supabase.from("coaches").select("id").eq("is_active", true)
+
+    if (coachesError) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: coachesError.message,
+        },
+        { status: 500 },
+      )
+    }
 
     if (coaches && coaches.length > 0) {
-      // Insert sample time slots for the next 30 days
-      const timeSlots = []
+      // Check if time slots already exist
+      const { data: existingSlots } = await supabase.from("time_slots").select("id").limit(1)
 
-      for (const coach of coaches) {
-        for (let i = 1; i <= 30; i++) {
-          const date = new Date()
-          date.setDate(date.getDate() + i)
-          const dateString = date.toISOString().split("T")[0]
+      if (!existingSlots || existingSlots.length === 0) {
+        // Insert sample time slots for the next 30 days
+        const timeSlots = []
 
-          // Skip weekends
-          if (date.getDay() === 0 || date.getDay() === 6) continue
+        for (const coach of coaches) {
+          for (let i = 1; i <= 30; i++) {
+            const date = new Date()
+            date.setDate(date.getDate() + i)
+            const dateString = date.toISOString().split("T")[0]
 
-          // Add time slots for each weekday
-          const slots = ["09:00:00", "10:00:00", "11:00:00", "14:00:00", "15:00:00", "16:00:00", "17:00:00"]
+            // Skip weekends
+            if (date.getDay() === 0 || date.getDay() === 6) continue
 
-          for (const time of slots) {
-            const endTime = time.replace(
-              /(\d{2}):(\d{2}):(\d{2})/,
-              (_, h, m, s) => `${String(Number.parseInt(h) + 1).padStart(2, "0")}:${m}:${s}`,
-            )
+            // Add time slots for each weekday
+            const slots = ["09:00:00", "10:00:00", "11:00:00", "14:00:00", "15:00:00", "16:00:00", "17:00:00"]
 
-            timeSlots.push({
-              coach_id: coach.id,
-              date: dateString,
-              start_time: time,
-              end_time: endTime,
-              is_available: true,
-            })
+            for (const time of slots) {
+              const endTime = time.replace(
+                /(\d{2}):(\d{2}):(\d{2})/,
+                (_, h, m, s) => `${String(Number.parseInt(h) + 1).padStart(2, "0")}:${m}:${s}`,
+              )
+
+              timeSlots.push({
+                coach_id: coach.id,
+                date: dateString,
+                start_time: time,
+                end_time: endTime,
+                is_available: true,
+              })
+            }
           }
         }
-      }
 
-      // Insert time slots in batches
-      const batchSize = 100
-      for (let i = 0; i < timeSlots.length; i += batchSize) {
-        const batch = timeSlots.slice(i, i + batchSize)
-        const { error: timeSlotsInsertError } = await supabase.from("time_slots").upsert(batch, {
-          onConflict: "coach_id,date,start_time",
-          ignoreDuplicates: true,
-        })
+        // Insert time slots in smaller batches
+        const batchSize = 50
+        let insertedCount = 0
 
-        if (timeSlotsInsertError) {
-          console.error("Error inserting time slots batch:", timeSlotsInsertError)
+        for (let i = 0; i < timeSlots.length; i += batchSize) {
+          const batch = timeSlots.slice(i, i + batchSize)
+          const { error: timeSlotsInsertError } = await supabase.from("time_slots").insert(batch)
+
+          if (timeSlotsInsertError) {
+            console.error("Error inserting time slots batch:", timeSlotsInsertError)
+            // Continue with next batch instead of failing completely
+          } else {
+            insertedCount += batch.length
+          }
         }
+
+        return NextResponse.json({
+          success: true,
+          message: "Database initialized successfully!",
+          coaches: coaches.length,
+          timeSlots: `${insertedCount} time slots created for next 30 days`,
+        })
       }
     }
 
     return NextResponse.json({
       success: true,
-      message: "Database initialized successfully!",
+      message: "Database already initialized!",
       coaches: coaches?.length || 0,
-      timeSlots: "Generated for next 30 days",
+      timeSlots: "Already exists",
     })
   } catch (error) {
     console.error("Error initializing database:", error)
