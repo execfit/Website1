@@ -1,5 +1,7 @@
 "use client"
 
+import type React from "react"
+
 import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import Image from "next/image"
@@ -8,6 +10,36 @@ import Header from "@/components/header"
 export default function HomePage() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear())
+  const [currentCoachIndex, setCurrentCoachIndex] = useState(0)
+  const [touchStart, setTouchStart] = useState(0)
+  const [touchEnd, setTouchEnd] = useState(0)
+
+  const coaches = [
+    {
+      id: "gabriela",
+      name: "Gabriela Garcia",
+      specialty: "Personal Trainer | Nutrition Coach",
+      bio: "Life doesn't slow down for you, but that doesn't mean your goals should wait. I help busy individuals build strength, confidence, and a body they're proud of!",
+      image: "/images/coach-gabriela.jpg",
+      link: "/coaches/gabriela-garcia",
+    },
+    {
+      id: "maddy",
+      name: "Maddy Gold",
+      specialty: "Certified Personal Trainer | PN1 Nutrition Coach",
+      bio: "I specialize in building amazing bodies, good habits, and strength. Let's build up confidence with a fun, balanced approach to fitness!",
+      image: "/images/coach-maddy.jpg",
+      link: "/coaches/maddy-gold",
+    },
+    {
+      id: "yosof",
+      name: "Yosof Abuhasan",
+      specialty: "Physique/Strength Training/Mindset Coaching",
+      bio: "I'm a certified trainer focused on helping clients build muscle, burn fat, and develop the mental discipline to sustain long-term results.",
+      image: "/images/coach-yosof.jpg",
+      link: "/coaches/yosof-abuhasan",
+    },
+  ]
 
   useEffect(() => {
     // Logo Animation
@@ -67,6 +99,43 @@ export default function HomePage() {
         behavior: "smooth",
       })
     }
+  }
+
+  // Enhanced touch handlers for mobile swipe
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.targetTouches[0].clientX)
+    setTouchEnd(e.targetTouches[0].clientX) // Initialize touchEnd
+  }
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX)
+  }
+
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return
+
+    const distance = touchStart - touchEnd
+    const isLeftSwipe = distance > 50
+    const isRightSwipe = distance < -50
+
+    if (isLeftSwipe && currentCoachIndex < coaches.length - 1) {
+      setCurrentCoachIndex(currentCoachIndex + 1)
+    }
+    if (isRightSwipe && currentCoachIndex > 0) {
+      setCurrentCoachIndex(currentCoachIndex - 1)
+    }
+
+    // Reset touch values
+    setTouchStart(0)
+    setTouchEnd(0)
+  }
+
+  const nextCoach = () => {
+    setCurrentCoachIndex((prev) => (prev + 1) % coaches.length)
+  }
+
+  const prevCoach = () => {
+    setCurrentCoachIndex((prev) => (prev - 1 + coaches.length) % coaches.length)
   }
 
   return (
@@ -337,32 +406,131 @@ export default function HomePage() {
                 </div>
               </div>
 
-              {/* Mobile swipe instruction */}
-              <div className="execfit-swipe-instruction mobile-only">
-                <span className="execfit-swipe-text">Swipe Left!</span>
-              </div>
+              {/* Mobile Card Deck */}
+              <div className="mobile-only">
+                <div className="text-center mb-6">
+                  <span className="text-white/60 text-sm">← Swipe to explore coaches →</span>
+                </div>
 
-              {/* Mobile coaches deck - simplified for now */}
-              <div className="execfit-coaches-deck-container mobile-only">
-                <div className="execfit-coaches-deck">
-                  <div className="execfit-coach-card-deck">
-                    <div className="execfit-coach-image-container">
-                      <Image
-                        src="/images/coach-gabriela.jpg"
-                        alt="Gabriela Garcia"
-                        width={80}
-                        height={80}
-                        className="execfit-coach-image"
+                <div className="relative w-full max-w-xs mx-auto h-80 mb-8">
+                  {/* Card Stack Container */}
+                  <div
+                    className="relative w-full h-full"
+                    onTouchStart={handleTouchStart}
+                    onTouchMove={handleTouchMove}
+                    onTouchEnd={handleTouchEnd}
+                    style={{ perspective: "1000px" }}
+                  >
+                    {coaches.map((coach, index) => {
+                      const isActive = index === currentCoachIndex
+                      const isNext = index === currentCoachIndex + 1
+                      const isNextNext = index === currentCoachIndex + 2
+                      const isPrev = index === currentCoachIndex - 1
+                      const isHidden = index < currentCoachIndex - 1 || index > currentCoachIndex + 2
+
+                      let transform = "translateX(100%) translateY(20px) scale(0.85) rotateY(25deg)"
+                      let zIndex = 1
+                      let opacity = 0
+
+                      if (isActive) {
+                        transform = "translateX(0%) translateY(0px) scale(1) rotateY(0deg)"
+                        zIndex = 10
+                        opacity = 1
+                      } else if (isNext) {
+                        transform = "translateX(15%) translateY(8px) scale(0.92) rotateY(8deg)"
+                        zIndex = 8
+                        opacity = 0.8
+                      } else if (isNextNext) {
+                        transform = "translateX(25%) translateY(16px) scale(0.85) rotateY(15deg)"
+                        zIndex = 6
+                        opacity = 0.6
+                      } else if (isPrev) {
+                        transform = "translateX(-100%) translateY(10px) scale(0.9) rotateY(-15deg)"
+                        zIndex = 5
+                        opacity = 0
+                      } else if (isHidden) {
+                        transform = "translateX(200%) translateY(30px) scale(0.8) rotateY(30deg)"
+                        zIndex = 1
+                        opacity = 0
+                      }
+
+                      return (
+                        <div
+                          key={coach.id}
+                          className="absolute inset-0 transition-all duration-500 ease-out cursor-grab active:cursor-grabbing"
+                          style={{
+                            transform,
+                            zIndex,
+                            opacity,
+                            transformStyle: "preserve-3d",
+                          }}
+                        >
+                          <div className="w-full h-full bg-gradient-to-br from-black/80 to-black/60 backdrop-blur-md border border-white/20 rounded-xl p-5 shadow-2xl flex flex-col">
+                            {/* Coach Image */}
+                            <div className="w-16 h-16 rounded-full overflow-hidden mx-auto mb-4 border-2 border-white/30 shadow-lg">
+                              <Image
+                                src={coach.image || "/placeholder.svg"}
+                                alt={coach.name}
+                                width={64}
+                                height={64}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+
+                            {/* Coach Info */}
+                            <h3 className="text-lg font-bold text-white text-center mb-2 leading-tight">
+                              {coach.name}
+                            </h3>
+
+                            <p className="text-xs text-white/80 text-center mb-3 leading-relaxed">{coach.specialty}</p>
+
+                            <div className="flex-1 flex items-center">
+                              <p className="text-sm text-white/90 text-center leading-relaxed italic">"{coach.bio}"</p>
+                            </div>
+
+                            {/* View Profile Link */}
+                            <div className="mt-4 pt-3 border-t border-white/20">
+                              <Link
+                                href={coach.link}
+                                className="block text-center text-white text-sm font-medium hover:text-white/80 transition-colors"
+                              >
+                                View Full Profile →
+                              </Link>
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                {/* Enhanced Navigation */}
+                <div className="flex justify-center mb-4">
+                  <div className="flex space-x-2 bg-black/40 backdrop-blur-sm rounded-full px-4 py-2 border border-white/20">
+                    {coaches.map((_, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setCurrentCoachIndex(index)}
+                        className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                          index === currentCoachIndex ? "bg-white scale-125" : "bg-white/30 hover:bg-white/50"
+                        }`}
                       />
+                    ))}
+                  </div>
+                </div>
+
+                {/* Swipe Instructions */}
+                <div className="text-center">
+                  <div className="inline-flex items-center space-x-4 text-white/60 text-xs">
+                    <div className="flex items-center space-x-1">
+                      <span>←</span>
+                      <span>Previous</span>
                     </div>
-                    <h3 className="execfit-coach-name">Gabriela Garcia</h3>
-                    <p className="execfit-coach-specialty">Personal Trainer | Nutrition Coach</p>
-                    <p className="execfit-coach-bio">
-                      "Hi, I'm Gabriella! Life doesn't slow down for you, but that doesn't mean your goals should wait."
-                    </p>
-                    <Link href="/coaches/gabriela-garcia" className="execfit-coach-link">
-                      View Profile <span className="execfit-arrow">→</span>
-                    </Link>
+                    <div className="w-px h-4 bg-white/30"></div>
+                    <div className="flex items-center space-x-1">
+                      <span>Next</span>
+                      <span>→</span>
+                    </div>
                   </div>
                 </div>
               </div>
