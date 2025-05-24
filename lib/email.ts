@@ -75,8 +75,18 @@ export async function sendCookbookEmail({ to, cookbookId, cookbookTitle }: SendC
               📥 Download Your Cookbook
             </a>
             <p style="color: #666; font-size: 14px; margin-top: 12px;">
-              Click the button above to download your PDF cookbook directly to your device
+              Click the button above to download your PDF cookbook
             </p>
+          </div>
+
+          <!-- Mobile Download Instructions -->
+          <div style="background: #e8f4fd; padding: 20px; border-radius: 6px; margin-bottom: 25px; border-left: 4px solid #007acc;">
+            <h3 style="color: #007acc; margin-bottom: 10px; font-size: 16px;">📱 Mobile Download Tips:</h3>
+            <ul style="color: #666; font-size: 14px; line-height: 1.6; margin: 0; padding-left: 20px;">
+              <li><strong>iPhone/Safari:</strong> Tap the download button, then tap the share icon and "Save to Files"</li>
+              <li><strong>Android:</strong> The PDF will download to your Downloads folder automatically</li>
+              <li><strong>Alternative:</strong> Long-press the download button and select "Download Link"</li>
+            </ul>
           </div>
 
           <div style="margin-bottom: 30px; background: #f9f9f9; padding: 20px; border-radius: 6px;">

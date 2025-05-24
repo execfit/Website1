@@ -45,13 +45,23 @@ export async function GET(request: NextRequest) {
     const downloadFileName = fileName.replace(/-/g, " ").replace(/\.pdf$/, " - ExecFit.pdf")
     console.log("Download filename:", downloadFileName)
 
+    // Enhanced headers for better mobile compatibility
+    const headers = new Headers({
+      "Content-Type": "application/pdf",
+      "Content-Disposition": `attachment; filename="${downloadFileName}"`,
+      "Content-Length": fileBuffer.length.toString(),
+      // Additional headers for mobile Safari compatibility
+      "Cache-Control": "no-cache, no-store, must-revalidate",
+      Pragma: "no-cache",
+      Expires: "0",
+      // Force download on mobile devices
+      "X-Content-Type-Options": "nosniff",
+      "Content-Transfer-Encoding": "binary",
+    })
+
     return new NextResponse(fileBuffer, {
       status: 200,
-      headers: {
-        "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="${downloadFileName}"`,
-        "Content-Length": fileBuffer.length.toString(),
-      },
+      headers,
     })
   } catch (error) {
     console.error("=== DOWNLOAD ERROR ===")

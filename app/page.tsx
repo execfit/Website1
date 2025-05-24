@@ -13,6 +13,7 @@ export default function HomePage() {
   const [currentCoachIndex, setCurrentCoachIndex] = useState(0)
   const [touchStart, setTouchStart] = useState(0)
   const [touchEnd, setTouchEnd] = useState(0)
+  const [isTransitioning, setIsTransitioning] = useState(false)
 
   const coaches = [
     {
@@ -101,28 +102,40 @@ export default function HomePage() {
     }
   }
 
-  // Enhanced touch handlers for mobile swipe
+  // Enhanced touch handlers for mobile swipe with looping
   const handleTouchStart = (e: React.TouchEvent) => {
+    if (isTransitioning) return
     setTouchStart(e.targetTouches[0].clientX)
-    setTouchEnd(e.targetTouches[0].clientX) // Initialize touchEnd
+    setTouchEnd(e.targetTouches[0].clientX)
   }
 
   const handleTouchMove = (e: React.TouchEvent) => {
+    if (isTransitioning) return
     setTouchEnd(e.targetTouches[0].clientX)
   }
 
   const handleTouchEnd = () => {
-    if (!touchStart || !touchEnd) return
+    if (isTransitioning || !touchStart || !touchEnd) return
 
     const distance = touchStart - touchEnd
     const isLeftSwipe = distance > 50
     const isRightSwipe = distance < -50
 
-    if (isLeftSwipe && currentCoachIndex < coaches.length - 1) {
-      setCurrentCoachIndex(currentCoachIndex + 1)
-    }
-    if (isRightSwipe && currentCoachIndex > 0) {
-      setCurrentCoachIndex(currentCoachIndex - 1)
+    if (isLeftSwipe || isRightSwipe) {
+      setIsTransitioning(true)
+
+      if (isLeftSwipe) {
+        // Next coach (with looping)
+        setCurrentCoachIndex((prev) => (prev + 1) % coaches.length)
+      } else if (isRightSwipe) {
+        // Previous coach (with looping)
+        setCurrentCoachIndex((prev) => (prev - 1 + coaches.length) % coaches.length)
+      }
+
+      // Reset transition state after animation completes
+      setTimeout(() => {
+        setIsTransitioning(false)
+      }, 400)
     }
 
     // Reset touch values
@@ -131,11 +144,17 @@ export default function HomePage() {
   }
 
   const nextCoach = () => {
+    if (isTransitioning) return
+    setIsTransitioning(true)
     setCurrentCoachIndex((prev) => (prev + 1) % coaches.length)
+    setTimeout(() => setIsTransitioning(false), 400)
   }
 
   const prevCoach = () => {
+    if (isTransitioning) return
+    setIsTransitioning(true)
     setCurrentCoachIndex((prev) => (prev - 1 + coaches.length) % coaches.length)
+    setTimeout(() => setIsTransitioning(false), 400)
   }
 
   return (
@@ -423,14 +442,15 @@ export default function HomePage() {
                   >
                     {coaches.map((coach, index) => {
                       const isActive = index === currentCoachIndex
-                      const isNext = index === currentCoachIndex + 1
-                      const isNextNext = index === currentCoachIndex + 2
-                      const isPrev = index === currentCoachIndex - 1
-                      const isHidden = index < currentCoachIndex - 1 || index > currentCoachIndex + 2
+                      const isNext = index === (currentCoachIndex + 1) % coaches.length
+                      const isNextNext = index === (currentCoachIndex + 2) % coaches.length
+                      const isPrev = index === (currentCoachIndex - 1 + coaches.length) % coaches.length
+                      const isHidden = !isActive && !isNext && !isNextNext && !isPrev
 
                       let transform = "translateX(100%) translateY(20px) scale(0.85) rotateY(25deg)"
                       let zIndex = 1
                       let opacity = 0
+                      const transitionDuration = isTransitioning ? "300ms" : "500ms"
 
                       if (isActive) {
                         transform = "translateX(0%) translateY(0px) scale(1) rotateY(0deg)"
@@ -457,12 +477,13 @@ export default function HomePage() {
                       return (
                         <div
                           key={coach.id}
-                          className="absolute inset-0 transition-all duration-500 ease-out cursor-grab active:cursor-grabbing"
+                          className="absolute inset-0 cursor-grab active:cursor-grabbing"
                           style={{
                             transform,
                             zIndex,
                             opacity,
                             transformStyle: "preserve-3d",
+                            transition: `all ${transitionDuration} cubic-bezier(0.25, 0.46, 0.45, 0.94)`,
                           }}
                         >
                           <div className="w-full h-full bg-gradient-to-br from-black/80 to-black/60 backdrop-blur-md border border-white/20 rounded-xl p-6 shadow-2xl flex flex-col">
@@ -516,7 +537,13 @@ export default function HomePage() {
                     {coaches.map((_, index) => (
                       <button
                         key={index}
-                        onClick={() => setCurrentCoachIndex(index)}
+                        onClick={() => {
+                          if (!isTransitioning) {
+                            setIsTransitioning(true)
+                            setCurrentCoachIndex(index)
+                            setTimeout(() => setIsTransitioning(false), 400)
+                          }
+                        }}
                         className={`w-2 h-2 rounded-full transition-all duration-300 ${
                           index === currentCoachIndex ? "bg-white scale-125" : "bg-white/30 hover:bg-white/50"
                         }`}
