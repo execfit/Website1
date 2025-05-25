@@ -161,18 +161,26 @@ export default function HomePage() {
       if (distance > 0) {
         // Swiped left - show next coach
         setSwipeDirection("left")
-        // DON'T update index immediately - wait for animation to complete
+        // Update index and reset state atomically after animation
         setTimeout(() => {
           setCurrentCoachIndex((prev) => (prev + 1) % coaches.length)
-          resetSwipeState()
+          // Reset state immediately after index update to prevent duplicate rendering
+          setIsTransitioning(false)
+          setSwipeDirection(null)
+          setTouchStart(0)
+          setTouchCurrent(0)
         }, 400)
       } else {
         // Swiped right - show previous coach
         setSwipeDirection("right")
-        // DON'T update index immediately - wait for animation to complete
+        // Update index and reset state atomically after animation
         setTimeout(() => {
           setCurrentCoachIndex((prev) => (prev - 1 + coaches.length) % coaches.length)
-          resetSwipeState()
+          // Reset state immediately after index update to prevent duplicate rendering
+          setIsTransitioning(false)
+          setSwipeDirection(null)
+          setTouchStart(0)
+          setTouchCurrent(0)
         }, 400)
       }
     } else {
@@ -213,9 +221,9 @@ export default function HomePage() {
     const dragOffset = getDragOffset()
 
     if (isTransitioning && swipeDirection) {
-      // During transition - use DESTINATION logic to prevent duplicates
+      // During transition - cards move to their final positions
       if (swipeDirection === "left") {
-        // Swiping left: current slides out left, next slides in from right
+        // Swiping left: current slides out left, next slides in to center
         if (cardPosition === "current") {
           return "translateX(-400px) rotate(-15deg) scale(0.8)"
         } else if (cardPosition === "next") {
@@ -224,7 +232,7 @@ export default function HomePage() {
           return "translateX(-350px) scale(0.95)"
         }
       } else {
-        // Swiping right: current slides out right, prev slides in from left
+        // Swiping right: current slides out right, prev slides in to center
         if (cardPosition === "current") {
           return "translateX(400px) rotate(15deg) scale(0.8)"
         } else if (cardPosition === "prev") {
@@ -264,32 +272,10 @@ export default function HomePage() {
     return "translateX(0px) scale(1)"
   }
 
-  // Get the correct coach content for each card position during transitions
+  // Get the correct coach content for each card position
   const getCoachForCard = (cardPosition: "current" | "next" | "prev") => {
-    if (isTransitioning && swipeDirection) {
-      // During transition, show destination coaches to prevent duplicates
-      if (swipeDirection === "left") {
-        // Left swipe: next coach becomes current, current becomes prev
-        if (cardPosition === "current") {
-          return coaches[currentCoachIndex] // Old current sliding out
-        } else if (cardPosition === "next") {
-          return coaches[(currentCoachIndex + 1) % coaches.length] // New current sliding in
-        } else {
-          return coaches[(currentCoachIndex - 1 + coaches.length) % coaches.length]
-        }
-      } else {
-        // Right swipe: prev coach becomes current, current becomes next
-        if (cardPosition === "current") {
-          return coaches[currentCoachIndex] // Old current sliding out
-        } else if (cardPosition === "prev") {
-          return coaches[(currentCoachIndex - 1 + coaches.length) % coaches.length] // New current sliding in
-        } else {
-          return coaches[(currentCoachIndex + 1) % coaches.length]
-        }
-      }
-    }
-
-    // Normal state - use current index
+    // Always use the current index as the source of truth
+    // This prevents the duplicate rendering issue
     if (cardPosition === "current") return coaches[currentCoachIndex]
     if (cardPosition === "next") return coaches[(currentCoachIndex + 1) % coaches.length]
     if (cardPosition === "prev") return coaches[(currentCoachIndex - 1 + coaches.length) % coaches.length]
