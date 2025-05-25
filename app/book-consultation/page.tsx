@@ -135,31 +135,42 @@ export default function BookConsultationPage() {
     setIsSubmitting(true)
     setError(null)
 
+    console.log("🚀 Starting consultation booking submission")
+
     try {
+      const bookingData = {
+        coach_id: selectedCoach === "no-preference" ? null : selectedCoach,
+        client_name: formData.name,
+        client_email: formData.email,
+        client_phone: formData.phone,
+        consultation_date: selectedDate,
+        consultation_time: selectedTime,
+        client_goals: formData.goals,
+        client_experience: formData.experience,
+      }
+
+      console.log("📋 Booking data:", bookingData)
+
       const response = await fetch("/api/consultations/book", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          coach_id: selectedCoach === "no-preference" ? null : selectedCoach,
-          client_name: formData.name,
-          client_email: formData.email,
-          client_phone: formData.phone,
-          consultation_date: selectedDate,
-          consultation_time: selectedTime,
-          client_goals: formData.goals,
-          client_experience: formData.experience,
-        }),
+        body: JSON.stringify(bookingData),
       })
 
+      console.log("📡 Response status:", response.status)
+
       if (response.ok) {
+        const result = await response.json()
+        console.log("✅ Booking successful:", result)
         setShowSuccess(true)
       } else {
         const errorData = await response.json()
-        setError(errorData.error || "Failed to book consultation")
+        console.error("❌ Booking failed:", errorData)
+        setError(errorData.error || `Failed to book consultation (${response.status})`)
       }
     } catch (error) {
-      console.error("Error booking consultation:", error)
-      setError("Failed to book consultation. Please try again.")
+      console.error("💥 Error booking consultation:", error)
+      setError("Failed to book consultation. Please check your internet connection and try again.")
     } finally {
       setIsSubmitting(false)
     }
@@ -264,6 +275,9 @@ export default function BookConsultationPage() {
           {error && (
             <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-4 mb-6 text-center">
               <p className="text-red-200">{error}</p>
+              <button onClick={() => setError(null)} className="mt-2 text-sm text-red-300 hover:text-red-100 underline">
+                Dismiss
+              </button>
             </div>
           )}
 

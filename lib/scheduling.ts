@@ -10,6 +10,7 @@ export interface Coach {
   image: string
   timezone: string
   is_active: boolean
+  calendar_id?: string
 }
 
 export interface TimeSlot {
@@ -36,6 +37,8 @@ export interface Consultation {
   client_goals?: string | null
   client_experience?: string | null
   notes?: string | null
+  calendar_event_id?: string | null
+  meeting_link?: string | null
   created_at?: string
   updated_at?: string
 }
@@ -54,24 +57,44 @@ export async function getCoaches(): Promise<Coach[]> {
 
 // Get available time slots for a coach on a specific date
 export async function getAvailableSlots(coachId: string, date: string) {
-  const { data, error } = await supabase
-    .from("time_slots")
-    .select("*")
-    .eq("coach_id", coachId)
-    .eq("date", date)
-    .eq("is_available", true)
-    .order("start_time")
+  try {
+    console.log(`🔍 Getting available slots for coach ${coachId} on ${date}`)
 
-  if (error) {
-    console.error("Error fetching time slots:", error)
+    // Get base time slots from database
+    const { data, error } = await supabase
+      .from("time_slots")
+      .select("*")
+      .eq("coach_id", coachId)
+      .eq("date", date)
+      .eq("is_available", true)
+      .order("start_time")
+
+    if (error) {
+      console.error("Error fetching time slots:", error)
+      return []
+    }
+
+    console.log(`📅 Found ${data?.length || 0} base time slots`)
+
+    // Get already booked consultations
+    const bookedSlots = await getBookedSlots(coachId, date)
+    const bookedTimes = bookedSlots.map((slot) => slot.consultation_time)
+
+    console.log(`🚫 Booked times: ${bookedTimes.join(", ")}`)
+
+    // Filter out booked slots
+    const availableSlots =
+      data?.filter((slot) => {
+        return !bookedTimes.includes(slot.start_time)
+      }) || []
+
+    console.log(`✅ Available slots: ${availableSlots.length}`)
+
+    return availableSlots
+  } catch (error) {
+    console.error("Error getting available slots:", error)
     return []
   }
-
-  // Filter out already booked slots
-  const bookedSlots = await getBookedSlots(coachId, date)
-  const bookedTimes = bookedSlots.map((slot) => slot.consultation_time)
-
-  return data?.filter((slot) => !bookedTimes.includes(slot.start_time)) || []
 }
 
 // Get all available slots across all coaches for "no preference"
@@ -113,8 +136,11 @@ export async function getBookedSlots(coachId: string, date: string) {
 // Book a consultation
 export async function bookConsultation(consultation: Omit<Consultation, "id" | "created_at" | "updated_at">) {
   try {
+    console.log("💾 Starting consultation booking process")
+
     // Check if slot is still available (if coach is specified)
     if (consultation.coach_id) {
+      console.log(`🔍 Checking availability for coach ${consultation.coach_id}`)
       const isAvailable = await checkSlotAvailability(
         consultation.coach_id,
         consultation.consultation_date,
@@ -122,20 +148,37 @@ export async function bookConsultation(consultation: Omit<Consultation, "id" | "
       )
 
       if (!isAvailable) {
+        console.log("❌ Time slot no longer available")
         throw new Error("This time slot is no longer available")
       }
+      console.log("✅ Time slot is available")
     }
 
+    // Insert consultation into database
+    console.log("💾 Inserting consultation into database")
     const { data, error } = await supabase.from("consultations").insert([consultation]).select().single()
 
-    if (error) throw error
+    if (error) {
+      console.error("❌ Database insert error:", error)
+      throw error
+    }
+
+    console.log("✅ Consultation inserted successfully:", data.id)
 
     // Send confirmation email
-    await sendConsultationConfirmation(data)
+    console.log("📧 Sending confirmation email")
+    const emailResult = await sendConsultationConfirmation(data)
+
+    if (emailResult.success) {
+      console.log("✅ Confirmation email sent successfully")
+    } else {
+      console.log("⚠️ Email sending failed:", emailResult.error)
+      // Don't fail the booking if email fails
+    }
 
     return { success: true, data }
   } catch (error) {
-    console.error("Error booking consultation:", error)
+    console.error("💥 Error booking consultation:", error)
     const errorMessage = error instanceof Error ? error.message : "Unknown error occurred"
     return { success: false, error: errorMessage }
   }
@@ -143,6 +186,7 @@ export async function bookConsultation(consultation: Omit<Consultation, "id" | "
 
 // Check if a time slot is available
 export async function checkSlotAvailability(coachId: string, date: string, time: string): Promise<boolean> {
+  // Check database bookings
   const { data, error } = await supabase
     .from("consultations")
     .select("id")
@@ -162,6 +206,8 @@ export async function checkSlotAvailability(coachId: string, date: string, time:
 // Send consultation confirmation email
 export async function sendConsultationConfirmation(consultation: Consultation) {
   try {
+    console.log("📧 Attempting to send confirmation email to:", consultation.client_email)
+
     const response = await fetch("/api/send-consultation-confirmation", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -169,12 +215,17 @@ export async function sendConsultationConfirmation(consultation: Consultation) {
     })
 
     if (!response.ok) {
-      throw new Error("Failed to send confirmation email")
+      const errorText = await response.text()
+      console.error("❌ Email API response not ok:", response.status, errorText)
+      throw new Error(`Failed to send confirmation email: ${response.status}`)
     }
+
+    const result = await response.json()
+    console.log("✅ Email API response:", result)
 
     return { success: true }
   } catch (error) {
-    console.error("Error sending confirmation:", error)
+    console.error("💥 Error sending confirmation:", error)
     const errorMessage = error instanceof Error ? error.message : "Unknown error occurred"
     return { success: false, error: errorMessage }
   }
