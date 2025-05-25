@@ -535,7 +535,7 @@ export default function HomePage() {
                     <div
                       className="absolute inset-0 pointer-events-none"
                       style={{
-                        zIndex: 0,
+                        zIndex: 2, // Changed from 0 to 2 to be above traveling cards (z-index: -1)
                         transform: "scale(0.9)",
                       }}
                     >
@@ -649,9 +649,16 @@ export default function HomePage() {
                         if (position === "hidden") return 1
 
                         if (isTransitioning && swipeDirection) {
-                          if (swipeDirection === "left" && position === "next") return 10
-                          if (swipeDirection === "right" && position === "prev") return 10
-                          if (position === "current") return 5
+                          // Cards traveling across screen should be behind static icon (z-index 0)
+                          if (swipeDirection === "left") {
+                            if (position === "next") return 10 // Coming in from right
+                            if (position === "current") return 5 // Going out left
+                            if (position === "prev") return -1 // Traveling across behind icon
+                          } else if (swipeDirection === "right") {
+                            if (position === "prev") return 10 // Coming in from left
+                            if (position === "current") return 5 // Going out right
+                            if (position === "next") return -1 // Traveling across behind icon
+                          }
                           return 3
                         }
 
