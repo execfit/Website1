@@ -110,7 +110,7 @@ export default function HomePage() {
     }
   }
 
-  // Enhanced swipe handlers with smooth transitions
+  // Enhanced swipe handlers with proper Tinder-like behavior
   const handleTouchStart = (e: React.TouchEvent) => {
     if (isTransitioning) return
     const touch = e.targetTouches[0].clientX
@@ -139,23 +139,24 @@ export default function HomePage() {
       if (distance > 0) {
         // Swiped left - show next coach
         setSwipeDirection("left")
+        setTimeout(() => {
+          setCurrentCoachIndex((prev) => (prev + 1) % coaches.length)
+          setIsTransitioning(false)
+          setSwipeDirection(null)
+          setTouchStart(0)
+          setTouchCurrent(0)
+        }, 400)
       } else {
         // Swiped right - show previous coach
         setSwipeDirection("right")
-      }
-
-      // Reset states after animation completes
-      setTimeout(() => {
-        if (swipeDirection === "left") {
-          setCurrentCoachIndex((prev) => (prev + 1) % coaches.length)
-        } else if (swipeDirection === "right") {
+        setTimeout(() => {
           setCurrentCoachIndex((prev) => (prev - 1 + coaches.length) % coaches.length)
-        }
-        setIsTransitioning(false)
-        setSwipeDirection(null)
-        setTouchStart(0)
-        setTouchCurrent(0)
-      }, 400)
+          setIsTransitioning(false)
+          setSwipeDirection(null)
+          setTouchStart(0)
+          setTouchCurrent(0)
+        }, 400)
+      }
     } else {
       // Snap back to original position
       setTouchStart(0)
@@ -175,6 +176,51 @@ export default function HomePage() {
     if (offset === 1) return coaches[(currentCoachIndex + 1) % coaches.length]
     if (offset === -1) return coaches[(currentCoachIndex - 1 + coaches.length) % coaches.length]
     return coaches[currentCoachIndex]
+  }
+
+  // Calculate card transforms for smooth Tinder-like animation
+  const getCardTransform = (cardPosition: "current" | "next" | "prev") => {
+    const dragOffset = getDragOffset()
+
+    if (isTransitioning && swipeDirection) {
+      // During transition animation
+      if (cardPosition === "current") {
+        // Current card slides out completely
+        const exitPosition = swipeDirection === "left" ? -400 : 400
+        return `translateX(${exitPosition}px) rotate(${swipeDirection === "left" ? -15 : 15}deg)`
+      } else if (cardPosition === "next" && swipeDirection === "left") {
+        // Next card slides in from right to center
+        return "translateX(0px) rotate(0deg)"
+      } else if (cardPosition === "prev" && swipeDirection === "right") {
+        // Previous card slides in from left to center
+        return "translateX(0px) rotate(0deg)"
+      }
+      // Cards not involved in transition stay hidden
+      return cardPosition === "next" ? "translateX(350px)" : "translateX(-350px)"
+    }
+
+    if (isDragging) {
+      // During drag - current card follows finger
+      if (cardPosition === "current") {
+        const rotation = Math.min(Math.max(dragOffset * 0.1, -15), 15)
+        return `translateX(${dragOffset}px) rotate(${rotation}deg)`
+      } else if (cardPosition === "next" && dragOffset < -20) {
+        // Next card starts sliding in from right when dragging left
+        const slideAmount = Math.max(350 + dragOffset * 0.8, 0)
+        return `translateX(${slideAmount}px)`
+      } else if (cardPosition === "prev" && dragOffset > 20) {
+        // Previous card starts sliding in from left when dragging right
+        const slideAmount = Math.min(-350 + dragOffset * 0.8, 0)
+        return `translateX(${slideAmount}px)`
+      }
+    }
+
+    // Default positions
+    if (cardPosition === "current") return "translateX(0px) rotate(0deg)"
+    if (cardPosition === "next") return "translateX(350px)"
+    if (cardPosition === "prev") return "translateX(-350px)"
+
+    return "translateX(0px)"
   }
 
   const renderCoachCard = (coach: (typeof coaches)[0]) => (
@@ -498,11 +544,15 @@ export default function HomePage() {
                   >
                     {/* Current Card */}
                     <div
-                      key={`current-${currentCoachIndex}`}
+                      key={`current-${currentCoachIndex}-${Date.now()}`}
                       className="absolute inset-0 cursor-grab active:cursor-grabbing"
                       style={{
-                        transform: `translateX(${getDragOffset()}px)`,
-                        transition: isTransitioning ? "transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)" : "none",
+                        transform: getCardTransform("current"),
+                        transition: isTransitioning
+                          ? "transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)"
+                          : isDragging
+                            ? "none"
+                            : "transform 0.2s ease-out",
                         willChange: "transform",
                         backfaceVisibility: "hidden",
                         zIndex: 10,
@@ -513,13 +563,15 @@ export default function HomePage() {
 
                     {/* Next Card */}
                     <div
-                      key={`next-${nextCoachIndex}`}
+                      key={`next-${(currentCoachIndex + 1) % coaches.length}`}
                       className="absolute inset-0 pointer-events-none"
                       style={{
-                        transform: `translateX(${
-                          swipeDirection === "left" ? Math.min(300, 300 + getDragOffset()) : 300
-                        }px)`,
-                        transition: isTransitioning ? "transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)" : "none",
+                        transform: getCardTransform("next"),
+                        transition: isTransitioning
+                          ? "transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)"
+                          : isDragging
+                            ? "transform 0.1s ease-out"
+                            : "transform 0.2s ease-out",
                         willChange: "transform",
                         backfaceVisibility: "hidden",
                         zIndex: 5,
@@ -533,10 +585,12 @@ export default function HomePage() {
                       key={`prev-${(currentCoachIndex - 1 + coaches.length) % coaches.length}`}
                       className="absolute inset-0 pointer-events-none"
                       style={{
-                        transform: `translateX(${
-                          swipeDirection === "right" ? Math.max(-300, -300 + getDragOffset()) : -300
-                        }px)`,
-                        transition: isTransitioning ? "transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)" : "none",
+                        transform: getCardTransform("prev"),
+                        transition: isTransitioning
+                          ? "transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)"
+                          : isDragging
+                            ? "transform 0.1s ease-out"
+                            : "transform 0.2s ease-out",
                         willChange: "transform",
                         backfaceVisibility: "hidden",
                         zIndex: 5,
@@ -544,32 +598,6 @@ export default function HomePage() {
                     >
                       {renderCoachCard(getCoachAtPosition(-1))}
                     </div>
-
-                    {/* Subtle Next Card Preview (when not dragging) */}
-                    {!isDragging && !isTransitioning && (
-                      <div
-                        className="absolute inset-0 pointer-events-none"
-                        style={{
-                          transform: "translateX(5%) scale(0.95)",
-                          opacity: 0.2,
-                          zIndex: -1,
-                        }}
-                      >
-                        <div className="w-full h-full bg-gradient-to-br from-black/60 to-black/40 backdrop-blur-sm border border-white/10 rounded-xl shadow-lg">
-                          <div className="w-full h-full flex items-center justify-center">
-                            <div className="w-16 h-16 rounded-full overflow-hidden border border-white/20">
-                              <Image
-                                src={getCoachAtPosition(1).image || "/placeholder.svg"}
-                                alt="Next coach"
-                                width={64}
-                                height={64}
-                                className="w-full h-full object-cover opacity-50"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
                   </div>
                 </div>
 
