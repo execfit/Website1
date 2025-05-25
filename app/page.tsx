@@ -161,15 +161,21 @@ export default function HomePage() {
       if (distance > 0) {
         // Swiped left - show next coach
         setSwipeDirection("left")
+        // Update the index immediately, then reset states after animation
+        const newIndex = (currentCoachIndex + 1) % coaches.length
+        setCurrentCoachIndex(newIndex)
+
         setTimeout(() => {
-          setCurrentCoachIndex((prev) => (prev + 1) % coaches.length)
           resetSwipeState()
         }, 400)
       } else {
         // Swiped right - show previous coach
         setSwipeDirection("right")
+        // Update the index immediately, then reset states after animation
+        const newIndex = (currentCoachIndex - 1 + coaches.length) % coaches.length
+        setCurrentCoachIndex(newIndex)
+
         setTimeout(() => {
-          setCurrentCoachIndex((prev) => (prev - 1 + coaches.length) % coaches.length)
           resetSwipeState()
         }, 400)
       }
@@ -211,11 +217,11 @@ export default function HomePage() {
     const dragOffset = getDragOffset()
 
     if (isTransitioning && swipeDirection) {
-      // During transition animation
+      // During transition animation - use the OLD currentCoachIndex for positioning
       if (cardPosition === "current") {
         // Current card slides out completely
         const exitPosition = swipeDirection === "left" ? -400 : 400
-        return `translateX(${exitPosition}px) rotate(${swipeDirection === "left" ? -15 : 15}deg)`
+        return `translateX(${exitPosition}px) rotate(${swipeDirection === "left" ? -15 : 15}deg) scale(0.8)`
       } else if (cardPosition === "next" && swipeDirection === "left") {
         // Next card slides in from right to center when swiping left
         return "translateX(0px) rotate(0deg) scale(1)"
