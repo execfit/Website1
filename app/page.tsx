@@ -208,81 +208,6 @@ export default function HomePage() {
     return Math.max(-300, Math.min(300, offset))
   }
 
-  // Get the coach for a given relative position
-  const getCoachAtPosition = (offset: number) => {
-    if (offset === 0) return coaches[currentCoachIndex]
-    if (offset === 1) return coaches[(currentCoachIndex + 1) % coaches.length]
-    if (offset === -1) return coaches[(currentCoachIndex - 1 + coaches.length) % coaches.length]
-    return coaches[currentCoachIndex]
-  }
-
-  // Calculate card transforms for smooth Tinder-like animation
-  const getCardTransform = (cardPosition: "current" | "next" | "prev") => {
-    const dragOffset = getDragOffset()
-
-    if (isTransitioning && swipeDirection) {
-      // During transition - cards move to their final positions
-      if (swipeDirection === "left") {
-        // Swiping left: current slides out left, next slides in to center
-        if (cardPosition === "current") {
-          return "translateX(-400px) rotate(-15deg) scale(0.8)"
-        } else if (cardPosition === "next") {
-          return "translateX(0px) rotate(0deg) scale(1)"
-        } else {
-          return "translateX(-350px) scale(0.95)"
-        }
-      } else {
-        // Swiping right: current slides out right, prev slides in to center
-        if (cardPosition === "current") {
-          return "translateX(400px) rotate(15deg) scale(0.8)"
-        } else if (cardPosition === "prev") {
-          return "translateX(0px) rotate(0deg) scale(1)"
-        } else {
-          return "translateX(350px) scale(0.95)"
-        }
-      }
-    }
-
-    if (isDragging) {
-      // During drag - current card follows finger
-      if (cardPosition === "current") {
-        const rotation = Math.min(Math.max(dragOffset * 0.1, -15), 15)
-        return `translateX(${dragOffset}px) rotate(${rotation}deg) scale(${Math.max(0.98, 1 - Math.abs(dragOffset) * 0.0003)})`
-      } else if (cardPosition === "next" && dragOffset < -50) {
-        // Next card starts sliding in from right when dragging left
-        const slideAmount = Math.max(350 + dragOffset * 0.8, 20)
-        const scale = Math.min(0.95 + Math.abs(dragOffset) * 0.0008, 1)
-        return `translateX(${slideAmount}px) scale(${scale})`
-      } else if (cardPosition === "prev" && dragOffset > 50) {
-        // Previous card starts sliding in from left when dragging right
-        const slideAmount = Math.min(-350 + dragOffset * 0.8, -20)
-        const scale = Math.min(0.95 + Math.abs(dragOffset) * 0.0008, 1)
-        return `translateX(${slideAmount}px) scale(${scale})`
-      } else {
-        // Cards not being dragged stay in default positions
-        return cardPosition === "next" ? "translateX(350px) scale(0.95)" : "translateX(-350px) scale(0.95)"
-      }
-    }
-
-    // Default positions when not dragging or transitioning
-    if (cardPosition === "current") return "translateX(0px) rotate(0deg) scale(1)"
-    if (cardPosition === "next") return "translateX(350px) scale(0.95)"
-    if (cardPosition === "prev") return "translateX(-350px) scale(0.95)"
-
-    return "translateX(0px) scale(1)"
-  }
-
-  // Get the correct coach content for each card position
-  const getCoachForCard = (cardPosition: "current" | "next" | "prev") => {
-    // Always use the current index as the source of truth
-    // This prevents the duplicate rendering issue
-    if (cardPosition === "current") return coaches[currentCoachIndex]
-    if (cardPosition === "next") return coaches[(currentCoachIndex + 1) % coaches.length]
-    if (cardPosition === "prev") return coaches[(currentCoachIndex - 1 + coaches.length) % coaches.length]
-
-    return coaches[currentCoachIndex]
-  }
-
   const renderCoachCard = (coach: (typeof coaches)[0]) => (
     <div className="w-full h-full bg-gradient-to-br from-black/80 to-black/60 backdrop-blur-md border border-white/20 rounded-xl p-6 shadow-2xl flex flex-col">
       {/* Coach Image */}
@@ -625,66 +550,136 @@ export default function HomePage() {
                       </div>
                     </div>
 
-                    {/* Previous Card (comes from LEFT when swiping RIGHT) */}
-                    <div
-                      className="absolute inset-0 pointer-events-none"
-                      style={{
-                        transform: getCardTransform("prev"),
-                        transition: isTransitioning
-                          ? "all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)"
-                          : isDragging
-                            ? "none"
-                            : "all 0.2s ease-out",
-                        zIndex: isTransitioning && swipeDirection === "right" ? 10 : 5,
-                        opacity:
-                          isTransitioning && swipeDirection === "right"
-                            ? 1
-                            : isDragging && getDragOffset() > 50
-                              ? 0.8
-                              : 0.7,
-                      }}
-                    >
-                      {renderCoachCard(getCoachForCard("prev"))}
-                    </div>
+                    {/* Render each coach as a separate, persistent card */}
+                    {coaches.map((coach, index) => {
+                      // Determine this card's position relative to current
+                      let position: "current" | "next" | "prev" | "hidden"
+                      if (index === currentCoachIndex) {
+                        position = "current"
+                      } else if (index === (currentCoachIndex + 1) % coaches.length) {
+                        position = "next"
+                      } else if (index === (currentCoachIndex - 1 + coaches.length) % coaches.length) {
+                        position = "prev"
+                      } else {
+                        position = "hidden"
+                      }
 
-                    {/* Next Card (comes from RIGHT when swiping LEFT) */}
-                    <div
-                      className="absolute inset-0 pointer-events-none"
-                      style={{
-                        transform: getCardTransform("next"),
-                        transition: isTransitioning
-                          ? "all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)"
-                          : isDragging
-                            ? "none"
-                            : "all 0.2s ease-out",
-                        zIndex: isTransitioning && swipeDirection === "left" ? 10 : 5,
-                        opacity:
-                          isTransitioning && swipeDirection === "left"
-                            ? 1
-                            : isDragging && getDragOffset() < -50
-                              ? 0.8
-                              : 0.7,
-                      }}
-                    >
-                      {renderCoachCard(getCoachForCard("next"))}
-                    </div>
+                      // Calculate transform for this specific card
+                      const getCardSpecificTransform = () => {
+                        const dragOffset = getDragOffset()
 
-                    {/* Current Active Card */}
-                    <div
-                      className="absolute inset-0 cursor-grab active:cursor-grabbing"
-                      style={{
-                        transform: getCardTransform("current"),
-                        transition: isTransitioning
-                          ? "all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)"
-                          : isDragging
-                            ? "none"
-                            : "all 0.2s ease-out",
-                        zIndex: isTransitioning ? 5 : 10,
-                        opacity: isTransitioning ? 1 : Math.max(0.8, 1 - Math.abs(getDragOffset()) * 0.001),
-                      }}
-                    >
-                      {renderCoachCard(getCoachForCard("current"))}
-                    </div>
+                        if (isTransitioning && swipeDirection) {
+                          if (swipeDirection === "left") {
+                            if (position === "current") {
+                              return "translateX(-400px) rotate(-15deg) scale(0.8)"
+                            } else if (position === "next") {
+                              return "translateX(0px) rotate(0deg) scale(1)"
+                            } else if (position === "prev") {
+                              // Previous card travels across screen to right side (hidden)
+                              return "translateX(400px) scale(0.95)"
+                            }
+                          } else if (swipeDirection === "right") {
+                            if (position === "current") {
+                              return "translateX(400px) rotate(15deg) scale(0.8)"
+                            } else if (position === "prev") {
+                              return "translateX(0px) rotate(0deg) scale(1)"
+                            } else if (position === "next") {
+                              // Next card travels across screen to left side (hidden)
+                              return "translateX(-400px) scale(0.95)"
+                            }
+                          }
+                        }
+
+                        if (isDragging) {
+                          if (position === "current") {
+                            const rotation = Math.min(Math.max(dragOffset * 0.1, -15), 15)
+                            return `translateX(${dragOffset}px) rotate(${rotation}deg) scale(${Math.max(0.98, 1 - Math.abs(dragOffset) * 0.0003)})`
+                          } else if (position === "next" && dragOffset < -50) {
+                            const slideAmount = Math.max(350 + dragOffset * 0.8, 20)
+                            const scale = Math.min(0.95 + Math.abs(dragOffset) * 0.0008, 1)
+                            return `translateX(${slideAmount}px) scale(${scale})`
+                          } else if (position === "prev" && dragOffset > 50) {
+                            const slideAmount = Math.min(-350 + dragOffset * 0.8, -20)
+                            const scale = Math.min(0.95 + Math.abs(dragOffset) * 0.0008, 1)
+                            return `translateX(${slideAmount}px) scale(${scale})`
+                          }
+                        }
+
+                        // Default positions
+                        if (position === "current") return "translateX(0px) rotate(0deg) scale(1)"
+                        if (position === "next") return "translateX(350px) scale(0.95)"
+                        if (position === "prev") return "translateX(-350px) scale(0.95)"
+                        return "translateX(500px) scale(0.9)" // Hidden cards far off-screen
+                      }
+
+                      // Calculate opacity for this specific card
+                      const getCardOpacity = () => {
+                        if (position === "hidden") return 0
+
+                        if (isTransitioning && swipeDirection) {
+                          if (swipeDirection === "left") {
+                            if (position === "current") return Math.max(0.3, 1 - 0.7) // Fade out as it leaves
+                            if (position === "next") return 1 // Fade in as it becomes current
+                            if (position === "prev") return 0 // Hide previous card during cross-screen travel
+                          } else if (swipeDirection === "right") {
+                            if (position === "current") return Math.max(0.3, 1 - 0.7) // Fade out as it leaves
+                            if (position === "prev") return 1 // Fade in as it becomes current
+                            if (position === "next") return 0 // Hide next card during cross-screen travel
+                          }
+                        }
+
+                        if (isDragging) {
+                          if (position === "current") {
+                            return Math.max(0.8, 1 - Math.abs(getDragOffset()) * 0.001)
+                          } else if (position === "next" && getDragOffset() < -50) {
+                            return 0.8
+                          } else if (position === "prev" && getDragOffset() > 50) {
+                            return 0.8
+                          }
+                        }
+
+                        // Default opacities
+                        if (position === "current") return 1
+                        if (position === "next" || position === "prev") return 0.7
+                        return 0
+                      }
+
+                      // Calculate z-index for this specific card
+                      const getCardZIndex = () => {
+                        if (position === "hidden") return 1
+
+                        if (isTransitioning && swipeDirection) {
+                          if (swipeDirection === "left" && position === "next") return 10
+                          if (swipeDirection === "right" && position === "prev") return 10
+                          if (position === "current") return 5
+                          return 3
+                        }
+
+                        if (position === "current") return 10
+                        if (position === "next" || position === "prev") return 5
+                        return 1
+                      }
+
+                      return (
+                        <div
+                          key={`coach-${coach.id}`} // Stable key based on coach ID
+                          className="absolute inset-0"
+                          style={{
+                            transform: getCardSpecificTransform(),
+                            opacity: getCardOpacity(),
+                            zIndex: getCardZIndex(),
+                            transition: isTransitioning
+                              ? "all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)"
+                              : isDragging
+                                ? "none"
+                                : "all 0.2s ease-out",
+                            pointerEvents: position === "current" && !isTransitioning ? "auto" : "none",
+                          }}
+                        >
+                          {renderCoachCard(coach)}
+                        </div>
+                      )
+                    })}
                   </div>
                 </div>
 
