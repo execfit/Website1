@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
-import Image from "next/image"
+import Image from "next/Image"
 import Header from "@/components/header"
 
 export default function HomePage() {
@@ -16,6 +16,7 @@ export default function HomePage() {
   const [touchCurrent, setTouchCurrent] = useState(0)
   const [isDragging, setIsDragging] = useState(false)
   const [isTransitioning, setIsTransitioning] = useState(false)
+  const [swipeDirection, setSwipeDirection] = useState<"left" | "right" | null>(null)
 
   const coaches = [
     {
@@ -38,7 +39,7 @@ export default function HomePage() {
       id: "yosof",
       name: "Yosof Abuhasan",
       specialty: "Physique/Strength Training/Mindset Coaching",
-      bio: "I'm Yosof, a certified trainer focused on helping clients build muscle, burn fat, and develop the mental discipline to sustain long-term results.",
+      bio: "I'm a certified trainer focused on helping clients build muscle, burn fat, and develop the mental discipline to sustain long-term results.",
       image: "/images/coach-yosof.jpg",
       link: "/coaches/yosof-abuhasan",
     },
@@ -116,6 +117,7 @@ export default function HomePage() {
     setTouchStart(touch)
     setTouchCurrent(touch)
     setIsDragging(true)
+    setSwipeDirection(null)
   }
 
   const handleTouchMove = (e: React.TouchEvent) => {
@@ -134,21 +136,27 @@ export default function HomePage() {
     if (Math.abs(distance) > threshold) {
       setIsTransitioning(true)
 
-      // Immediately update the coach index for smooth transition
       if (distance > 0) {
         // Swiped left - show next coach
-        setCurrentCoachIndex((prev) => (prev + 1) % coaches.length)
+        setSwipeDirection("left")
+        setTimeout(() => {
+          setCurrentCoachIndex((prev) => (prev + 1) % coaches.length)
+        }, 150) // Delay index change to allow smooth animation
       } else {
         // Swiped right - show previous coach
-        setCurrentCoachIndex((prev) => (prev - 1 + coaches.length) % coaches.length)
+        setSwipeDirection("right")
+        setTimeout(() => {
+          setCurrentCoachIndex((prev) => (prev - 1 + coaches.length) % coaches.length)
+        }, 150)
       }
 
       // Reset states after animation completes
       setTimeout(() => {
         setIsTransitioning(false)
+        setSwipeDirection(null)
         setTouchStart(0)
         setTouchCurrent(0)
-      }, 350)
+      }, 500)
     } else {
       // Snap back to original position
       setTouchStart(0)
@@ -168,6 +176,44 @@ export default function HomePage() {
     if (offset === 1) return coaches[(currentCoachIndex + 1) % coaches.length]
     if (offset === -1) return coaches[(currentCoachIndex - 1 + coaches.length) % coaches.length]
     return coaches[currentCoachIndex]
+  }
+
+  // Calculate positions for smooth transitions
+  const getCardTransform = (cardType: "current" | "next" | "prev") => {
+    const dragOffset = getDragOffset()
+
+    if (isTransitioning && swipeDirection) {
+      // During transition animation
+      if (cardType === "current") {
+        // Current card slides out
+        const exitPosition = swipeDirection === "left" ? -400 : 400
+        return `translateX(${exitPosition}px)`
+      } else if (cardType === "next" && swipeDirection === "left") {
+        // Next card slides in from right to center
+        return `translateX(0px)`
+      } else if (cardType === "prev" && swipeDirection === "right") {
+        // Previous card slides in from left to center
+        return `translateX(0px)`
+      }
+    }
+
+    if (isDragging) {
+      // During drag
+      if (cardType === "current") {
+        return `translateX(${dragOffset}px)`
+      } else if (cardType === "next" && dragOffset < -20) {
+        return `translateX(${Math.max(300 + dragOffset, 0)}px)`
+      } else if (cardType === "prev" && dragOffset > 20) {
+        return `translateX(${Math.min(-300 + dragOffset, 0)}px)`
+      }
+    }
+
+    // Default positions
+    if (cardType === "current") return "translateX(0px)"
+    if (cardType === "next") return "translateX(300px)"
+    if (cardType === "prev") return "translateX(-300px)"
+
+    return "translateX(0px)"
   }
 
   const renderCoachCard = (coach: (typeof coaches)[0]) => (
@@ -495,8 +541,8 @@ export default function HomePage() {
                       key={`current-${currentCoachIndex}`}
                       className="absolute inset-0 cursor-grab active:cursor-grabbing"
                       style={{
-                        transform: `translateX(${getDragOffset()}px)`,
-                        transition: isTransitioning ? "transform 0.3s ease-out" : "none",
+                        transform: getCardTransform("current"),
+                        transition: isTransitioning ? "transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)" : "none",
                         willChange: "transform",
                         backfaceVisibility: "hidden",
                         zIndex: 10,
@@ -505,41 +551,35 @@ export default function HomePage() {
                       {renderCoachCard(getCoachAtPosition(0))}
                     </div>
 
-                    {/* Next Card (slides in from right when dragging left) */}
-                    {getDragOffset() < -20 && (
-                      <div
-                        key={`next-${nextCoachIndex}`}
-                        className="absolute inset-0 pointer-events-none"
-                        style={{
-                          transform: `translateX(${Math.max(300 + getDragOffset(), 0)}px) scale(0.95)`,
-                          opacity: Math.min(1, Math.abs(getDragOffset()) / 150),
-                          transition: isDragging ? "none" : "all 350ms cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-                          willChange: "transform, opacity",
-                          backfaceVisibility: "hidden",
-                          zIndex: 5,
-                        }}
-                      >
-                        {renderCoachCard(getCoachAtPosition(1))}
-                      </div>
-                    )}
+                    {/* Next Card */}
+                    <div
+                      key={`next-${nextCoachIndex}`}
+                      className="absolute inset-0 pointer-events-none"
+                      style={{
+                        transform: getCardTransform("next"),
+                        transition: isTransitioning ? "transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)" : "none",
+                        willChange: "transform",
+                        backfaceVisibility: "hidden",
+                        zIndex: 5,
+                      }}
+                    >
+                      {renderCoachCard(getCoachAtPosition(1))}
+                    </div>
 
-                    {/* Previous Card (slides in from left when dragging right) */}
-                    {getDragOffset() > 20 && (
-                      <div
-                        key={`prev-${(currentCoachIndex - 1 + coaches.length) % coaches.length}`}
-                        className="absolute inset-0 pointer-events-none"
-                        style={{
-                          transform: `translateX(${Math.min(-300 + getDragOffset(), 0)}px) scale(0.95)`,
-                          opacity: Math.min(1, Math.abs(getDragOffset()) / 150),
-                          transition: isDragging ? "none" : "all 350ms cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-                          willChange: "transform, opacity",
-                          backfaceVisibility: "hidden",
-                          zIndex: 5,
-                        }}
-                      >
-                        {renderCoachCard(getCoachAtPosition(-1))}
-                      </div>
-                    )}
+                    {/* Previous Card */}
+                    <div
+                      key={`prev-${(currentCoachIndex - 1 + coaches.length) % coaches.length}`}
+                      className="absolute inset-0 pointer-events-none"
+                      style={{
+                        transform: getCardTransform("prev"),
+                        transition: isTransitioning ? "transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)" : "none",
+                        willChange: "transform",
+                        backfaceVisibility: "hidden",
+                        zIndex: 5,
+                      }}
+                    >
+                      {renderCoachCard(getCoachAtPosition(-1))}
+                    </div>
 
                     {/* Subtle Next Card Preview (when not dragging) */}
                     {!isDragging && !isTransitioning && (
