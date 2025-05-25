@@ -217,38 +217,44 @@ export default function HomePage() {
         const exitPosition = swipeDirection === "left" ? -400 : 400
         return `translateX(${exitPosition}px) rotate(${swipeDirection === "left" ? -15 : 15}deg)`
       } else if (cardPosition === "next" && swipeDirection === "left") {
-        // Next card slides in from right to center
-        return "translateX(0px) rotate(0deg)"
+        // Next card slides in from right to center when swiping left
+        return "translateX(0px) rotate(0deg) scale(1)"
       } else if (cardPosition === "prev" && swipeDirection === "right") {
-        // Previous card slides in from left to center
-        return "translateX(0px) rotate(0deg)"
+        // Previous card slides in from left to center when swiping right
+        return "translateX(0px) rotate(0deg) scale(1)"
+      } else {
+        // All other cards stay hidden during transition
+        return cardPosition === "next" ? "translateX(350px) scale(0.95)" : "translateX(-350px) scale(0.95)"
       }
-      // Cards not involved in transition stay hidden
-      return cardPosition === "next" ? "translateX(350px)" : "translateX(-350px)"
     }
 
     if (isDragging) {
       // During drag - current card follows finger
       if (cardPosition === "current") {
         const rotation = Math.min(Math.max(dragOffset * 0.1, -15), 15)
-        return `translateX(${dragOffset}px) rotate(${rotation}deg)`
-      } else if (cardPosition === "next" && dragOffset < -20) {
+        return `translateX(${dragOffset}px) rotate(${rotation}deg) scale(${Math.max(0.98, 1 - Math.abs(dragOffset) * 0.0003)})`
+      } else if (cardPosition === "next" && dragOffset < -50) {
         // Next card starts sliding in from right when dragging left
-        const slideAmount = Math.max(350 + dragOffset * 0.8, 0)
-        return `translateX(${slideAmount}px)`
-      } else if (cardPosition === "prev" && dragOffset > 20) {
+        const slideAmount = Math.max(350 + dragOffset * 0.8, 20)
+        const scale = Math.min(0.95 + Math.abs(dragOffset) * 0.0008, 1)
+        return `translateX(${slideAmount}px) scale(${scale})`
+      } else if (cardPosition === "prev" && dragOffset > 50) {
         // Previous card starts sliding in from left when dragging right
-        const slideAmount = Math.min(-350 + dragOffset * 0.8, 0)
-        return `translateX(${slideAmount}px)`
+        const slideAmount = Math.min(-350 + dragOffset * 0.8, -20)
+        const scale = Math.min(0.95 + Math.abs(dragOffset) * 0.0008, 1)
+        return `translateX(${slideAmount}px) scale(${scale})`
+      } else {
+        // Cards not being dragged stay in default positions
+        return cardPosition === "next" ? "translateX(350px) scale(0.95)" : "translateX(-350px) scale(0.95)"
       }
     }
 
-    // Default positions
-    if (cardPosition === "current") return "translateX(0px) rotate(0deg)"
-    if (cardPosition === "next") return "translateX(350px)"
-    if (cardPosition === "prev") return "translateX(-350px)"
+    // Default positions when not dragging or transitioning
+    if (cardPosition === "current") return "translateX(0px) rotate(0deg) scale(1)"
+    if (cardPosition === "next") return "translateX(350px) scale(0.95)"
+    if (cardPosition === "prev") return "translateX(-350px) scale(0.95)"
 
-    return "translateX(0px)"
+    return "translateX(0px) scale(1)"
   }
 
   const renderCoachCard = (coach: (typeof coaches)[0]) => (
@@ -597,26 +603,19 @@ export default function HomePage() {
                     <div
                       className="absolute inset-0 pointer-events-none"
                       style={{
-                        transform: `translateX(${
-                          isTransitioning && swipeDirection === "right"
-                            ? "0px"
-                            : isDragging && getDragOffset() > 50
-                              ? `${Math.min(-350 + getDragOffset() * 0.8, -20)}px`
-                              : "-350px"
-                        }) scale(${
-                          isTransitioning && swipeDirection === "right"
-                            ? "1"
-                            : isDragging && getDragOffset() > 50
-                              ? Math.min(0.95 + Math.abs(getDragOffset()) * 0.0008, 1)
-                              : "0.95"
-                        })`,
+                        transform: getCardTransform("prev"),
                         transition: isTransitioning
                           ? "all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)"
                           : isDragging
                             ? "none"
                             : "all 0.2s ease-out",
                         zIndex: 5,
-                        opacity: isTransitioning && swipeDirection === "right" ? 1 : 0.8,
+                        opacity:
+                          isTransitioning && swipeDirection === "right"
+                            ? 1
+                            : isDragging && getDragOffset() > 50
+                              ? 0.8
+                              : 0.7,
                       }}
                     >
                       {renderCoachCard(coaches[(currentCoachIndex - 1 + coaches.length) % coaches.length])}
@@ -626,26 +625,19 @@ export default function HomePage() {
                     <div
                       className="absolute inset-0 pointer-events-none"
                       style={{
-                        transform: `translateX(${
-                          isTransitioning && swipeDirection === "left"
-                            ? "0px"
-                            : isDragging && getDragOffset() < -50
-                              ? `${Math.max(350 + getDragOffset() * 0.8, 20)}px`
-                              : "350px"
-                        }) scale(${
-                          isTransitioning && swipeDirection === "left"
-                            ? "1"
-                            : isDragging && getDragOffset() < -50
-                              ? Math.min(0.95 + Math.abs(getDragOffset()) * 0.0008, 1)
-                              : "0.95"
-                        })`,
+                        transform: getCardTransform("next"),
                         transition: isTransitioning
                           ? "all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)"
                           : isDragging
                             ? "none"
                             : "all 0.2s ease-out",
                         zIndex: 5,
-                        opacity: isTransitioning && swipeDirection === "left" ? 1 : 0.8,
+                        opacity:
+                          isTransitioning && swipeDirection === "left"
+                            ? 1
+                            : isDragging && getDragOffset() < -50
+                              ? 0.8
+                              : 0.7,
                       }}
                     >
                       {renderCoachCard(coaches[(currentCoachIndex + 1) % coaches.length])}
@@ -655,23 +647,7 @@ export default function HomePage() {
                     <div
                       className="absolute inset-0 cursor-grab active:cursor-grabbing"
                       style={{
-                        transform: `translateX(${
-                          isTransitioning
-                            ? swipeDirection === "left"
-                              ? "-400px"
-                              : swipeDirection === "right"
-                                ? "400px"
-                                : "0px"
-                            : getDragOffset()
-                        }px) rotate(${
-                          isTransitioning
-                            ? swipeDirection === "left"
-                              ? "-15deg"
-                              : swipeDirection === "right"
-                                ? "15deg"
-                                : "0deg"
-                            : Math.max(-15, Math.min(15, getDragOffset() * 0.1))
-                        }deg) scale(${isDragging ? Math.max(0.98, 1 - Math.abs(getDragOffset()) * 0.0003) : 1})`,
+                        transform: getCardTransform("current"),
                         transition: isTransitioning
                           ? "all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)"
                           : isDragging
