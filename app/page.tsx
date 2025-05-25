@@ -213,7 +213,7 @@ export default function HomePage() {
     const dragOffset = getDragOffset()
 
     if (isTransitioning && swipeDirection) {
-      // During transition animation - keep using the CURRENT coach positions
+      // During transition animation - keep coach identities stable
       if (cardPosition === "current") {
         // Current card slides out completely
         const exitPosition = swipeDirection === "left" ? -400 : 400
@@ -645,7 +645,7 @@ export default function HomePage() {
                       {renderCoachCard(coaches[(currentCoachIndex + 1) % coaches.length])}
                     </div>
 
-                    {/* Current Active Card */}
+                    {/* Current Active Card - Hide during transition to prevent duplicates */}
                     <div
                       className="absolute inset-0 cursor-grab active:cursor-grabbing"
                       style={{
@@ -769,9 +769,9 @@ export default function HomePage() {
                     </svg>
                   </a>
                 </div>
-              </div>
-              <div className="execfit-footer-bottom">
-                <p>© {currentYear} ExecFit. All rights reserved.</p>
+                <div className="execfit-footer-bottom">
+                  <p>© {currentYear} ExecFit. All rights reserved.</p>
+                </div>
               </div>
             </div>
           </footer>
