@@ -38,7 +38,7 @@ export default function HomePage() {
       id: "yosof",
       name: "Yosof Abuhasan",
       specialty: "Physique/Strength Training/Mindset Coaching",
-      bio: "I'm a certified trainer focused on helping clients build muscle, burn fat, and develop the mental discipline to sustain long-term results.",
+      bio: "I'm Yosof, a certified trainer focused on helping clients build muscle, burn fat, and develop the mental discipline to sustain long-term results.",
       image: "/images/coach-yosof.jpg",
       link: "/coaches/yosof-abuhasan",
     },
@@ -495,10 +495,9 @@ export default function HomePage() {
                       key={`current-${currentCoachIndex}`}
                       className="absolute inset-0 cursor-grab active:cursor-grabbing"
                       style={{
-                        transform: `translateX(${getDragOffset()}px) scale(${isDragging ? 0.98 : 1})`,
-                        opacity: Math.max(0.3, 1 - Math.abs(getDragOffset()) / 300),
-                        transition: isDragging ? "none" : "all 350ms cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-                        willChange: "transform, opacity",
+                        transform: `translateX(${getDragOffset()}px)`,
+                        transition: isTransitioning ? "transform 0.3s ease-out" : "none",
+                        willChange: "transform",
                         backfaceVisibility: "hidden",
                         zIndex: 10,
                       }}
