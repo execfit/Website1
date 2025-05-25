@@ -110,30 +110,52 @@ export default function HomePage() {
     }
   }
 
-  // Enhanced swipe handlers with proper Tinder-like behavior
+  // Enhanced swipe handlers with bulletproof touch detection
   const handleTouchStart = (e: React.TouchEvent) => {
-    if (isTransitioning) return
-    const touch = e.targetTouches[0].clientX
-    setTouchStart(touch)
-    setTouchCurrent(touch)
+    if (isTransitioning) {
+      e.preventDefault()
+      return
+    }
+
+    const touch = e.touches[0]
+    if (!touch) return
+
+    setTouchStart(touch.clientX)
+    setTouchCurrent(touch.clientX)
     setIsDragging(true)
     setSwipeDirection(null)
+
+    // Prevent default to avoid scrolling issues
+    e.preventDefault()
   }
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (isTransitioning || !isDragging) return
-    setTouchCurrent(e.targetTouches[0].clientX)
+    if (isTransitioning || !isDragging) {
+      return
+    }
+
+    const touch = e.touches[0]
+    if (!touch) return
+
+    setTouchCurrent(touch.clientX)
+
+    // Prevent default to avoid scrolling
+    e.preventDefault()
   }
 
-  const handleTouchEnd = () => {
-    if (isTransitioning || !isDragging) return
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (isTransitioning || !isDragging) {
+      return
+    }
 
     const distance = touchStart - touchCurrent
     const threshold = 80
+    const velocity = Math.abs(distance)
 
     setIsDragging(false)
 
-    if (Math.abs(distance) > threshold) {
+    // Check if swipe was significant enough
+    if (Math.abs(distance) > threshold || velocity > 100) {
       setIsTransitioning(true)
 
       if (distance > 0) {
@@ -141,33 +163,39 @@ export default function HomePage() {
         setSwipeDirection("left")
         setTimeout(() => {
           setCurrentCoachIndex((prev) => (prev + 1) % coaches.length)
-          setIsTransitioning(false)
-          setSwipeDirection(null)
-          setTouchStart(0)
-          setTouchCurrent(0)
+          resetSwipeState()
         }, 400)
       } else {
         // Swiped right - show previous coach
         setSwipeDirection("right")
         setTimeout(() => {
           setCurrentCoachIndex((prev) => (prev - 1 + coaches.length) % coaches.length)
-          setIsTransitioning(false)
-          setSwipeDirection(null)
-          setTouchStart(0)
-          setTouchCurrent(0)
+          resetSwipeState()
         }, 400)
       }
     } else {
-      // Snap back to original position
-      setTouchStart(0)
-      setTouchCurrent(0)
+      // Snap back to center - no swipe
+      resetSwipeState()
     }
+
+    e.preventDefault()
   }
 
-  // Calculate drag offset for real-time movement
+  // Helper function to reset all swipe states
+  const resetSwipeState = () => {
+    setIsTransitioning(false)
+    setSwipeDirection(null)
+    setTouchStart(0)
+    setTouchCurrent(0)
+    setIsDragging(false)
+  }
+
+  // Calculate drag offset with bounds
   const getDragOffset = () => {
     if (!isDragging || touchStart === 0) return 0
-    return touchCurrent - touchStart
+    const offset = touchCurrent - touchStart
+    // Limit drag distance to prevent extreme movements
+    return Math.max(-300, Math.min(300, offset))
   }
 
   // Get the coach for a given relative position
@@ -533,75 +561,125 @@ export default function HomePage() {
                   <span className="text-white/60 text-sm">← Swipe to explore coaches →</span>
                 </div>
 
-                <div className="relative w-full max-w-xs mx-auto h-96 mb-8 overflow-hidden">
-                  {/* Card Container */}
+                <div className="relative w-full max-w-xs mx-auto h-96 mb-8">
+                  {/* Card Stack Container */}
                   <div
-                    className="relative w-full h-full"
+                    className="relative w-full h-full touch-pan-y"
                     onTouchStart={handleTouchStart}
                     onTouchMove={handleTouchMove}
                     onTouchEnd={handleTouchEnd}
-                    style={{ touchAction: "pan-y" }}
+                    style={{
+                      touchAction: "pan-y",
+                      WebkitUserSelect: "none",
+                      userSelect: "none",
+                    }}
                   >
-                    {/* Current Card */}
+                    {/* Background Cards (for depth effect) */}
                     <div
-                      key={`current-${currentCoachIndex}-${Date.now()}`}
-                      className="absolute inset-0 cursor-grab active:cursor-grabbing"
+                      className="absolute inset-0 pointer-events-none"
                       style={{
-                        transform: getCardTransform("current"),
-                        transition: isTransitioning
-                          ? "transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)"
-                          : isDragging
-                            ? "none"
-                            : "transform 0.2s ease-out",
-                        willChange: "transform",
-                        backfaceVisibility: "hidden",
-                        zIndex: 10,
+                        transform: "translateX(8px) scale(0.95)",
+                        zIndex: 1,
+                        opacity: 0.3,
                       }}
                     >
-                      {renderCoachCard(getCoachAtPosition(0))}
+                      <div className="w-full h-full bg-gradient-to-br from-black/60 to-black/40 backdrop-blur-sm border border-white/10 rounded-xl"></div>
                     </div>
 
                     {/* Next Card */}
                     <div
-                      key={`next-${(currentCoachIndex + 1) % coaches.length}`}
                       className="absolute inset-0 pointer-events-none"
                       style={{
-                        transform: getCardTransform("next"),
+                        transform: `translateX(${
+                          isTransitioning && swipeDirection === "left"
+                            ? "0px"
+                            : isDragging && getDragOffset() < -50
+                              ? `${Math.max(4 + getDragOffset() * 0.1, 0)}px`
+                              : "4px"
+                        }) scale(${
+                          isTransitioning && swipeDirection === "left"
+                            ? "1"
+                            : isDragging && getDragOffset() < -50
+                              ? Math.min(0.98 + Math.abs(getDragOffset()) * 0.0005, 1)
+                              : "0.98"
+                        })`,
                         transition: isTransitioning
-                          ? "transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)"
+                          ? "all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)"
                           : isDragging
-                            ? "transform 0.1s ease-out"
-                            : "transform 0.2s ease-out",
-                        willChange: "transform",
-                        backfaceVisibility: "hidden",
-                        zIndex: 5,
+                            ? "none"
+                            : "all 0.2s ease-out",
+                        zIndex: 2,
+                        opacity: isTransitioning && swipeDirection === "left" ? 1 : 0.7,
                       }}
                     >
-                      {renderCoachCard(getCoachAtPosition(1))}
+                      {renderCoachCard(coaches[(currentCoachIndex + 1) % coaches.length])}
                     </div>
 
                     {/* Previous Card */}
                     <div
-                      key={`prev-${(currentCoachIndex - 1 + coaches.length) % coaches.length}`}
                       className="absolute inset-0 pointer-events-none"
                       style={{
-                        transform: getCardTransform("prev"),
+                        transform: `translateX(${
+                          isTransitioning && swipeDirection === "right"
+                            ? "0px"
+                            : isDragging && getDragOffset() > 50
+                              ? `${Math.min(-4 + getDragOffset() * 0.1, 0)}px`
+                              : "-4px"
+                        }) scale(${
+                          isTransitioning && swipeDirection === "right"
+                            ? "1"
+                            : isDragging && getDragOffset() > 50
+                              ? Math.min(0.98 + Math.abs(getDragOffset()) * 0.0005, 1)
+                              : "0.98"
+                        })`,
                         transition: isTransitioning
-                          ? "transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)"
+                          ? "all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)"
                           : isDragging
-                            ? "transform 0.1s ease-out"
-                            : "transform 0.2s ease-out",
-                        willChange: "transform",
-                        backfaceVisibility: "hidden",
-                        zIndex: 5,
+                            ? "none"
+                            : "all 0.2s ease-out",
+                        zIndex: 2,
+                        opacity: isTransitioning && swipeDirection === "right" ? 1 : 0.7,
                       }}
                     >
-                      {renderCoachCard(getCoachAtPosition(-1))}
+                      {renderCoachCard(coaches[(currentCoachIndex - 1 + coaches.length) % coaches.length])}
+                    </div>
+
+                    {/* Current Active Card */}
+                    <div
+                      className="absolute inset-0 cursor-grab active:cursor-grabbing"
+                      style={{
+                        transform: `translateX(${
+                          isTransitioning
+                            ? swipeDirection === "left"
+                              ? "-400px"
+                              : swipeDirection === "right"
+                                ? "400px"
+                                : "0px"
+                            : getDragOffset()
+                        }px) rotate(${
+                          isTransitioning
+                            ? swipeDirection === "left"
+                              ? "-15deg"
+                              : swipeDirection === "right"
+                                ? "15deg"
+                                : "0deg"
+                            : Math.max(-15, Math.min(15, getDragOffset() * 0.1))
+                        }deg) scale(${isDragging ? Math.max(0.95, 1 - Math.abs(getDragOffset()) * 0.0005) : 1})`,
+                        transition: isTransitioning
+                          ? "all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)"
+                          : isDragging
+                            ? "none"
+                            : "all 0.2s ease-out",
+                        zIndex: 10,
+                        opacity: isTransitioning ? 0 : Math.max(0.7, 1 - Math.abs(getDragOffset()) * 0.002),
+                      }}
+                    >
+                      {renderCoachCard(coaches[currentCoachIndex])}
                     </div>
                   </div>
                 </div>
 
-                {/* Enhanced Navigation Dots with Glow */}
+                {/* Enhanced Navigation Dots */}
                 <div className="flex justify-center mb-4">
                   <div className="flex space-x-3 bg-black/40 backdrop-blur-sm rounded-full px-6 py-3 border border-white/20">
                     {coaches.map((_, index) => (
@@ -612,6 +690,7 @@ export default function HomePage() {
                             setCurrentCoachIndex(index)
                           }
                         }}
+                        disabled={isTransitioning || isDragging}
                         className={`w-3 h-3 rounded-full transition-all duration-300 ${
                           index === currentCoachIndex
                             ? "bg-white scale-125 shadow-lg"
