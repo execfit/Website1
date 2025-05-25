@@ -574,48 +574,26 @@ export default function HomePage() {
                       userSelect: "none",
                     }}
                   >
-                    {/* Background Cards (for depth effect) */}
+                    {/* Static Background Card with Icon - Always behind everything */}
                     <div
                       className="absolute inset-0 pointer-events-none"
                       style={{
-                        transform: "translateX(8px) scale(0.95)",
-                        zIndex: 1,
-                        opacity: 0.3,
+                        zIndex: 0,
+                        transform: "scale(0.9)",
                       }}
                     >
-                      <div className="w-full h-full bg-gradient-to-br from-black/60 to-black/40 backdrop-blur-sm border border-white/10 rounded-xl"></div>
+                      <div className="w-full h-full bg-gradient-to-br from-black/90 to-black/70 backdrop-blur-md border border-white/10 rounded-xl flex items-center justify-center">
+                        <Image
+                          src="/images/icononly.jpg"
+                          alt="ExecFit Icon"
+                          width={60}
+                          height={60}
+                          className="opacity-30"
+                        />
+                      </div>
                     </div>
 
-                    {/* Next Card */}
-                    <div
-                      className="absolute inset-0 pointer-events-none"
-                      style={{
-                        transform: `translateX(${
-                          isTransitioning && swipeDirection === "left"
-                            ? "0px"
-                            : isDragging && getDragOffset() < -50
-                              ? `${Math.max(4 + getDragOffset() * 0.1, 0)}px`
-                              : "4px"
-                        }) scale(${
-                          isTransitioning && swipeDirection === "left"
-                            ? "1"
-                            : isDragging && getDragOffset() < -50
-                              ? Math.min(0.98 + Math.abs(getDragOffset()) * 0.0005, 1)
-                              : "0.98"
-                        })`,
-                        transition: isTransitioning
-                          ? "all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)"
-                          : isDragging
-                            ? "none"
-                            : "all 0.2s ease-out",
-                        zIndex: 2,
-                        opacity: isTransitioning && swipeDirection === "left" ? 1 : 0.7,
-                      }}
-                    >
-                      {renderCoachCard(coaches[(currentCoachIndex + 1) % coaches.length])}
-                    </div>
-
-                    {/* Previous Card */}
+                    {/* Previous Card (comes from LEFT when swiping RIGHT) */}
                     <div
                       className="absolute inset-0 pointer-events-none"
                       style={{
@@ -623,25 +601,54 @@ export default function HomePage() {
                           isTransitioning && swipeDirection === "right"
                             ? "0px"
                             : isDragging && getDragOffset() > 50
-                              ? `${Math.min(-4 + getDragOffset() * 0.1, 0)}px`
-                              : "-4px"
+                              ? `${Math.min(-350 + getDragOffset() * 0.8, -20)}px`
+                              : "-350px"
                         }) scale(${
                           isTransitioning && swipeDirection === "right"
                             ? "1"
                             : isDragging && getDragOffset() > 50
-                              ? Math.min(0.98 + Math.abs(getDragOffset()) * 0.0005, 1)
-                              : "0.98"
+                              ? Math.min(0.95 + Math.abs(getDragOffset()) * 0.0008, 1)
+                              : "0.95"
                         })`,
                         transition: isTransitioning
                           ? "all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)"
                           : isDragging
                             ? "none"
                             : "all 0.2s ease-out",
-                        zIndex: 2,
-                        opacity: isTransitioning && swipeDirection === "right" ? 1 : 0.7,
+                        zIndex: 5,
+                        opacity: isTransitioning && swipeDirection === "right" ? 1 : 0.8,
                       }}
                     >
                       {renderCoachCard(coaches[(currentCoachIndex - 1 + coaches.length) % coaches.length])}
+                    </div>
+
+                    {/* Next Card (comes from RIGHT when swiping LEFT) */}
+                    <div
+                      className="absolute inset-0 pointer-events-none"
+                      style={{
+                        transform: `translateX(${
+                          isTransitioning && swipeDirection === "left"
+                            ? "0px"
+                            : isDragging && getDragOffset() < -50
+                              ? `${Math.max(350 + getDragOffset() * 0.8, 20)}px`
+                              : "350px"
+                        }) scale(${
+                          isTransitioning && swipeDirection === "left"
+                            ? "1"
+                            : isDragging && getDragOffset() < -50
+                              ? Math.min(0.95 + Math.abs(getDragOffset()) * 0.0008, 1)
+                              : "0.95"
+                        })`,
+                        transition: isTransitioning
+                          ? "all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)"
+                          : isDragging
+                            ? "none"
+                            : "all 0.2s ease-out",
+                        zIndex: 5,
+                        opacity: isTransitioning && swipeDirection === "left" ? 1 : 0.8,
+                      }}
+                    >
+                      {renderCoachCard(coaches[(currentCoachIndex + 1) % coaches.length])}
                     </div>
 
                     {/* Current Active Card */}
@@ -664,14 +671,14 @@ export default function HomePage() {
                                 ? "15deg"
                                 : "0deg"
                             : Math.max(-15, Math.min(15, getDragOffset() * 0.1))
-                        }deg) scale(${isDragging ? Math.max(0.95, 1 - Math.abs(getDragOffset()) * 0.0005) : 1})`,
+                        }deg) scale(${isDragging ? Math.max(0.98, 1 - Math.abs(getDragOffset()) * 0.0003) : 1})`,
                         transition: isTransitioning
                           ? "all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)"
                           : isDragging
                             ? "none"
                             : "all 0.2s ease-out",
                         zIndex: 10,
-                        opacity: isTransitioning ? 0 : Math.max(0.7, 1 - Math.abs(getDragOffset()) * 0.002),
+                        opacity: isTransitioning ? 0 : Math.max(0.8, 1 - Math.abs(getDragOffset()) * 0.001),
                       }}
                     >
                       {renderCoachCard(coaches[currentCoachIndex])}
