@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
-import Image from "next/Image"
+import Image from "next/image"
 import Header from "@/components/header"
 
 export default function HomePage() {
@@ -39,7 +39,7 @@ export default function HomePage() {
       id: "yosof",
       name: "Yosof Abuhasan",
       specialty: "Physique/Strength Training/Mindset Coaching",
-      bio: "I'm a certified trainer focused on helping clients build muscle, burn fat, and develop the mental discipline to sustain long-term results.",
+      bio: "I'm Yosof, a certified trainer focused on helping clients build muscle, burn fat, and develop the mental discipline to sustain long-term results.",
       image: "/images/coach-yosof.jpg",
       link: "/coaches/yosof-abuhasan",
     },
@@ -139,24 +139,23 @@ export default function HomePage() {
       if (distance > 0) {
         // Swiped left - show next coach
         setSwipeDirection("left")
-        setTimeout(() => {
-          setCurrentCoachIndex((prev) => (prev + 1) % coaches.length)
-        }, 150) // Delay index change to allow smooth animation
       } else {
         // Swiped right - show previous coach
         setSwipeDirection("right")
-        setTimeout(() => {
-          setCurrentCoachIndex((prev) => (prev - 1 + coaches.length) % coaches.length)
-        }, 150)
       }
 
       // Reset states after animation completes
       setTimeout(() => {
+        if (swipeDirection === "left") {
+          setCurrentCoachIndex((prev) => (prev + 1) % coaches.length)
+        } else if (swipeDirection === "right") {
+          setCurrentCoachIndex((prev) => (prev - 1 + coaches.length) % coaches.length)
+        }
         setIsTransitioning(false)
         setSwipeDirection(null)
         setTouchStart(0)
         setTouchCurrent(0)
-      }, 500)
+      }, 400)
     } else {
       // Snap back to original position
       setTouchStart(0)
@@ -176,44 +175,6 @@ export default function HomePage() {
     if (offset === 1) return coaches[(currentCoachIndex + 1) % coaches.length]
     if (offset === -1) return coaches[(currentCoachIndex - 1 + coaches.length) % coaches.length]
     return coaches[currentCoachIndex]
-  }
-
-  // Calculate positions for smooth transitions
-  const getCardTransform = (cardType: "current" | "next" | "prev") => {
-    const dragOffset = getDragOffset()
-
-    if (isTransitioning && swipeDirection) {
-      // During transition animation
-      if (cardType === "current") {
-        // Current card slides out
-        const exitPosition = swipeDirection === "left" ? -400 : 400
-        return `translateX(${exitPosition}px)`
-      } else if (cardType === "next" && swipeDirection === "left") {
-        // Next card slides in from right to center
-        return `translateX(0px)`
-      } else if (cardType === "prev" && swipeDirection === "right") {
-        // Previous card slides in from left to center
-        return `translateX(0px)`
-      }
-    }
-
-    if (isDragging) {
-      // During drag
-      if (cardType === "current") {
-        return `translateX(${dragOffset}px)`
-      } else if (cardType === "next" && dragOffset < -20) {
-        return `translateX(${Math.max(300 + dragOffset, 0)}px)`
-      } else if (cardType === "prev" && dragOffset > 20) {
-        return `translateX(${Math.min(-300 + dragOffset, 0)}px)`
-      }
-    }
-
-    // Default positions
-    if (cardType === "current") return "translateX(0px)"
-    if (cardType === "next") return "translateX(300px)"
-    if (cardType === "prev") return "translateX(-300px)"
-
-    return "translateX(0px)"
   }
 
   const renderCoachCard = (coach: (typeof coaches)[0]) => (
@@ -290,7 +251,6 @@ export default function HomePage() {
           <div className="bg-floating-element bg-circle-2"></div>
           <div className="bg-floating-element bg-square"></div>
           <div className="bg-floating-element bg-circle-3"></div>
-          <div className="bg-floating-element bg-circle-4"></div>
           <div className="bg-floating-element bg-square-2"></div>
           <div className="bg-pulse-circle"></div>
           <div className="bg-pulse-circle bg-pulse-circle-2"></div>
@@ -541,7 +501,7 @@ export default function HomePage() {
                       key={`current-${currentCoachIndex}`}
                       className="absolute inset-0 cursor-grab active:cursor-grabbing"
                       style={{
-                        transform: getCardTransform("current"),
+                        transform: `translateX(${getDragOffset()}px)`,
                         transition: isTransitioning ? "transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)" : "none",
                         willChange: "transform",
                         backfaceVisibility: "hidden",
@@ -556,7 +516,9 @@ export default function HomePage() {
                       key={`next-${nextCoachIndex}`}
                       className="absolute inset-0 pointer-events-none"
                       style={{
-                        transform: getCardTransform("next"),
+                        transform: `translateX(${
+                          swipeDirection === "left" ? Math.min(300, 300 + getDragOffset()) : 300
+                        }px)`,
                         transition: isTransitioning ? "transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)" : "none",
                         willChange: "transform",
                         backfaceVisibility: "hidden",
@@ -571,7 +533,9 @@ export default function HomePage() {
                       key={`prev-${(currentCoachIndex - 1 + coaches.length) % coaches.length}`}
                       className="absolute inset-0 pointer-events-none"
                       style={{
-                        transform: getCardTransform("prev"),
+                        transform: `translateX(${
+                          swipeDirection === "right" ? Math.max(-300, -300 + getDragOffset()) : -300
+                        }px)`,
                         transition: isTransitioning ? "transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)" : "none",
                         willChange: "transform",
                         backfaceVisibility: "hidden",
@@ -639,15 +603,9 @@ export default function HomePage() {
                 {/* Swipe Instructions */}
                 <div className="text-center">
                   <div className="inline-flex items-center space-x-4 text-white/60 text-xs">
-                    <div className="flex items-center space-x-1">
-                      <span>←</span>
-                      <span>Previous</span>
-                    </div>
-                    <div className="w-px h-4 bg-white/30"></div>
-                    <div className="flex items-center space-x-1">
-                      <span>Next</span>
-                      <span>→</span>
-                    </div>
+                    <span className="mr-2">←</span>
+                    <span>Swipe</span>
+                    <span className="ml-2">→</span>
                   </div>
                 </div>
               </div>
