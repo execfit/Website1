@@ -213,20 +213,25 @@ export default function HomePage() {
     const dragOffset = getDragOffset()
 
     if (isTransitioning && swipeDirection) {
-      // During transition animation - keep coach identities stable
-      if (cardPosition === "current") {
-        // Current card slides out completely
-        const exitPosition = swipeDirection === "left" ? -400 : 400
-        return `translateX(${exitPosition}px) rotate(${swipeDirection === "left" ? -15 : 15}deg) scale(0.8)`
-      } else if (cardPosition === "next" && swipeDirection === "left") {
-        // Next card slides in from right to center when swiping left
-        return "translateX(0px) rotate(0deg) scale(1)"
-      } else if (cardPosition === "prev" && swipeDirection === "right") {
-        // Previous card slides in from left to center when swiping right
-        return "translateX(0px) rotate(0deg) scale(1)"
+      // During transition - use DESTINATION logic to prevent duplicates
+      if (swipeDirection === "left") {
+        // Swiping left: current slides out left, next slides in from right
+        if (cardPosition === "current") {
+          return "translateX(-400px) rotate(-15deg) scale(0.8)"
+        } else if (cardPosition === "next") {
+          return "translateX(0px) rotate(0deg) scale(1)"
+        } else {
+          return "translateX(-350px) scale(0.95)"
+        }
       } else {
-        // All other cards stay hidden during transition
-        return cardPosition === "next" ? "translateX(350px) scale(0.95)" : "translateX(-350px) scale(0.95)"
+        // Swiping right: current slides out right, prev slides in from left
+        if (cardPosition === "current") {
+          return "translateX(400px) rotate(15deg) scale(0.8)"
+        } else if (cardPosition === "prev") {
+          return "translateX(0px) rotate(0deg) scale(1)"
+        } else {
+          return "translateX(350px) scale(0.95)"
+        }
       }
     }
 
@@ -257,6 +262,39 @@ export default function HomePage() {
     if (cardPosition === "prev") return "translateX(-350px) scale(0.95)"
 
     return "translateX(0px) scale(1)"
+  }
+
+  // Get the correct coach content for each card position during transitions
+  const getCoachForCard = (cardPosition: "current" | "next" | "prev") => {
+    if (isTransitioning && swipeDirection) {
+      // During transition, show destination coaches to prevent duplicates
+      if (swipeDirection === "left") {
+        // Left swipe: next coach becomes current, current becomes prev
+        if (cardPosition === "current") {
+          return coaches[currentCoachIndex] // Old current sliding out
+        } else if (cardPosition === "next") {
+          return coaches[(currentCoachIndex + 1) % coaches.length] // New current sliding in
+        } else {
+          return coaches[(currentCoachIndex - 1 + coaches.length) % coaches.length]
+        }
+      } else {
+        // Right swipe: prev coach becomes current, current becomes next
+        if (cardPosition === "current") {
+          return coaches[currentCoachIndex] // Old current sliding out
+        } else if (cardPosition === "prev") {
+          return coaches[(currentCoachIndex - 1 + coaches.length) % coaches.length] // New current sliding in
+        } else {
+          return coaches[(currentCoachIndex + 1) % coaches.length]
+        }
+      }
+    }
+
+    // Normal state - use current index
+    if (cardPosition === "current") return coaches[currentCoachIndex]
+    if (cardPosition === "next") return coaches[(currentCoachIndex + 1) % coaches.length]
+    if (cardPosition === "prev") return coaches[(currentCoachIndex - 1 + coaches.length) % coaches.length]
+
+    return coaches[currentCoachIndex]
   }
 
   const renderCoachCard = (coach: (typeof coaches)[0]) => (
@@ -611,7 +649,7 @@ export default function HomePage() {
                           : isDragging
                             ? "none"
                             : "all 0.2s ease-out",
-                        zIndex: 5,
+                        zIndex: isTransitioning && swipeDirection === "right" ? 10 : 5,
                         opacity:
                           isTransitioning && swipeDirection === "right"
                             ? 1
@@ -620,7 +658,7 @@ export default function HomePage() {
                               : 0.7,
                       }}
                     >
-                      {renderCoachCard(coaches[(currentCoachIndex - 1 + coaches.length) % coaches.length])}
+                      {renderCoachCard(getCoachForCard("prev"))}
                     </div>
 
                     {/* Next Card (comes from RIGHT when swiping LEFT) */}
@@ -633,7 +671,7 @@ export default function HomePage() {
                           : isDragging
                             ? "none"
                             : "all 0.2s ease-out",
-                        zIndex: 5,
+                        zIndex: isTransitioning && swipeDirection === "left" ? 10 : 5,
                         opacity:
                           isTransitioning && swipeDirection === "left"
                             ? 1
@@ -642,10 +680,10 @@ export default function HomePage() {
                               : 0.7,
                       }}
                     >
-                      {renderCoachCard(coaches[(currentCoachIndex + 1) % coaches.length])}
+                      {renderCoachCard(getCoachForCard("next"))}
                     </div>
 
-                    {/* Current Active Card - Hide during transition to prevent duplicates */}
+                    {/* Current Active Card */}
                     <div
                       className="absolute inset-0 cursor-grab active:cursor-grabbing"
                       style={{
@@ -655,11 +693,11 @@ export default function HomePage() {
                           : isDragging
                             ? "none"
                             : "all 0.2s ease-out",
-                        zIndex: 10,
-                        opacity: isTransitioning ? 0 : Math.max(0.8, 1 - Math.abs(getDragOffset()) * 0.001),
+                        zIndex: isTransitioning ? 5 : 10,
+                        opacity: isTransitioning ? 1 : Math.max(0.8, 1 - Math.abs(getDragOffset()) * 0.001),
                       }}
                     >
-                      {renderCoachCard(coaches[currentCoachIndex])}
+                      {renderCoachCard(getCoachForCard("current"))}
                     </div>
                   </div>
                 </div>
