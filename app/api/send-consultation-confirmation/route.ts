@@ -122,9 +122,9 @@ export async function POST(request: NextRequest) {
 
     console.log("📧 Attempting to send email to:", consultation.client_email)
 
-    // Send client confirmation email using Resend's default domain
+    // Send client confirmation email using your professional domain
     const { data: clientEmailData, error: clientEmailError } = await resend.emails.send({
-      from: "ExecFit <onboarding@resend.dev>", // Using Resend's default domain
+      from: "ExecFit <noreply@execfitnow.com>", // Using your professional domain
       to: [consultation.client_email],
       subject: "Your ExecFit Consultation is Confirmed! 🎯",
       html: emailHtml,
