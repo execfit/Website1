@@ -72,147 +72,143 @@ export async function GET() {
 
 export async function POST() {
   try {
-    // Check if coaches already exist
-    const { data: existingCoaches, error: checkError } = await supabase.from("coaches").select("email").limit(1)
+    console.log("🚀 Starting database initialization with specific coach IDs...")
 
-    if (checkError) {
-      // If table doesn't exist, we'll get an error
-      console.log("Coaches table might not exist yet:", checkError.message)
+    // First, clear existing data to avoid conflicts
+    console.log("🧹 Clearing existing data...")
 
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Database tables need to be created manually in Supabase dashboard",
-          error: "Please create the tables in your Supabase dashboard first",
-          instructions: [
-            "1. Go to your Supabase dashboard",
-            "2. Navigate to the SQL Editor",
-            "3. Run the SQL commands to create the tables",
-            "4. Then run this endpoint again to populate data",
-          ],
-        },
-        { status: 400 },
-      )
+    // Delete existing time slots
+    const { error: deleteTimeSlotsError } = await supabase.from("time_slots").delete().neq("id", "")
+    if (deleteTimeSlotsError) {
+      console.log("⚠️ Error deleting time slots (might not exist):", deleteTimeSlotsError.message)
     }
 
-    // Insert sample coaches if they don't exist
-    if (!existingCoaches || existingCoaches.length === 0) {
-      const { error: insertError } = await supabase.from("coaches").insert([
+    // Delete existing consultations
+    const { error: deleteConsultationsError } = await supabase.from("consultations").delete().neq("id", "")
+    if (deleteConsultationsError) {
+      console.log("⚠️ Error deleting consultations (might not exist):", deleteConsultationsError.message)
+    }
+
+    // Delete existing coaches
+    const { error: deleteCoachesError } = await supabase.from("coaches").delete().neq("id", "")
+    if (deleteCoachesError) {
+      console.log("⚠️ Error deleting coaches (might not exist):", deleteCoachesError.message)
+    }
+
+    // Insert coaches with specific string IDs
+    console.log("👥 Inserting coaches with specific IDs...")
+    const { data: coaches, error: insertError } = await supabase
+      .from("coaches")
+      .insert([
         {
+          id: "gabriela",
           name: "Gabriela Garcia",
           email: "gabriela@execfitnow.com",
           specialty: "Personal Trainer | Nutrition Coach",
           image: "/images/coach-gabriela.jpg",
+          is_active: true,
         },
         {
+          id: "maddy",
           name: "Maddy Gold",
           email: "maddy@execfitnow.com",
           specialty: "Certified Personal Trainer | PN1 Nutrition Coach",
           image: "/images/coach-maddy.jpg",
+          is_active: true,
         },
         {
+          id: "yosof",
           name: "Yosof Abuhasan",
           email: "yosof@execfitnow.com",
           specialty: "Physique/Strength Training/Mindset Coaching",
           image: "/images/coach-yosof.jpg",
+          is_active: true,
         },
       ])
+      .select()
 
-      if (insertError) {
-        console.error("Error inserting coaches:", insertError)
-        return NextResponse.json(
-          {
-            success: false,
-            error: insertError.message,
-          },
-          { status: 500 },
-        )
-      }
-    }
-
-    // Get coaches for time slot creation
-    const { data: coaches, error: coachesError } = await supabase.from("coaches").select("id").eq("is_active", true)
-
-    if (coachesError) {
+    if (insertError) {
+      console.error("❌ Error inserting coaches:", insertError)
       return NextResponse.json(
         {
           success: false,
-          error: coachesError.message,
+          error: insertError.message,
         },
         { status: 500 },
       )
     }
 
-    if (coaches && coaches.length > 0) {
-      // Check if time slots already exist
-      const { data: existingSlots } = await supabase.from("time_slots").select("id").limit(1)
+    console.log("✅ Coaches inserted successfully:", coaches?.length)
 
-      if (!existingSlots || existingSlots.length === 0) {
-        // Insert sample time slots for the next 30 days
-        const timeSlots = []
+    // Generate time slots for the next 30 days
+    console.log("📅 Generating time slots...")
+    const timeSlots = []
+    const coachIds = ["gabriela", "maddy", "yosof"]
 
-        for (const coach of coaches) {
-          for (let i = 1; i <= 30; i++) {
-            const date = new Date()
-            date.setDate(date.getDate() + i)
-            const dateString = date.toISOString().split("T")[0]
+    for (const coachId of coachIds) {
+      console.log(`📋 Creating slots for coach: ${coachId}`)
 
-            // Skip weekends
-            if (date.getDay() === 0 || date.getDay() === 6) continue
+      for (let i = 1; i <= 30; i++) {
+        const date = new Date()
+        date.setDate(date.getDate() + i)
+        const dateString = date.toISOString().split("T")[0]
 
-            // Add time slots for each weekday
-            const slots = ["09:00:00", "10:00:00", "11:00:00", "14:00:00", "15:00:00", "16:00:00", "17:00:00"]
+        // Skip weekends
+        if (date.getDay() === 0 || date.getDay() === 6) continue
 
-            for (const time of slots) {
-              const endTime = time.replace(
-                /(\d{2}):(\d{2}):(\d{2})/,
-                (_, h, m, s) => `${String(Number.parseInt(h) + 1).padStart(2, "0")}:${m}:${s}`,
-              )
+        // Add time slots for each weekday
+        const slots = ["09:00:00", "10:00:00", "11:00:00", "14:00:00", "15:00:00", "16:00:00", "17:00:00"]
 
-              timeSlots.push({
-                coach_id: coach.id,
-                date: dateString,
-                start_time: time,
-                end_time: endTime,
-                is_available: true,
-              })
-            }
-          }
+        for (const time of slots) {
+          const endTime = time.replace(
+            /(\d{2}):(\d{2}):(\d{2})/,
+            (_, h, m, s) => `${String(Number.parseInt(h) + 1).padStart(2, "0")}:${m}:${s}`,
+          )
+
+          timeSlots.push({
+            coach_id: coachId,
+            date: dateString,
+            start_time: time,
+            end_time: endTime,
+            is_available: true,
+          })
         }
+      }
+    }
 
-        // Insert time slots in smaller batches
-        const batchSize = 50
-        let insertedCount = 0
+    console.log(`📊 Total time slots to create: ${timeSlots.length}`)
 
-        for (let i = 0; i < timeSlots.length; i += batchSize) {
-          const batch = timeSlots.slice(i, i + batchSize)
-          const { error: timeSlotsInsertError } = await supabase.from("time_slots").insert(batch)
+    // Insert time slots in batches
+    const batchSize = 100
+    let insertedCount = 0
 
-          if (timeSlotsInsertError) {
-            console.error("Error inserting time slots batch:", timeSlotsInsertError)
-            // Continue with next batch instead of failing completely
-          } else {
-            insertedCount += batch.length
-          }
-        }
+    for (let i = 0; i < timeSlots.length; i += batchSize) {
+      const batch = timeSlots.slice(i, i + batchSize)
+      const { error: timeSlotsInsertError } = await supabase.from("time_slots").insert(batch)
 
-        return NextResponse.json({
-          success: true,
-          message: "Database initialized successfully!",
-          coaches: coaches.length,
-          timeSlots: `${insertedCount} time slots created for next 30 days`,
-        })
+      if (timeSlotsInsertError) {
+        console.error("❌ Error inserting time slots batch:", timeSlotsInsertError)
+        // Continue with next batch instead of failing completely
+      } else {
+        insertedCount += batch.length
+        console.log(`✅ Inserted batch ${Math.floor(i / batchSize) + 1}, total: ${insertedCount}`)
       }
     }
 
     return NextResponse.json({
       success: true,
-      message: "Database already initialized!",
+      message: "Database initialized successfully with specific coach IDs!",
       coaches: coaches?.length || 0,
-      timeSlots: "Already exists",
+      timeSlots: insertedCount,
+      details: {
+        coachIds: coachIds,
+        totalSlotsCreated: insertedCount,
+        dateRange: "Next 30 days (weekdays only)",
+        timeSlots: "9AM-11AM, 2PM-5PM",
+      },
     })
   } catch (error) {
-    console.error("Error initializing database:", error)
+    console.error("💥 Error initializing database:", error)
     const errorMessage = error instanceof Error ? error.message : "Unknown error occurred"
 
     return NextResponse.json(

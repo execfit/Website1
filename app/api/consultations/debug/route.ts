@@ -5,32 +5,32 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
     const coachId = searchParams.get("coach_id")
-    const date = searchParams.get("date")
+    const date = searchParams.get("date") || new Date().toISOString().split("T")[0]
     const time = searchParams.get("time")
 
     console.log("🔍 Debug consultation booking:", { coachId, date, time })
 
     // Get coaches
-    const { data: coaches, error: coachesError } = await supabase.from("coaches").select("*")
+    const { data: coaches, error: coachesError } = await supabase.from("coaches").select("*").order("name")
 
     // Get time slots for the date
     const { data: timeSlots, error: timeSlotsError } = await supabase
       .from("time_slots")
       .select("*")
-      .eq("date", date || new Date().toISOString().split("T")[0])
+      .eq("date", date)
       .order("start_time")
 
     // Get existing consultations for the date
     const { data: consultations, error: consultationsError } = await supabase
       .from("consultations")
       .select("*")
-      .eq("consultation_date", date || new Date().toISOString().split("T")[0])
+      .eq("consultation_date", date)
       .order("consultation_time")
 
     // If specific coach and time provided, check availability
     let availabilityCheck = null
-    if (coachId && date && time) {
-      const { data: specificSlot } = await supabase
+    if (coachId && time) {
+      const { data: specificSlot, error: slotError } = await supabase
         .from("time_slots")
         .select("*")
         .eq("coach_id", coachId)
@@ -38,7 +38,7 @@ export async function GET(request: Request) {
         .eq("start_time", time)
         .single()
 
-      const { data: existingBooking } = await supabase
+      const { data: existingBooking, error: bookingError } = await supabase
         .from("consultations")
         .select("*")
         .eq("coach_id", coachId)
@@ -49,8 +49,15 @@ export async function GET(request: Request) {
       availabilityCheck = {
         timeSlotExists: !!specificSlot,
         timeSlotData: specificSlot,
+        timeSlotError: slotError?.message,
         existingBookings: existingBooking || [],
+        bookingError: bookingError?.message,
         isAvailable: !existingBooking || existingBooking.length === 0,
+        query: {
+          coach_id: coachId,
+          date: date,
+          time: time,
+        },
       }
     }
 
@@ -70,6 +77,7 @@ export async function GET(request: Request) {
           totalCoaches: coaches?.length || 0,
           totalTimeSlots: timeSlots?.length || 0,
           totalConsultations: consultations?.length || 0,
+          coachIds: coaches?.map((c) => c.id) || [],
         },
       },
     })
