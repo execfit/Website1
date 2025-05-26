@@ -268,6 +268,39 @@ export default function HomePage() {
     return 1
   }
 
+  // Calculate opacity for this specific card
+  const getCardOpacity = (position: "current" | "next" | "prev" | "hidden") => {
+    if (position === "hidden") return 0
+
+    // Set opacity to 0 immediately when swipe direction is determined for traveling cards
+    if (swipeDirection) {
+      if (swipeDirection === "left") {
+        if (position === "current") return Math.max(0.3, 1 - 0.7) // Fade out as it leaves
+        if (position === "next") return 1 // Fade in as it becomes current
+        if (position === "prev") return 0 // Hide previous card immediately during cross-screen travel
+      } else if (swipeDirection === "right") {
+        if (position === "current") return Math.max(0.3, 1 - 0.7) // Fade out as it leaves
+        if (position === "prev") return 1 // Fade in as it becomes current
+        if (position === "next") return 0 // Hide next card immediately during cross-screen travel
+      }
+    }
+
+    if (isDragging) {
+      if (position === "current") {
+        return Math.max(0.8, 1 - Math.abs(getDragOffset()) * 0.001)
+      } else if (position === "next" && getDragOffset() < -50) {
+        return 0.8
+      } else if (position === "prev" && getDragOffset() > 50) {
+        return 0.8
+      }
+    }
+
+    // Default opacities
+    if (position === "current") return 1
+    if (position === "next" || position === "prev") return 0.7
+    return 0
+  }
+
   return (
     <div className="execfit-main">
       {/* Header */}
@@ -639,15 +672,16 @@ export default function HomePage() {
                       const getCardOpacity = () => {
                         if (position === "hidden") return 0
 
-                        if (isTransitioning && swipeDirection) {
+                        // Set opacity to 0 immediately when swipe direction is determined for traveling cards
+                        if (swipeDirection) {
                           if (swipeDirection === "left") {
                             if (position === "current") return Math.max(0.3, 1 - 0.7) // Fade out as it leaves
                             if (position === "next") return 1 // Fade in as it becomes current
-                            if (position === "prev") return 0 // Hide previous card during cross-screen travel
+                            if (position === "prev") return 0 // Hide previous card immediately during cross-screen travel
                           } else if (swipeDirection === "right") {
                             if (position === "current") return Math.max(0.3, 1 - 0.7) // Fade out as it leaves
                             if (position === "prev") return 1 // Fade in as it becomes current
-                            if (position === "next") return 0 // Hide next card during cross-screen travel
+                            if (position === "next") return 0 // Hide next card immediately during cross-screen travel
                           }
                         }
 
