@@ -245,6 +245,29 @@ export default function HomePage() {
     </div>
   )
 
+  // Calculate z-index for this specific card
+  const getCardZIndex = (position: "current" | "next" | "prev" | "hidden") => {
+    if (position === "hidden") return 1
+
+    // Set z-index immediately when swipe direction is determined
+    if (swipeDirection) {
+      if (swipeDirection === "left") {
+        if (position === "next") return 10 // Coming in from right
+        if (position === "current") return 5 // Going out left
+        if (position === "prev") return -1 // Traveling across behind icon - SET IMMEDIATELY
+      } else if (swipeDirection === "right") {
+        if (position === "prev") return 10 // Coming in from left
+        if (position === "current") return 5 // Going out right
+        if (position === "next") return -1 // Traveling across behind icon - SET IMMEDIATELY
+      }
+      return 3
+    }
+
+    if (position === "current") return 10
+    if (position === "next" || position === "prev") return 5
+    return 1
+  }
+
   return (
     <div className="execfit-main">
       {/* Header */}
@@ -644,29 +667,6 @@ export default function HomePage() {
                         return 0
                       }
 
-                      // Calculate z-index for this specific card
-                      const getCardZIndex = () => {
-                        if (position === "hidden") return 1
-
-                        if (isTransitioning && swipeDirection) {
-                          // Cards traveling across screen should be behind static icon (z-index 0)
-                          if (swipeDirection === "left") {
-                            if (position === "next") return 10 // Coming in from right
-                            if (position === "current") return 5 // Going out left
-                            if (position === "prev") return -1 // Traveling across behind icon
-                          } else if (swipeDirection === "right") {
-                            if (position === "prev") return 10 // Coming in from left
-                            if (position === "current") return 5 // Going out right
-                            if (position === "next") return -1 // Traveling across behind icon
-                          }
-                          return 3
-                        }
-
-                        if (position === "current") return 10
-                        if (position === "next" || position === "prev") return 5
-                        return 1
-                      }
-
                       return (
                         <div
                           key={`coach-${coach.id}`} // Stable key based on coach ID
@@ -674,12 +674,12 @@ export default function HomePage() {
                           style={{
                             transform: getCardSpecificTransform(),
                             opacity: getCardOpacity(),
-                            zIndex: getCardZIndex(),
+                            zIndex: getCardZIndex(position),
                             transition: isTransitioning
-                              ? "all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)"
+                              ? "transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.4s ease-out" // Removed z-index from transition
                               : isDragging
                                 ? "none"
-                                : "all 0.2s ease-out",
+                                : "transform 0.2s ease-out, opacity 0.2s ease-out", // Removed z-index from transition
                             pointerEvents: position === "current" && !isTransitioning ? "auto" : "none",
                           }}
                         >
