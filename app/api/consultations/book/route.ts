@@ -60,27 +60,38 @@ export async function POST(request: NextRequest) {
 
     console.log("💾 Attempting to book consultation:", consultationData)
 
-    // For debugging - check what's in the database
-    if (consultationData.coach_id) {
-      console.log("🔍 Debug: Checking database state before booking...")
-
-      const debugResponse = await fetch(
-        `${request.nextUrl.origin}/api/consultations/debug?coach_id=${consultationData.coach_id}&date=${consultationData.consultation_date}&time=${consultationData.consultation_time}`,
-      )
-
-      if (debugResponse.ok) {
-        const debugData = await debugResponse.json()
-        console.log("📊 Debug data:", debugData.debug.availabilityCheck)
-      }
-    }
-
     const result = await bookConsultation(consultationData)
 
     console.log("📊 Booking result:", result)
 
     if (result.success) {
       console.log("✅ Consultation booked successfully")
-      return NextResponse.json(result.data)
+
+      // EXPLICITLY try to send email here as a backup
+      console.log("🔄 Attempting to send confirmation email as backup...")
+      try {
+        const emailResponse = await fetch(`${request.nextUrl.origin}/api/send-consultation-confirmation`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(result.data),
+        })
+
+        const emailResult = await emailResponse.json()
+        console.log("📧 Backup email attempt result:", emailResult)
+
+        if (emailResponse.ok) {
+          console.log("✅ Backup email sent successfully")
+        } else {
+          console.log("❌ Backup email failed:", emailResult)
+        }
+      } catch (emailError) {
+        console.error("💥 Backup email error:", emailError)
+      }
+
+      return NextResponse.json({
+        ...result.data,
+        message: "Consultation booked successfully! Check your email for confirmation.",
+      })
     } else {
       console.log("❌ Booking failed:", result.error)
       return NextResponse.json({ error: result.error }, { status: 400 })

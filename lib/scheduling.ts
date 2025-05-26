@@ -138,23 +138,6 @@ export async function checkSlotAvailability(coachId: string, date: string, time:
   try {
     console.log(`🔍 Checking availability for coach ${coachId} on ${date} at ${time}`)
 
-    // First check if the time slot exists in the time_slots table
-    const { data: timeSlot, error: timeSlotError } = await supabase
-      .from("time_slots")
-      .select("*")
-      .eq("coach_id", coachId)
-      .eq("date", date)
-      .eq("start_time", time)
-      .eq("is_available", true)
-      .single()
-
-    if (timeSlotError || !timeSlot) {
-      console.log("❌ Time slot not found in time_slots table:", timeSlotError?.message)
-      // Don't fail here - the slot might still be bookable even if not in time_slots table
-    } else {
-      console.log("✅ Time slot found in time_slots table")
-    }
-
     // Check for existing bookings at this time
     const { data: existingBookings, error: bookingError } = await supabase
       .from("consultations")
@@ -188,6 +171,7 @@ export async function bookConsultation(consultation: Omit<Consultation, "id" | "
     console.log("📋 Consultation data:", {
       coach_id: consultation.coach_id,
       client_name: consultation.client_name,
+      client_email: consultation.client_email,
       consultation_date: consultation.consultation_date,
       consultation_time: consultation.consultation_time,
     })
@@ -219,19 +203,30 @@ export async function bookConsultation(consultation: Omit<Consultation, "id" | "
       throw error
     }
 
-    console.log("✅ Consultation inserted successfully:", data.id)
+    console.log("✅ Consultation inserted successfully with ID:", data.id)
+    console.log("📋 Full consultation data:", data)
 
     // Send confirmation email
-    console.log("📧 Sending confirmation email")
-    const emailResult = await sendConsultationConfirmation(data)
+    console.log("📧 STARTING EMAIL CONFIRMATION PROCESS")
+    console.log("📧 Email will be sent to:", data.client_email)
+    console.log("📧 Consultation ID for email:", data.id)
 
-    if (emailResult.success) {
-      console.log("✅ Confirmation email sent successfully")
-    } else {
-      console.log("⚠️ Email sending failed:", emailResult.error)
-      // Don't fail the booking if email fails
+    try {
+      const emailResult = await sendConsultationConfirmation(data)
+      console.log("📧 Email result:", emailResult)
+
+      if (emailResult.success) {
+        console.log("✅ Confirmation email sent successfully")
+      } else {
+        console.log("⚠️ Email sending failed:", emailResult.error)
+        // Log the error but don't fail the booking
+      }
+    } catch (emailError) {
+      console.error("💥 Email error (non-critical):", emailError)
+      // Continue - booking is still successful even if email fails
     }
 
+    console.log("🎉 Booking process completed successfully")
     return { success: true, data }
   } catch (error) {
     console.error("💥 Error booking consultation:", error)
@@ -243,24 +238,44 @@ export async function bookConsultation(consultation: Omit<Consultation, "id" | "
 // Send consultation confirmation email
 export async function sendConsultationConfirmation(consultation: Consultation) {
   try {
-    console.log("📧 Attempting to send confirmation email to:", consultation.client_email)
+    console.log("📧 sendConsultationConfirmation called with:", {
+      id: consultation.id,
+      client_email: consultation.client_email,
+      client_name: consultation.client_name,
+    })
+
+    // Check if we're in a browser environment
+    if (typeof window !== "undefined") {
+      console.log("🌐 Running in browser, using fetch with full URL")
+      const baseUrl = window.location.origin
+      const url = `${baseUrl}/api/send-consultation-confirmation`
+      console.log("📧 Email API URL:", url)
+    } else {
+      console.log("🖥️ Running on server")
+    }
 
     const response = await fetch("/api/send-consultation-confirmation", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
       body: JSON.stringify(consultation),
     })
+
+    console.log("📧 Email API response status:", response.status)
+    console.log("📧 Email API response ok:", response.ok)
 
     if (!response.ok) {
       const errorText = await response.text()
       console.error("❌ Email API response not ok:", response.status, errorText)
-      throw new Error(`Failed to send confirmation email: ${response.status}`)
+      throw new Error(`Failed to send confirmation email: ${response.status} - ${errorText}`)
     }
 
     const result = await response.json()
     console.log("✅ Email API response:", result)
 
-    return { success: true }
+    return { success: true, data: result }
   } catch (error) {
     console.error("💥 Error sending confirmation:", error)
     const errorMessage = error instanceof Error ? error.message : "Unknown error occurred"
