@@ -37,6 +37,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
     }
 
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(body.client_email)) {
+      console.log("❌ Invalid email format")
+      return NextResponse.json({ error: "Invalid email format" }, { status: 400 })
+    }
+
     // If no coach preference, we'll assign based on availability
     const consultationData = {
       coach_id: body.coach_id === "no-preference" ? null : body.coach_id,
@@ -52,6 +59,20 @@ export async function POST(request: NextRequest) {
     }
 
     console.log("💾 Attempting to book consultation:", consultationData)
+
+    // For debugging - check what's in the database
+    if (consultationData.coach_id) {
+      console.log("🔍 Debug: Checking database state before booking...")
+
+      const debugResponse = await fetch(
+        `${request.nextUrl.origin}/api/consultations/debug?coach_id=${consultationData.coach_id}&date=${consultationData.consultation_date}&time=${consultationData.consultation_time}`,
+      )
+
+      if (debugResponse.ok) {
+        const debugData = await debugResponse.json()
+        console.log("📊 Debug data:", debugData.debug.availabilityCheck)
+      }
+    }
 
     const result = await bookConsultation(consultationData)
 

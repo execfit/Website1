@@ -133,14 +133,68 @@ export async function getBookedSlots(coachId: string, date: string) {
   return data || []
 }
 
+// Check if a time slot is available
+export async function checkSlotAvailability(coachId: string, date: string, time: string): Promise<boolean> {
+  try {
+    console.log(`🔍 Checking availability for coach ${coachId} on ${date} at ${time}`)
+
+    // First check if the time slot exists in the time_slots table
+    const { data: timeSlot, error: timeSlotError } = await supabase
+      .from("time_slots")
+      .select("*")
+      .eq("coach_id", coachId)
+      .eq("date", date)
+      .eq("start_time", time)
+      .eq("is_available", true)
+      .single()
+
+    if (timeSlotError || !timeSlot) {
+      console.log("❌ Time slot not found in time_slots table:", timeSlotError?.message)
+      // Don't fail here - the slot might still be bookable even if not in time_slots table
+    } else {
+      console.log("✅ Time slot found in time_slots table")
+    }
+
+    // Check for existing bookings at this time
+    const { data: existingBookings, error: bookingError } = await supabase
+      .from("consultations")
+      .select("id, status")
+      .eq("coach_id", coachId)
+      .eq("consultation_date", date)
+      .eq("consultation_time", time)
+      .in("status", ["pending", "confirmed"])
+
+    if (bookingError) {
+      console.error("❌ Error checking existing bookings:", bookingError)
+      return false
+    }
+
+    const isAvailable = !existingBookings || existingBookings.length === 0
+    console.log(
+      `📊 Availability check result: ${isAvailable ? "AVAILABLE" : "BOOKED"} (${existingBookings?.length || 0} existing bookings)`,
+    )
+
+    return isAvailable
+  } catch (error) {
+    console.error("💥 Error in checkSlotAvailability:", error)
+    return false
+  }
+}
+
 // Book a consultation
 export async function bookConsultation(consultation: Omit<Consultation, "id" | "created_at" | "updated_at">) {
   try {
     console.log("💾 Starting consultation booking process")
+    console.log("📋 Consultation data:", {
+      coach_id: consultation.coach_id,
+      client_name: consultation.client_name,
+      consultation_date: consultation.consultation_date,
+      consultation_time: consultation.consultation_time,
+    })
 
-    // Check if slot is still available (if coach is specified)
+    // Only check availability if coach is specified (not for "no preference")
     if (consultation.coach_id) {
-      console.log(`🔍 Checking availability for coach ${consultation.coach_id}`)
+      console.log(`🔍 Checking availability for specific coach: ${consultation.coach_id}`)
       const isAvailable = await checkSlotAvailability(
         consultation.coach_id,
         consultation.consultation_date,
@@ -152,6 +206,8 @@ export async function bookConsultation(consultation: Omit<Consultation, "id" | "
         throw new Error("This time slot is no longer available")
       }
       console.log("✅ Time slot is available")
+    } else {
+      console.log("🎯 No specific coach preference - skipping availability check")
     }
 
     // Insert consultation into database
@@ -182,25 +238,6 @@ export async function bookConsultation(consultation: Omit<Consultation, "id" | "
     const errorMessage = error instanceof Error ? error.message : "Unknown error occurred"
     return { success: false, error: errorMessage }
   }
-}
-
-// Check if a time slot is available
-export async function checkSlotAvailability(coachId: string, date: string, time: string): Promise<boolean> {
-  // Check database bookings
-  const { data, error } = await supabase
-    .from("consultations")
-    .select("id")
-    .eq("coach_id", coachId)
-    .eq("consultation_date", date)
-    .eq("consultation_time", time)
-    .in("status", ["pending", "confirmed"])
-
-  if (error) {
-    console.error("Error checking availability:", error)
-    return false
-  }
-
-  return data.length === 0
 }
 
 // Send consultation confirmation email
