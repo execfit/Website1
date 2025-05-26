@@ -535,8 +535,8 @@ export default function HomePage() {
                     <div
                       className="absolute inset-0 pointer-events-none"
                       style={{
-                        zIndex: 2, // Changed from 0 to 2 to be above traveling cards (z-index: -1)
-                        transform: "scale(0.9)",
+                        zIndex: 2, // Above traveling cards (z-index: -1)
+                        transform: "scale(1)", // Changed from scale(0.9) to scale(1) to cover full area
                       }}
                     >
                       <div className="w-full h-full bg-gradient-to-br from-black/90 to-black/70 backdrop-blur-md border border-white/10 rounded-xl flex items-center justify-center">
