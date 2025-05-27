@@ -8,6 +8,18 @@ export interface SendCookbookEmailParams {
   cookbookTitle: string
 }
 
+export interface SendBookingConfirmationParams {
+  to: string
+  clientName: string
+  trainerName: string
+  sessionDate: string
+  sessionTime: string
+  duration: string
+  location: string
+  sessionType: string
+  notes?: string
+}
+
 export async function sendCookbookEmail({ to, cookbookId, cookbookTitle }: SendCookbookEmailParams) {
   try {
     console.log("Starting email send process...")
@@ -133,6 +145,128 @@ export async function sendCookbookEmail({ to, cookbookId, cookbookTitle }: SendC
     return { success: true, data }
   } catch (error) {
     console.error("Error in sendCookbookEmail:", error)
+    throw error
+  }
+}
+
+export async function sendBookingConfirmation({
+  to,
+  clientName,
+  trainerName,
+  sessionDate,
+  sessionTime,
+  duration,
+  location,
+  sessionType,
+  notes,
+}: SendBookingConfirmationParams) {
+  try {
+    console.log("Sending booking confirmation email...")
+    console.log("To:", to)
+    console.log("Client:", clientName)
+
+    // Check if API key exists
+    if (!process.env.RESEND_API_KEY) {
+      throw new Error("RESEND_API_KEY environment variable is not set")
+    }
+
+    const formatDate = (dateString: string) => {
+      return new Date(dateString).toLocaleDateString("en-US", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+    }
+
+    const formatTime = (timeString: string) => {
+      return new Date(`2000-01-01T${timeString}`).toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+      })
+    }
+
+    const { data, error } = await resend.emails.send({
+      from: "ExecFit <noreply@execfitnow.com>",
+      to: [to],
+      subject: "Training Session Confirmed - ExecFit",
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #000; color: #fff; padding: 20px;">
+          <div style="text-align: center; margin-bottom: 30px;">
+            <h1 style="color: #fff; margin: 0; font-size: 28px;">ExecFit</h1>
+            <p style="color: #ccc; margin: 5px 0; font-size: 14px; letter-spacing: 2px;">EXECUTE NOW.</p>
+          </div>
+          
+          <h2 style="color: #fff; margin-bottom: 20px;">Training Session Confirmed ✅</h2>
+          
+          <p style="color: #fff; line-height: 1.6;">Hi ${clientName},</p>
+          
+          <p style="color: #fff; line-height: 1.6;">Your training session has been confirmed! Here are the details:</p>
+          
+          <div style="background: rgba(255,255,255,0.1); padding: 25px; border-radius: 8px; margin: 25px 0; border-left: 4px solid #fff;">
+            <div style="display: grid; gap: 12px;">
+              <p style="margin: 0; color: #fff;"><strong>📅 Date:</strong> ${formatDate(sessionDate)}</p>
+              <p style="margin: 0; color: #fff;"><strong>🕐 Time:</strong> ${formatTime(sessionTime)}</p>
+              <p style="margin: 0; color: #fff;"><strong>⏱️ Duration:</strong> ${duration} minutes</p>
+              <p style="margin: 0; color: #fff;"><strong>📍 Location:</strong> ${location}</p>
+              <p style="margin: 0; color: #fff;"><strong>👨‍💼 Trainer:</strong> ${trainerName}</p>
+              <p style="margin: 0; color: #fff;"><strong>🏋️ Session Type:</strong> ${sessionType.replace("_", " ").replace(/\b\w/g, (l) => l.toUpperCase())}</p>
+              ${notes ? `<p style="margin: 0; color: #fff;"><strong>📝 Notes:</strong> ${notes}</p>` : ""}
+            </div>
+          </div>
+          
+          <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; margin: 25px 0;">
+            <h3 style="color: #fff; margin-bottom: 15px;">📋 Session Preparation:</h3>
+            <ul style="color: #ccc; line-height: 1.8; margin: 0; padding-left: 20px;">
+              <li>Arrive 5-10 minutes early</li>
+              <li>Bring water and a towel</li>
+              <li>Wear comfortable workout attire</li>
+              <li>Bring any specific equipment if requested</li>
+            </ul>
+          </div>
+
+          <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; margin: 25px 0;">
+            <h3 style="color: #fff; margin-bottom: 15px;">🔄 Cancellation Policy:</h3>
+            <p style="color: #ccc; line-height: 1.6; margin: 0;">
+              If you need to cancel or reschedule, please contact your trainer at least 24 hours in advance to avoid being charged for the session.
+            </p>
+          </div>
+
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="https://instagram.com/execfitboston" 
+               style="background: linear-gradient(45deg, #833ab4, #fd1d1d, #fcb045); 
+                      color: white; 
+                      padding: 12px 24px; 
+                      text-decoration: none; 
+                      border-radius: 6px; 
+                      font-weight: bold;
+                      display: inline-block;">
+              📱 Follow @execfitboston
+            </a>
+          </div>
+
+          <div style="border-top: 1px solid #333; padding-top: 20px; text-align: center; color: #666; font-size: 14px;">
+            <p style="margin: 5px 0;">Questions? Contact your trainer or reply to this email.</p>
+            <p style="margin: 5px 0;">© ${new Date().getFullYear()} ExecFit. All rights reserved.</p>
+            <p style="margin: 5px 0;">
+              <a href="mailto:noreply@execfitnow.com" style="color: #666;">Contact us</a> | 
+              <a href="https://execfitnow.com" style="color: #666;">Visit our website</a>
+            </p>
+          </div>
+        </div>
+      `,
+    })
+
+    if (error) {
+      console.error("Resend API error:", error)
+      throw new Error(`Resend API error: ${JSON.stringify(error)}`)
+    }
+
+    console.log("Booking confirmation email sent successfully:", data)
+    return { success: true, data }
+  } catch (error) {
+    console.error("Error in sendBookingConfirmation:", error)
     throw error
   }
 }
