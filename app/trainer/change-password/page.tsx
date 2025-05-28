@@ -1,8 +1,7 @@
 "use client"
 
 import type React from "react"
-
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -11,6 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Eye, EyeOff, AlertCircle, CheckCircle, Lock } from "lucide-react"
 import Image from "next/image"
+import { changeTrainerPassword } from "@/lib/auth"
 
 export default function ChangePassword() {
   const [currentPassword, setCurrentPassword] = useState("")
@@ -22,7 +22,18 @@ export default function ChangePassword() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState(false)
+  const [mounted, setMounted] = useState(false)
+  const [trainerEmail, setTrainerEmail] = useState("")
   const router = useRouter()
+
+  useEffect(() => {
+    setMounted(true)
+    // Get the trainer email from session storage
+    const email = sessionStorage.getItem("trainer_email")
+    if (email) {
+      setTrainerEmail(email)
+    }
+  }, [])
 
   const validatePassword = (password: string) => {
     const minLength = password.length >= 8
@@ -52,30 +63,66 @@ export default function ChangePassword() {
       // Validate passwords match
       if (newPassword !== confirmPassword) {
         setError("New passwords do not match")
+        setLoading(false)
         return
       }
 
       // Validate password strength
       if (!passwordValidation.isValid) {
         setError("Password does not meet security requirements")
+        setLoading(false)
         return
       }
 
-      // TODO: Implement actual password change API call
       console.log("Changing password:", { currentPassword, newPassword })
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+      // Call the changeTrainerPassword function from auth.ts
+      const result = await changeTrainerPassword("current-trainer-id", currentPassword, newPassword)
 
-      setSuccess(true)
-      setTimeout(() => {
-        router.push("/trainer/dashboard")
-      }, 2000)
+      if (result.success) {
+        console.log("Password changed successfully")
+        setSuccess(true)
+        // Clear the temporary email from session storage
+        sessionStorage.removeItem("trainer_email")
+
+        setTimeout(() => {
+          router.push("/trainer/dashboard")
+        }, 2000)
+      } else {
+        setError(result.error || "Failed to change password. Please try again.")
+      }
     } catch (error) {
+      console.error("Password change error:", error)
       setError("Failed to change password. Please try again.")
     } finally {
       setLoading(false)
     }
+  }
+
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-black text-white relative overflow-hidden flex items-center justify-center">
+        {/* Background Animation */}
+        <div className="absolute inset-0 z-0">
+          <div className="absolute inset-0 bg-gradient-radial from-gray-900/20 via-black to-black"></div>
+          <div className="absolute inset-0 opacity-10">
+            <div
+              className="absolute inset-0"
+              style={{
+                backgroundImage: `
+                  repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(255,255,255,0.5) 40px, rgba(255,255,255,0.5) 41px),
+                  repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(255,255,255,0.5) 40px, rgba(255,255,255,0.5) 41px)
+                `,
+              }}
+            ></div>
+          </div>
+        </div>
+
+        <div className="relative z-10 text-center">
+          <h1 className="text-2xl font-bold text-white mb-2">Loading...</h1>
+        </div>
+      </div>
+    )
   }
 
   if (success) {
@@ -143,7 +190,9 @@ export default function ChangePassword() {
             </div>
             <div>
               <h1 className="text-3xl font-bold text-white mb-2 font-montserrat">Change Password</h1>
-              <p className="text-white/70 font-raleway">Please update your temporary password to secure your account</p>
+              <p className="text-white/70 font-raleway">
+                {trainerEmail ? `For: ${trainerEmail}` : "Please update your temporary password to secure your account"}
+              </p>
             </div>
           </div>
 

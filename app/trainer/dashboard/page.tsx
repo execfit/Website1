@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Calendar, Users, DollarSign, Clock, TrendingUp, Plus } from "lucide-react"
+import { Calendar, Users, DollarSign, Clock, TrendingUp, Plus } from 'lucide-react'
 import Link from "next/link"
 import Image from "next/image"
 import { getCurrentTrainerProfile } from "@/lib/auth"
@@ -219,7 +219,7 @@ export default function TrainerDashboard() {
 
         {/* Mobile particles */}
         <div className="md:hidden absolute inset-0 pointer-events-none">
-          {Array.from({ length: 15 }, (_, i) => (
+          {Array.from({ length: 8 }, (_, i) => (
             <div
               key={i}
               className={`absolute w-0.5 h-0.5 bg-white rounded-full opacity-50 animate-pulse`}
@@ -244,25 +244,25 @@ export default function TrainerDashboard() {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 p-8 space-y-8">
-        {/* Header with ExecFit Branding */}
-        <div className="flex justify-between items-center">
-          <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 rounded-full bg-black/50 border border-white/20 flex items-center justify-center backdrop-blur-sm">
-              <Image src="/images/icononly.jpg" alt="ExecFit Icon" width={32} height={32} className="rounded-full" />
+      <div className="relative z-10 p-4 md:p-8 space-y-6 md:space-y-8">
+        {/* Header with ExecFit Branding - Mobile Optimized */}
+        <div className="flex flex-col space-y-4 md:flex-row md:justify-between md:items-center md:space-y-0">
+          <div className="flex items-center space-x-3 md:space-x-4">
+            <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-black/50 border border-white/20 flex items-center justify-center backdrop-blur-sm">
+              <Image src="/images/icononly.jpg" alt="ExecFit Icon" width={28} height={28} className="rounded-full md:w-8 md:h-8" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-white font-montserrat">
+              <h1 className="text-xl md:text-3xl font-bold text-white font-montserrat">
                 Welcome back, {trainer?.name || "Trainer"}!
               </h1>
-              <p className="text-white/70 mt-1 font-raleway">
+              <p className="text-sm md:text-base text-white/70 mt-1 font-raleway">
                 Here's what's happening with your training business today.
               </p>
             </div>
           </div>
-          <div className="flex space-x-3">
+          <div className="flex justify-center md:justify-end">
             <Link href="/trainer/calendar">
-              <Button className="flex items-center space-x-2 bg-white text-black hover:bg-white/90 font-semibold">
+              <Button className="w-full md:w-auto flex items-center justify-center space-x-2 bg-white text-black hover:bg-white/90 font-semibold h-12 md:h-auto">
                 <Plus className="h-4 w-4" />
                 <span>Schedule Session</span>
               </Button>
@@ -270,105 +270,105 @@ export default function TrainerDashboard() {
           </div>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+        {/* Stats Grid - Mobile Optimized */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-6">
           <Card className="bg-black/40 border-white/20 backdrop-blur-md">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-white">Total Clients</CardTitle>
-              <Users className="h-4 w-4 text-white/60" />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 md:p-6">
+              <CardTitle className="text-xs md:text-sm font-medium text-white">Total Clients</CardTitle>
+              <Users className="h-3 w-3 md:h-4 md:w-4 text-white/60" />
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-white">{stats.totalClients}</div>
-              <p className="text-xs text-white/60">Active training clients</p>
+            <CardContent className="p-3 md:p-6 pt-0">
+              <div className="text-lg md:text-2xl font-bold text-white">{stats.totalClients}</div>
+              <p className="text-xs text-white/60">Active clients</p>
             </CardContent>
           </Card>
 
           <Card className="bg-black/40 border-white/20 backdrop-blur-md">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-white">Total Sessions</CardTitle>
-              <Clock className="h-4 w-4 text-white/60" />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 md:p-6">
+              <CardTitle className="text-xs md:text-sm font-medium text-white">Sessions</CardTitle>
+              <Clock className="h-3 w-3 md:h-4 md:w-4 text-white/60" />
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-white">{stats.totalSessions}</div>
-              <p className="text-xs text-white/60">Sessions completed</p>
+            <CardContent className="p-3 md:p-6 pt-0">
+              <div className="text-lg md:text-2xl font-bold text-white">{stats.totalSessions}</div>
+              <p className="text-xs text-white/60">Completed</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-black/40 border-white/20 backdrop-blur-md col-span-2 md:col-span-1">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 md:p-6">
+              <CardTitle className="text-xs md:text-sm font-medium text-white">Revenue</CardTitle>
+              <DollarSign className="h-3 w-3 md:h-4 md:w-4 text-white/60" />
+            </CardHeader>
+            <CardContent className="p-3 md:p-6 pt-0">
+              <div className="text-lg md:text-2xl font-bold text-white">${stats.monthlyRevenue.toLocaleString()}</div>
+              <p className="text-xs text-white/60">This month</p>
             </CardContent>
           </Card>
 
           <Card className="bg-black/40 border-white/20 backdrop-blur-md">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-white">Monthly Revenue</CardTitle>
-              <DollarSign className="h-4 w-4 text-white/60" />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 md:p-6">
+              <CardTitle className="text-xs md:text-sm font-medium text-white">Upcoming</CardTitle>
+              <Calendar className="h-3 w-3 md:h-4 md:w-4 text-white/60" />
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-white">${stats.monthlyRevenue.toLocaleString()}</div>
-              <p className="text-xs text-white/60">This month's earnings</p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-black/40 border-white/20 backdrop-blur-md">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-white">Upcoming Sessions</CardTitle>
-              <Calendar className="h-4 w-4 text-white/60" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-white">{stats.upcomingSessions}</div>
+            <CardContent className="p-3 md:p-6 pt-0">
+              <div className="text-lg md:text-2xl font-bold text-white">{stats.upcomingSessions}</div>
               <p className="text-xs text-white/60">Next 7 days</p>
             </CardContent>
           </Card>
 
           <Card className="bg-black/40 border-white/20 backdrop-blur-md">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-white">Completion Rate</CardTitle>
-              <TrendingUp className="h-4 w-4 text-white/60" />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 md:p-6">
+              <CardTitle className="text-xs md:text-sm font-medium text-white">Rate</CardTitle>
+              <TrendingUp className="h-3 w-3 md:h-4 md:w-4 text-white/60" />
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-white">{stats.completionRate}%</div>
-              <p className="text-xs text-white/60">Session attendance</p>
+            <CardContent className="p-3 md:p-6 pt-0">
+              <div className="text-lg md:text-2xl font-bold text-white">{stats.completionRate}%</div>
+              <p className="text-xs text-white/60">Attendance</p>
             </CardContent>
           </Card>
         </div>
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Main Content Grid - Mobile Optimized */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
           {/* Upcoming Sessions */}
           <Card className="bg-black/40 border-white/20 backdrop-blur-md">
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2 text-white">
-                <Calendar className="h-5 w-5" />
+            <CardHeader className="p-4 md:p-6">
+              <CardTitle className="flex items-center space-x-2 text-white text-lg md:text-xl">
+                <Calendar className="h-4 w-4 md:h-5 md:w-5" />
                 <span>Upcoming Sessions</span>
               </CardTitle>
-              <CardDescription className="text-white/60">Your next scheduled training sessions</CardDescription>
+              <CardDescription className="text-white/60 text-sm">Your next scheduled training sessions</CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
+            <CardContent className="p-4 md:p-6 pt-0">
+              <div className="space-y-3 md:space-y-4">
                 {upcomingSessions.length > 0 ? (
                   upcomingSessions.map((session) => (
                     <div
                       key={session.id}
-                      className="flex items-center justify-between p-4 border border-white/10 rounded-lg bg-white/5"
+                      className="flex flex-col md:flex-row md:items-center md:justify-between p-3 md:p-4 border border-white/10 rounded-lg bg-white/5 space-y-2 md:space-y-0"
                     >
                       <div className="flex-1">
-                        <h4 className="font-medium text-white">{session.client_name}</h4>
-                        <p className="text-sm text-white/60">{session.client_apartment}</p>
-                        <div className="flex items-center space-x-4 mt-1">
-                          <span className="text-sm text-white/50">{formatDate(session.session_date)}</span>
-                          <span className="text-sm text-white/50">{formatTime(session.session_time)}</span>
-                          <Badge variant="outline" className="border-white/20 text-white/80">
+                        <h4 className="font-medium text-white text-sm md:text-base">{session.client_name}</h4>
+                        <p className="text-xs md:text-sm text-white/60">{session.client_apartment}</p>
+                        <div className="flex items-center space-x-2 md:space-x-4 mt-1">
+                          <span className="text-xs md:text-sm text-white/50">{formatDate(session.session_date)}</span>
+                          <span className="text-xs md:text-sm text-white/50">{formatTime(session.session_time)}</span>
+                          <Badge variant="outline" className="border-white/20 text-white/80 text-xs">
                             {session.duration_minutes}min
                           </Badge>
                         </div>
                       </div>
-                      <Button variant="outline" size="sm" className="border-white/20 text-white hover:bg-white/10">
+                      <Button variant="outline" size="sm" className="border-white/20 text-white hover:bg-white/10 w-full md:w-auto mt-2 md:mt-0">
                         View Details
                       </Button>
                     </div>
                   ))
                 ) : (
-                  <div className="text-center py-8 text-white/60">
-                    <Calendar className="h-12 w-12 mx-auto mb-4 text-white/30" />
-                    <p>No upcoming sessions scheduled</p>
+                  <div className="text-center py-6 md:py-8 text-white/60">
+                    <Calendar className="h-10 w-10 md:h-12 md:w-12 mx-auto mb-4 text-white/30" />
+                    <p className="text-sm">No upcoming sessions scheduled</p>
                     <Link href="/trainer/calendar">
-                      <Button variant="outline" className="mt-2 border-white/20 text-white hover:bg-white/10">
+                      <Button variant="outline" className="mt-2 border-white/20 text-white hover:bg-white/10 w-full md:w-auto">
                         Schedule a Session
                       </Button>
                     </Link>
@@ -380,44 +380,44 @@ export default function TrainerDashboard() {
 
           {/* Recent Clients */}
           <Card className="bg-black/40 border-white/20 backdrop-blur-md">
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2 text-white">
-                <Users className="h-5 w-5" />
+            <CardHeader className="p-4 md:p-6">
+              <CardTitle className="flex items-center space-x-2 text-white text-lg md:text-xl">
+                <Users className="h-4 w-4 md:h-5 md:w-5" />
                 <span>Recent Clients</span>
               </CardTitle>
-              <CardDescription className="text-white/60">Your most active training clients</CardDescription>
+              <CardDescription className="text-white/60 text-sm">Your most active training clients</CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
+            <CardContent className="p-4 md:p-6 pt-0">
+              <div className="space-y-3 md:space-y-4">
                 {recentClients.length > 0 ? (
                   recentClients.map((client) => (
                     <div
                       key={client.id}
-                      className="flex items-center justify-between p-4 border border-white/10 rounded-lg bg-white/5"
+                      className="flex flex-col md:flex-row md:items-center md:justify-between p-3 md:p-4 border border-white/10 rounded-lg bg-white/5 space-y-2 md:space-y-0"
                     >
                       <div className="flex-1">
-                        <h4 className="font-medium text-white">{client.name}</h4>
-                        <p className="text-sm text-white/60">{client.apartment_building}</p>
-                        <div className="flex items-center space-x-4 mt-1">
+                        <h4 className="font-medium text-white text-sm md:text-base">{client.name}</h4>
+                        <p className="text-xs md:text-sm text-white/60">{client.apartment_building}</p>
+                        <div className="flex flex-col md:flex-row md:items-center space-y-1 md:space-y-0 md:space-x-4 mt-1">
                           <Badge
                             variant={client.sessions_remaining > 3 ? "default" : "destructive"}
-                            className="bg-white/10 text-white border-white/20"
+                            className="bg-white/10 text-white border-white/20 text-xs w-fit"
                           >
                             {client.sessions_remaining} sessions left
                           </Badge>
-                          <span className="text-sm text-white/50">Last: {formatDate(client.last_session)}</span>
+                          <span className="text-xs md:text-sm text-white/50">Last: {formatDate(client.last_session)}</span>
                         </div>
                       </div>
-                      <Button variant="outline" size="sm" className="border-white/20 text-white hover:bg-white/10">
+                      <Button variant="outline" size="sm" className="border-white/20 text-white hover:bg-white/10 w-full md:w-auto mt-2 md:mt-0">
                         View Profile
                       </Button>
                     </div>
                   ))
                 ) : (
-                  <div className="text-center py-8 text-white/60">
-                    <Users className="h-12 w-12 mx-auto mb-4 text-white/30" />
-                    <p>No clients yet</p>
-                    <p className="text-sm">Clients will appear here after purchasing sessions</p>
+                  <div className="text-center py-6 md:py-8 text-white/60">
+                    <Users className="h-10 w-10 md:h-12 md:w-12 mx-auto mb-4 text-white/30" />
+                    <p className="text-sm">No clients yet</p>
+                    <p className="text-xs md:text-sm">Clients will appear here after purchasing sessions</p>
                   </div>
                 )}
               </div>
@@ -425,48 +425,48 @@ export default function TrainerDashboard() {
           </Card>
         </div>
 
-        {/* Quick Actions */}
+        {/* Quick Actions - Mobile Optimized */}
         <Card className="bg-black/40 border-white/20 backdrop-blur-md">
-          <CardHeader>
-            <CardTitle className="text-white">Quick Actions</CardTitle>
-            <CardDescription className="text-white/60">Common tasks and shortcuts</CardDescription>
+          <CardHeader className="p-4 md:p-6">
+            <CardTitle className="text-white text-lg md:text-xl">Quick Actions</CardTitle>
+            <CardDescription className="text-white/60 text-sm">Common tasks and shortcuts</CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <CardContent className="p-4 md:p-6 pt-0">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
               <Link href="/trainer/calendar">
                 <Button
                   variant="outline"
-                  className="w-full h-20 flex flex-col items-center space-y-2 border-white/20 text-white hover:bg-white/10"
+                  className="w-full h-16 md:h-20 flex flex-col items-center justify-center space-y-1 md:space-y-2 border-white/20 text-white hover:bg-white/10"
                 >
-                  <Calendar className="h-6 w-6" />
-                  <span className="text-sm">View Calendar</span>
+                  <Calendar className="h-5 w-5 md:h-6 md:w-6" />
+                  <span className="text-xs md:text-sm">Calendar</span>
                 </Button>
               </Link>
               <Link href="/trainer/clients">
                 <Button
                   variant="outline"
-                  className="w-full h-20 flex flex-col items-center space-y-2 border-white/20 text-white hover:bg-white/10"
+                  className="w-full h-16 md:h-20 flex flex-col items-center justify-center space-y-1 md:space-y-2 border-white/20 text-white hover:bg-white/10"
                 >
-                  <Users className="h-6 w-6" />
-                  <span className="text-sm">Manage Clients</span>
+                  <Users className="h-5 w-5 md:h-6 md:w-6" />
+                  <span className="text-xs md:text-sm">Clients</span>
                 </Button>
               </Link>
               <Link href="/trainer/profile">
                 <Button
                   variant="outline"
-                  className="w-full h-20 flex flex-col items-center space-y-2 border-white/20 text-white hover:bg-white/10"
+                  className="w-full h-16 md:h-20 flex flex-col items-center justify-center space-y-1 md:space-y-2 border-white/20 text-white hover:bg-white/10"
                 >
-                  <TrendingUp className="h-6 w-6" />
-                  <span className="text-sm">Update Profile</span>
+                  <TrendingUp className="h-5 w-5 md:h-6 md:w-6" />
+                  <span className="text-xs md:text-sm">Profile</span>
                 </Button>
               </Link>
               <Link href="/trainer/packages">
                 <Button
                   variant="outline"
-                  className="w-full h-20 flex flex-col items-center space-y-2 border-white/20 text-white hover:bg-white/10"
+                  className="w-full h-16 md:h-20 flex flex-col items-center justify-center space-y-1 md:space-y-2 border-white/20 text-white hover:bg-white/10"
                 >
-                  <DollarSign className="h-6 w-6" />
-                  <span className="text-sm">Session Packages</span>
+                  <DollarSign className="h-5 w-5 md:h-6 md:w-6" />
+                  <span className="text-xs md:text-sm">Packages</span>
                 </Button>
               </Link>
             </div>

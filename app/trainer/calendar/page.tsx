@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Calendar, Plus, Clock, Users, MapPin } from "lucide-react"
+import { Calendar, Plus, Clock, Users, MapPin } from 'lucide-react'
 import Image from "next/image"
 import { getCurrentTrainerProfile } from "@/lib/auth"
 import FullCalendar from "@fullcalendar/react"
@@ -241,7 +241,7 @@ export default function TrainerCalendar() {
 
         {/* Mobile particles */}
         <div className="md:hidden absolute inset-0 pointer-events-none">
-          {Array.from({ length: 15 }, (_, i) => (
+          {Array.from({ length: 8 }, (_, i) => (
             <div
               key={i}
               className={`absolute w-0.5 h-0.5 bg-white rounded-full opacity-50 animate-pulse`}
@@ -262,85 +262,86 @@ export default function TrainerCalendar() {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 p-8 space-y-8">
-        {/* Header with ExecFit Branding */}
-        <div className="flex justify-between items-center">
-          <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 rounded-full bg-black/50 border border-white/20 flex items-center justify-center backdrop-blur-sm">
+      <div className="relative z-10 p-4 md:p-8 space-y-6 md:space-y-8">
+        {/* Header with ExecFit Branding - Mobile Optimized */}
+        <div className="flex flex-col space-y-4 md:flex-row md:justify-between md:items-center md:space-y-0">
+          <div className="flex items-center space-x-3 md:space-x-4">
+            <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-black/50 border border-white/20 flex items-center justify-center backdrop-blur-sm">
               <Image
-                src="/images/icononly-new.png"
+                src="/images/icononly.jpg"
                 alt="ExecFit Icon"
-                width={32}
-                height={32}
-                className="rounded-full"
+                width={28}
+                height={28}
+                className="rounded-full md:w-8 md:h-8"
               />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-white font-montserrat">Calendar</h1>
-              <p className="text-white/70 mt-1 font-raleway">Manage your training sessions and availability</p>
+              <h1 className="text-xl md:text-3xl font-bold text-white font-montserrat">Calendar</h1>
+              <p className="text-sm md:text-base text-white/70 mt-1 font-raleway">Manage your training sessions and availability</p>
             </div>
           </div>
-          <div className="flex space-x-3">
+          <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-3">
             <Button
               variant="outline"
-              className="flex items-center space-x-2 border-white/20 text-white hover:bg-white/10"
+              className="flex items-center justify-center space-x-2 border-white/20 text-white hover:bg-white/10 h-12 md:h-auto"
             >
               <Clock className="h-4 w-4" />
               <span>Block Time</span>
             </Button>
-            <Button className="flex items-center space-x-2 bg-white text-black hover:bg-white/90 font-semibold">
+            <Button className="flex items-center justify-center space-x-2 bg-white text-black hover:bg-white/90 font-semibold h-12 md:h-auto">
               <Plus className="h-4 w-4" />
               <span>Schedule Session</span>
             </Button>
           </div>
         </div>
 
-        {/* Calendar Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Calendar Grid - Mobile Optimized */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
           {/* Main Calendar Area */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 order-2 lg:order-1">
             <Card className="bg-black/40 border-white/20 backdrop-blur-md">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2 text-white">
-                  <Calendar className="h-5 w-5" />
+              <CardHeader className="p-4 md:p-6">
+                <CardTitle className="flex items-center space-x-2 text-white text-lg md:text-xl">
+                  <Calendar className="h-4 w-4 md:h-5 md:w-5" />
                   <span>Calendar View</span>
                 </CardTitle>
-                <CardDescription className="text-white/60">Your training schedule and blocked times</CardDescription>
+                <CardDescription className="text-white/60 text-sm">Your training schedule and blocked times</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-4 md:p-6 pt-0">
                 <div className="fullcalendar-container">
                   <FullCalendar
                     ref={calendarRef}
                     plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
                     initialView="dayGridMonth"
                     headerToolbar={{
-                      left: "prev,next today",
+                      left: "prev,next",
                       center: "title",
-                      right: "dayGridMonth,timeGridWeek,timeGridDay",
+                      right: "today",
                     }}
                     events={events}
                     selectable={true}
                     selectMirror={true}
-                    dayMaxEvents={true}
+                    dayMaxEvents={2}
                     weekends={true}
                     eventClick={handleEventClick}
                     select={handleDateSelect}
                     height="auto"
                     eventDisplay="block"
                     eventClassNames="execfit-calendar-event"
+                    aspectRatio={1.2}
                   />
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
+          {/* Sidebar - Mobile Optimized */}
+          <div className="space-y-4 md:space-y-6 order-1 lg:order-2">
             {/* Today's Schedule */}
             <Card className="bg-black/40 border-white/20 backdrop-blur-md">
-              <CardHeader>
-                <CardTitle className="text-lg text-white">Today's Schedule</CardTitle>
-                <CardDescription className="text-white/60">
+              <CardHeader className="p-4 md:p-6">
+                <CardTitle className="text-base md:text-lg text-white">Today's Schedule</CardTitle>
+                <CardDescription className="text-white/60 text-sm">
                   {new Date().toLocaleDateString("en-US", {
                     weekday: "long",
                     month: "long",
@@ -348,15 +349,15 @@ export default function TrainerCalendar() {
                   })}
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-4 md:p-6 pt-0">
                 <div className="space-y-3">
                   {todaysEvents.length > 0 ? (
                     todaysEvents.map((event) => (
                       <div key={event.id} className="p-3 border border-white/10 rounded-lg bg-white/5">
-                        <div className="flex items-center justify-between mb-2">
+                        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-2 space-y-1 md:space-y-0">
                           <Badge
                             variant={event.type === "session" ? "default" : "secondary"}
-                            className="bg-white/10 text-white border-white/20"
+                            className="bg-white/10 text-white border-white/20 text-xs w-fit"
                           >
                             {event.type === "session"
                               ? "Session"
@@ -364,7 +365,7 @@ export default function TrainerCalendar() {
                                 ? "Blocked"
                                 : "Consultation"}
                           </Badge>
-                          <span className="text-sm text-white/50">
+                          <span className="text-xs md:text-sm text-white/50">
                             {formatTime(event.start)} - {formatTime(event.end)}
                           </span>
                         </div>
@@ -378,7 +379,7 @@ export default function TrainerCalendar() {
                       </div>
                     ))
                   ) : (
-                    <div className="text-center py-6 text-white/60">
+                    <div className="text-center py-4 md:py-6 text-white/60">
                       <Clock className="h-8 w-8 mx-auto mb-2 text-white/30" />
                       <p className="text-sm">No sessions today</p>
                     </div>
@@ -389,33 +390,35 @@ export default function TrainerCalendar() {
 
             {/* Upcoming Sessions */}
             <Card className="bg-black/40 border-white/20 backdrop-blur-md">
-              <CardHeader>
-                <CardTitle className="text-lg text-white">Upcoming Sessions</CardTitle>
-                <CardDescription className="text-white/60">Next 7 days</CardDescription>
+              <CardHeader className="p-4 md:p-6">
+                <CardTitle className="text-base md:text-lg text-white">Upcoming Sessions</CardTitle>
+                <CardDescription className="text-white/60 text-sm">Next 7 days</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-4 md:p-6 pt-0">
                 <div className="space-y-3">
                   {upcomingEvents.length > 0 ? (
-                    upcomingEvents.slice(0, 5).map((event) => (
+                    upcomingEvents.slice(0, 3).map((event) => (
                       <div key={event.id} className="p-3 border border-white/10 rounded-lg bg-white/5">
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-sm font-medium text-white">{event.client_name || "Blocked Time"}</span>
-                          <Badge variant="outline" className="text-xs border-white/20 text-white/80">
-                            {formatDate(event.start)}
-                          </Badge>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs text-white/50">
-                            {formatTime(event.start)} - {formatTime(event.end)}
-                          </span>
-                          {event.client_apartment && (
-                            <span className="text-xs text-white/50">{event.client_apartment}</span>
-                          )}
+                        <div className="flex flex-col space-y-1">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-medium text-white">{event.client_name || "Blocked Time"}</span>
+                            <Badge variant="outline" className="text-xs border-white/20 text-white/80">
+                              {formatDate(event.start)}
+                            </Badge>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-white/50">
+                              {formatTime(event.start)} - {formatTime(event.end)}
+                            </span>
+                            {event.client_apartment && (
+                              <span className="text-xs text-white/50">{event.client_apartment}</span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     ))
                   ) : (
-                    <div className="text-center py-6 text-white/60">
+                    <div className="text-center py-4 md:py-6 text-white/60">
                       <Users className="h-8 w-8 mx-auto mb-2 text-white/30" />
                       <p className="text-sm">No upcoming sessions</p>
                     </div>
@@ -426,10 +429,10 @@ export default function TrainerCalendar() {
 
             {/* Quick Stats */}
             <Card className="bg-black/40 border-white/20 backdrop-blur-md">
-              <CardHeader>
-                <CardTitle className="text-lg text-white">This Week</CardTitle>
+              <CardHeader className="p-4 md:p-6">
+                <CardTitle className="text-base md:text-lg text-white">This Week</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-4 md:p-6 pt-0">
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span className="text-sm text-white/60">Total Sessions</span>
@@ -450,13 +453,19 @@ export default function TrainerCalendar() {
         </div>
       </div>
 
-      {/* Custom CSS for FullCalendar */}
+      {/* Custom CSS for FullCalendar - Mobile Optimized */}
       <style jsx global>{`
         .fullcalendar-container .fc {
           background: rgba(0, 0, 0, 0.3);
           border-radius: 8px;
-          padding: 1rem;
+          padding: 0.5rem;
           backdrop-filter: blur(10px);
+        }
+
+        @media (min-width: 768px) {
+          .fullcalendar-container .fc {
+            padding: 1rem;
+          }
         }
 
         .fullcalendar-container .fc-theme-standard .fc-scrollgrid {
@@ -472,6 +481,15 @@ export default function TrainerCalendar() {
           background: rgba(255, 255, 255, 0.05);
           color: white;
           font-weight: 600;
+          font-size: 0.75rem;
+          padding: 0.5rem 0.25rem;
+        }
+
+        @media (min-width: 768px) {
+          .fullcalendar-container .fc-col-header-cell {
+            font-size: 0.875rem;
+            padding: 0.75rem 0.5rem;
+          }
         }
 
         .fullcalendar-container .fc-daygrid-day {
@@ -489,16 +507,49 @@ export default function TrainerCalendar() {
         .fullcalendar-container .fc-daygrid-day-number {
           color: white;
           font-weight: 500;
+          font-size: 0.75rem;
+          padding: 0.25rem;
+        }
+
+        @media (min-width: 768px) {
+          .fullcalendar-container .fc-daygrid-day-number {
+            font-size: 0.875rem;
+            padding: 0.5rem;
+          }
         }
 
         .fullcalendar-container .fc-toolbar {
-          margin-bottom: 1rem;
+          margin-bottom: 0.5rem;
+          flex-direction: column;
+          gap: 0.5rem;
+        }
+
+        @media (min-width: 768px) {
+          .fullcalendar-container .fc-toolbar {
+            margin-bottom: 1rem;
+            flex-direction: row;
+            gap: 0;
+          }
         }
 
         .fullcalendar-container .fc-toolbar-title {
           color: white;
-          font-size: 1.5rem;
+          font-size: 1.125rem;
           font-weight: 700;
+          order: 1;
+        }
+
+        @media (min-width: 768px) {
+          .fullcalendar-container .fc-toolbar-title {
+            font-size: 1.5rem;
+            order: 0;
+          }
+        }
+
+        .fullcalendar-container .fc-toolbar-chunk {
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
 
         .fullcalendar-container .fc-button {
@@ -506,6 +557,17 @@ export default function TrainerCalendar() {
           border: 1px solid rgba(255, 255, 255, 0.2);
           color: white;
           font-weight: 500;
+          font-size: 0.75rem;
+          padding: 0.375rem 0.75rem;
+          min-height: 2.5rem;
+        }
+
+        @media (min-width: 768px) {
+          .fullcalendar-container .fc-button {
+            font-size: 0.875rem;
+            padding: 0.5rem 1rem;
+            min-height: auto;
+          }
         }
 
         .fullcalendar-container .fc-button:hover {
@@ -525,10 +587,20 @@ export default function TrainerCalendar() {
 
         .fullcalendar-container .fc-event {
           border-radius: 4px;
-          font-size: 0.85rem;
+          font-size: 0.625rem;
           font-weight: 500;
           cursor: pointer;
           transition: all 0.2s ease;
+          margin: 1px;
+          padding: 1px 2px;
+        }
+
+        @media (min-width: 768px) {
+          .fullcalendar-container .fc-event {
+            font-size: 0.75rem;
+            margin: 2px;
+            padding: 2px 4px;
+          }
         }
 
         .fullcalendar-container .fc-event:hover {
@@ -541,6 +613,13 @@ export default function TrainerCalendar() {
           background: rgba(255, 255, 255, 0.1);
           border-radius: 4px;
           padding: 2px 6px;
+          font-size: 0.625rem;
+        }
+
+        @media (min-width: 768px) {
+          .fullcalendar-container .fc-more-link {
+            font-size: 0.75rem;
+          }
         }
 
         .fullcalendar-container .fc-more-link:hover {
@@ -557,6 +636,16 @@ export default function TrainerCalendar() {
 
         .fullcalendar-container .fc-timegrid-slot-label {
           color: white;
+        }
+
+        .fullcalendar-container .fc-daygrid-day-frame {
+          min-height: 2rem;
+        }
+
+        @media (min-width: 768px) {
+          .fullcalendar-container .fc-daygrid-day-frame {
+            min-height: 3rem;
+          }
         }
       `}</style>
     </div>

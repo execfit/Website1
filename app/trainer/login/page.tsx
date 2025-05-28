@@ -10,7 +10,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Eye, EyeOff, AlertCircle, ArrowLeft, Loader2 } from "lucide-react"
+import { Eye, EyeOff, AlertCircle, ArrowLeft, Loader2 } from 'lucide-react'
+import { loginTrainer } from "@/lib/auth"
 
 export default function TrainerLogin() {
   const [email, setEmail] = useState("")
@@ -32,22 +33,30 @@ export default function TrainerLogin() {
     setError("")
 
     try {
-      // TODO: Replace with actual authentication
       console.log("Login attempt:", { email, password })
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500))
+      // Use the loginTrainer function from auth.ts
+      const result = await loginTrainer(email, password)
 
-      // Check for demo credentials or implement real auth
-      if (email === "demo@execfit.com" && password === "demo123") {
-        router.push("/trainer/dashboard")
+      if (result.success && result.data) {
+        console.log("Login successful:", result)
+
+        // Check if user needs to change password (temporary password)
+        if (result.data.isTemporaryPassword || result.requiresPasswordChange) {
+          console.log("Temporary password detected, redirecting to change password")
+          // Store email for the change password page
+          sessionStorage.setItem("trainer_email", email)
+          router.push("/trainer/change-password")
+        } else {
+          console.log("Regular login, going to dashboard")
+          router.push("/trainer/dashboard")
+        }
       } else {
-        // For now, redirect to dashboard for any credentials
-        // In production, this would validate against your auth system
-        router.push("/trainer/dashboard")
+        setError(result.error || "Invalid email or password. Please try again.")
       }
     } catch (error) {
-      setError("Invalid email or password. Please try again.")
+      console.error("Login error:", error)
+      setError("An error occurred during login. Please try again.")
     } finally {
       setLoading(false)
     }
@@ -78,19 +87,19 @@ export default function TrainerLogin() {
             {/* Header */}
             <div className="text-center space-y-4">
               <div className="flex justify-center mb-6">
-                <div className="w-20 h-20 rounded-full bg-black/50 border border-white/20 flex items-center justify-center backdrop-blur-sm">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-black/50 border border-white/20 flex items-center justify-center backdrop-blur-sm">
                   <Image
-                    src="/images/icononly-new.png"
+                    src="/images/icononly.jpg"
                     alt="ExecFit Icon"
-                    width={60}
-                    height={60}
-                    className="rounded-full"
+                    width={48}
+                    height={48}
+                    className="rounded-full sm:w-[60px] sm:h-[60px] object-contain"
                   />
                 </div>
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-white mb-2 font-montserrat">Trainer Portal</h1>
-                <p className="text-white/70 font-raleway">Loading...</p>
+                <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2 font-montserrat">Trainer Portal</h1>
+                <p className="text-white/70 font-raleway text-sm sm:text-base">Loading...</p>
               </div>
             </div>
           </div>
@@ -146,7 +155,7 @@ export default function TrainerLogin() {
 
         {/* Mobile particles - only render after mount */}
         <div className="md:hidden absolute inset-0 pointer-events-none">
-          {Array.from({ length: 15 }, (_, i) => (
+          {Array.from({ length: 8 }, (_, i) => (
             <div
               key={i}
               className="absolute w-0.5 h-0.5 bg-white rounded-full opacity-50 animate-pulse"
@@ -161,58 +170,60 @@ export default function TrainerLogin() {
         </div>
 
         {/* Floating geometric elements */}
-        <div className="absolute top-20 left-20 w-32 h-32 bg-white/5 rounded-full blur-xl animate-pulse"></div>
-        <div className="absolute bottom-20 right-20 w-48 h-48 bg-white/3 rounded-full blur-2xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/4 w-24 h-24 bg-white/5 rounded-full blur-lg animate-pulse delay-500"></div>
+        <div className="absolute top-20 left-20 w-16 h-16 sm:w-32 sm:h-32 bg-white/5 rounded-full blur-xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-20 w-24 h-24 sm:w-48 sm:h-48 bg-white/3 rounded-full blur-2xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/4 w-12 h-12 sm:w-24 sm:h-24 bg-white/5 rounded-full blur-lg animate-pulse delay-500"></div>
 
         {/* Additional floating squares */}
-        <div className="absolute top-1/3 right-1/3 w-16 h-16 bg-white/5 backdrop-blur-sm rotate-45 animate-pulse delay-700"></div>
-        <div className="absolute bottom-1/3 left-1/4 w-20 h-20 border border-white/10 rotate-12 animate-pulse delay-300"></div>
+        <div className="absolute top-1/3 right-1/3 w-8 h-8 sm:w-16 sm:h-16 bg-white/5 backdrop-blur-sm rotate-45 animate-pulse delay-700"></div>
+        <div className="absolute bottom-1/3 left-1/4 w-10 h-10 sm:w-20 sm:h-20 border border-white/10 rotate-12 animate-pulse delay-300"></div>
       </div>
 
       {/* Content */}
-      <div className="relative z-10 flex items-center justify-center min-h-screen p-4">
-        <div className="w-full max-w-md space-y-8">
+      <div className="relative z-10 flex items-center justify-center min-h-screen p-4 sm:p-6">
+        <div className="w-full max-w-md space-y-6 sm:space-y-8">
           {/* Header */}
           <div className="text-center space-y-4">
             {/* Logo */}
-            <div className="flex justify-center mb-6">
-              <div className="w-20 h-20 rounded-full bg-black/50 border border-white/20 flex items-center justify-center backdrop-blur-sm">
+            <div className="flex justify-center mb-4 sm:mb-6">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-black/50 border border-white/20 flex items-center justify-center backdrop-blur-sm">
                 <Image
-                  src="/images/icononly-new.png"
+                  src="/images/icononly.jpg"
                   alt="ExecFit Icon"
-                  width={60}
-                  height={60}
-                  className="rounded-full"
+                  width={48}
+                  height={48}
+                  className="rounded-full sm:w-[60px] sm:h-[60px] object-contain"
                 />
               </div>
             </div>
 
             <div>
-              <h1 className="text-3xl font-bold text-white mb-2 font-montserrat">Trainer Portal</h1>
-              <p className="text-white/70 font-raleway">Sign in to manage your clients and sessions</p>
+              <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2 font-montserrat">Trainer Portal</h1>
+              <p className="text-white/70 font-raleway text-sm sm:text-base">
+                Sign in to manage your clients and sessions
+              </p>
             </div>
           </div>
 
           {/* Login Card */}
           <Card className="bg-black/40 border-white/20 backdrop-blur-md shadow-2xl">
-            <CardHeader className="space-y-1">
-              <CardTitle className="text-xl text-white font-montserrat">Welcome Back</CardTitle>
-              <CardDescription className="text-white/60">
+            <CardHeader className="space-y-1 p-4 sm:p-6">
+              <CardTitle className="text-lg sm:text-xl text-white font-montserrat">Welcome Back</CardTitle>
+              <CardDescription className="text-white/60 text-sm sm:text-base">
                 Enter your credentials to access your trainer dashboard
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-4 sm:p-6 pt-0">
               <form onSubmit={handleSubmit} className="space-y-4">
                 {error && (
                   <Alert variant="destructive" className="bg-red-900/20 border-red-500/50 text-red-200">
                     <AlertCircle className="h-4 w-4" />
-                    <AlertDescription>{error}</AlertDescription>
+                    <AlertDescription className="text-sm">{error}</AlertDescription>
                   </Alert>
                 )}
 
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-white font-medium">
+                  <Label htmlFor="email" className="text-white font-medium text-sm">
                     Email Address
                   </Label>
                   <Input
@@ -221,14 +232,14 @@ export default function TrainerLogin() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="your.email@example.com"
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:border-white/40 focus:ring-white/20"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:border-white/40 focus:ring-white/20 h-11"
                     required
                     disabled={loading}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="password" className="text-white font-medium">
+                  <Label htmlFor="password" className="text-white font-medium text-sm">
                     Password
                   </Label>
                   <div className="relative">
@@ -238,7 +249,7 @@ export default function TrainerLogin() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="Enter your password"
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:border-white/40 focus:ring-white/20 pr-10"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:border-white/40 focus:ring-white/20 pr-10 h-11"
                       required
                       disabled={loading}
                     />
@@ -257,7 +268,7 @@ export default function TrainerLogin() {
 
                 <Button
                   type="submit"
-                  className="w-full bg-white text-black hover:bg-white/90 font-semibold py-2.5 transition-all duration-200"
+                  className="w-full bg-white text-black hover:bg-white/90 font-semibold py-2.5 h-11 transition-all duration-200"
                   disabled={loading}
                 >
                   {loading ? (
@@ -272,16 +283,16 @@ export default function TrainerLogin() {
               </form>
 
               {/* Demo credentials info */}
-              <div className="mt-6 p-4 bg-blue-900/20 border border-blue-500/30 rounded-lg">
+              <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-blue-900/20 border border-blue-500/30 rounded-lg">
                 <h4 className="text-blue-200 text-sm font-medium mb-2">Demo Access:</h4>
                 <div className="text-blue-200/80 text-xs space-y-1">
-                  <p>Email: demo@execfit.com</p>
-                  <p>Password: demo123</p>
+                  <p>Regular Login: demo@execfit.com / demo123</p>
+                  <p>Temporary Password: demo@execfit.com / temp123</p>
                 </div>
               </div>
 
               {/* New trainer info */}
-              <div className="mt-4 p-4 bg-white/5 border border-white/10 rounded-lg">
+              <div className="mt-3 sm:mt-4 p-3 sm:p-4 bg-white/5 border border-white/10 rounded-lg">
                 <h4 className="text-white text-sm font-medium mb-2">New to ExecFit?</h4>
                 <ul className="text-white/70 text-xs space-y-1">
                   <li>• Use the email and temporary password provided by ExecFit</li>
