@@ -5,13 +5,12 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { CheckCircle, Instagram, BookOpen, ChefHat, Utensils, Salad } from "lucide-react"
+import { CheckCircle, BookOpen, ChefHat, Utensils, Salad } from "lucide-react"
 import Header from "@/components/header"
 
 export default function CookbookDistribution() {
   const [selectedCookbook, setSelectedCookbook] = useState<string | null>(null)
   const [email, setEmail] = useState("")
-  const [hasVisitedInstagram, setHasVisitedInstagram] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [emailSent, setEmailSent] = useState(false)
 
@@ -60,14 +59,8 @@ export default function CookbookDistribution() {
 
   const handleCookbookSelect = (cookbookId: string) => {
     setSelectedCookbook(cookbookId)
-    setHasVisitedInstagram(false)
     setIsSubmitted(false)
     setEmailSent(false)
-  }
-
-  const handleInstagramClick = () => {
-    window.open("https://instagram.com/execfitnow", "_blank")
-    setHasVisitedInstagram(true)
   }
 
   const handleEmailSubmit = async () => {
@@ -191,41 +184,8 @@ export default function CookbookDistribution() {
           </div>
         )}
 
-        {/* Visit Instagram Step */}
-        {selectedCookbook && !hasVisitedInstagram && (
-          <Card className="max-w-md mx-auto bg-black/40 backdrop-blur-md border-white/10 text-white">
-            <CardHeader className="text-center">
-              <div className="mx-auto mb-4 relative bg-black/20 rounded-lg p-2">
-                <img
-                  src={cookbooks.find((c) => c.id === selectedCookbook)?.image || "/placeholder.svg"}
-                  alt="Selected cookbook"
-                  className="w-full h-48 object-contain rounded-lg"
-                />
-              </div>
-              <CardTitle className="text-white">{cookbooks.find((c) => c.id === selectedCookbook)?.title}</CardTitle>
-              <CardDescription className="text-white/80">
-                Check out our Instagram page for daily nutrition tips and recipes!
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="text-center">
-                <Button
-                  className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white"
-                  onClick={handleInstagramClick}
-                >
-                  <Instagram className="w-4 h-4 mr-2" />
-                  Visit @execfitnow
-                </Button>
-                <p className="text-xs text-white/60 mt-2">
-                  This will open Instagram in a new tab. Come back here to get your cookbook!
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
         {/* Email Input Step */}
-        {selectedCookbook && hasVisitedInstagram && !emailSent && (
+        {selectedCookbook && !emailSent && (
           <Card className="max-w-md mx-auto bg-black/40 backdrop-blur-md border-white/10 text-white">
             <CardHeader className="text-center">
               <div className="mx-auto mb-4 relative bg-black/20 rounded-lg p-2">
@@ -287,7 +247,6 @@ export default function CookbookDistribution() {
                   onClick={() => {
                     setSelectedCookbook(null)
                     setEmail("")
-                    setHasVisitedInstagram(false)
                     setIsSubmitted(false)
                     setEmailSent(false)
                   }}

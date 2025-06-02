@@ -40,6 +40,8 @@ export default function HomePage() {
       name: "Yosof Abuhasan",
       specialty: "Physique/Strength Training/Mindset Coaching",
       bio: "I'm Yosof, a certified trainer focused on helping clients build muscle, burn fat, and develop the mental discipline to sustain long-term results through proven methods.",
+      bioMobile:
+        "I'm focused on helping clients build muscle, burn fat, and develop mental discipline to sustain long-term results.",
       image: "/images/coach-yosof.jpg",
       link: "/coaches/yosof-abuhasan",
     },
@@ -229,7 +231,9 @@ export default function HomePage() {
         <p className="text-xs text-white/80 text-center mb-4 leading-relaxed font-medium">{coach.specialty}</p>
 
         <div className="flex-1 flex items-center justify-center">
-          <p className="text-sm text-white/90 text-center leading-relaxed italic px-2">"{coach.bio}"</p>
+          <p className="text-sm text-white/90 text-center leading-relaxed italic px-2">
+            "{coach.bioMobile || coach.bio}"
+          </p>
         </div>
 
         {/* View Profile Link */}
