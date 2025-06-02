@@ -57,11 +57,22 @@ export default function Header() {
             >
               Coaches
             </button>
+            <button
+              onClick={() => {
+                const element = document.getElementById("contact")
+                if (element) {
+                  element.scrollIntoView({ behavior: "smooth" })
+                }
+              }}
+              className="text-white/80 hover:text-white transition-colors font-medium tracking-wide"
+            >
+              Contact
+            </button>
             <Link
-              href="/book-consultation"
+              href="/coming-soon"
               className="bg-white text-black px-4 py-2 rounded-lg font-medium hover:bg-white/90 transition-colors"
             >
-              Book Consultation
+              Book Free Consultation
             </Link>
           </nav>
 
@@ -116,12 +127,24 @@ export default function Header() {
               >
                 Coaches
               </button>
+              <button
+                onClick={() => {
+                  const element = document.getElementById("contact")
+                  if (element) {
+                    element.scrollIntoView({ behavior: "smooth" })
+                  }
+                  setIsMenuOpen(false)
+                }}
+                className="block w-full text-left px-3 py-2 text-white/80 hover:text-white transition-colors font-medium tracking-wide"
+              >
+                Contact
+              </button>
               <Link
-                href="/book-consultation"
+                href="/coming-soon"
                 className="block mx-3 my-2 bg-white text-black px-4 py-2 rounded-lg font-medium hover:bg-white/90 transition-colors text-center"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Book Consultation
+                Book Free Consultation
               </Link>
             </div>
           </div>

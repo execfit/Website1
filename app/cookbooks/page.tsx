@@ -11,7 +11,7 @@ import Header from "@/components/header"
 export default function CookbookDistribution() {
   const [selectedCookbook, setSelectedCookbook] = useState<string | null>(null)
   const [email, setEmail] = useState("")
-  const [hasFollowed, setHasFollowed] = useState(false)
+  const [hasVisitedInstagram, setHasVisitedInstagram] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [emailSent, setEmailSent] = useState(false)
 
@@ -60,14 +60,14 @@ export default function CookbookDistribution() {
 
   const handleCookbookSelect = (cookbookId: string) => {
     setSelectedCookbook(cookbookId)
-    setHasFollowed(false)
+    setHasVisitedInstagram(false)
     setIsSubmitted(false)
     setEmailSent(false)
   }
 
   const handleInstagramClick = () => {
-    window.open("https://instagram.com/execfitboston", "_blank")
-    setHasFollowed(true)
+    window.open("https://instagram.com/execfitnow", "_blank")
+    setHasVisitedInstagram(true)
   }
 
   const handleEmailSubmit = async () => {
@@ -191,8 +191,8 @@ export default function CookbookDistribution() {
           </div>
         )}
 
-        {/* Follow Instagram Step */}
-        {selectedCookbook && !hasFollowed && (
+        {/* Visit Instagram Step */}
+        {selectedCookbook && !hasVisitedInstagram && (
           <Card className="max-w-md mx-auto bg-black/40 backdrop-blur-md border-white/10 text-white">
             <CardHeader className="text-center">
               <div className="mx-auto mb-4 relative bg-black/20 rounded-lg p-2">
@@ -204,7 +204,7 @@ export default function CookbookDistribution() {
               </div>
               <CardTitle className="text-white">{cookbooks.find((c) => c.id === selectedCookbook)?.title}</CardTitle>
               <CardDescription className="text-white/80">
-                Follow our Instagram page to get your free cookbook!
+                Check out our Instagram page for daily nutrition tips and recipes!
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -214,15 +214,18 @@ export default function CookbookDistribution() {
                   onClick={handleInstagramClick}
                 >
                   <Instagram className="w-4 h-4 mr-2" />
-                  Follow @execfitboston
+                  Visit @execfitnow
                 </Button>
+                <p className="text-xs text-white/60 mt-2">
+                  This will open Instagram in a new tab. Come back here to get your cookbook!
+                </p>
               </div>
             </CardContent>
           </Card>
         )}
 
         {/* Email Input Step */}
-        {selectedCookbook && hasFollowed && !emailSent && (
+        {selectedCookbook && hasVisitedInstagram && !emailSent && (
           <Card className="max-w-md mx-auto bg-black/40 backdrop-blur-md border-white/10 text-white">
             <CardHeader className="text-center">
               <div className="mx-auto mb-4 relative bg-black/20 rounded-lg p-2">
@@ -284,7 +287,7 @@ export default function CookbookDistribution() {
                   onClick={() => {
                     setSelectedCookbook(null)
                     setEmail("")
-                    setHasFollowed(false)
+                    setHasVisitedInstagram(false)
                     setIsSubmitted(false)
                     setEmailSent(false)
                   }}
