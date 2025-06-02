@@ -39,7 +39,7 @@ export default function HomePage() {
       id: "yosof",
       name: "Yosof Abuhasan",
       specialty: "Physique/Strength Training/Mindset Coaching",
-      bio: "I'm Yosof, a certified trainer focused on helping clients build muscle, burn fat, and develop the mental discipline to sustain long-term results.",
+      bio: "I'm Yosof, a certified trainer focused on helping clients build muscle, burn fat, and develop the mental discipline to sustain long-term results through proven methods.",
       image: "/images/coach-yosof.jpg",
       link: "/coaches/yosof-abuhasan",
     },
@@ -365,7 +365,9 @@ export default function HomePage() {
         </div>
 
         <div className="tagline-container">
-          <h2 className="elevate-text">ELEVATE YOUR LIFESTYLE</h2>
+          <h2 className="elevate-text" data-text="EXECUTE NOW.">
+            EXECUTE NOW.
+          </h2>
         </div>
       </div>
 
@@ -377,33 +379,34 @@ export default function HomePage() {
             <div className="execfit-container">
               <div className="execfit-intro-content">
                 {/* Dictionary Definition */}
-                <div className="execfit-dictionary-definition execfit-dictionary-definition-compact">
-                  <div className="execfit-definition-content">
-                    <div className="def-flex">
-                      <span className="execfit-term">ex·ec·u·tive</span>
-                      <span className="execfit-pronunciation">| \ ig-ˈze-kyə-tiv \</span>
+                <div
+                  className="execfit-dictionary-definition execfit-dictionary-definition-compact"
+                  style={{ boxShadow: "0 0 20px rgba(255, 255, 255, 0.3), 0 0 40px rgba(255, 255, 255, 0.2)" }}
+                >
+                  <div className="execfit-definition-content text-center">
+                    <div className="def-flex justify-center">
+                      <span className="execfit-term">SPECIAL OFFER</span>
                     </div>
-                    <div className="execfit-part-of-speech">adjective</div>
-                    <div className="def-flex def-flex-align-top">
-                      <span className="execfit-definition-text">
-                        designed for or relating to execution or carrying into effect
+                    <div className="def-flex def-flex-align-top justify-center">
+                      <span className="execfit-definition-text font-bold">
+                        Your first personal training session is completely FREE
                       </span>
                     </div>
-                    <div className="execfit-definition-source">Merriam-Webster</div>
+                    <div className="execfit-definition-source text-center">No commitment required</div>
                   </div>
                 </div>
 
                 <p className="execfit-tagline execfit-raleway-text execfit-black-glow">
-                  Premium fitness and nutrition coaching tailored for high-performing professionals who demand
-                  excellence in every aspect of life.
+                  Premium personal trainers delivered directly to your luxury apartment building. Experience elite
+                  fitness coaching in the comfort and convenience of your own home.
                 </p>
                 <div className="execfit-buttons">
-                  <button onClick={() => scrollToSection("coaches")} className="execfit-btn-primary">
-                    Meet Our Coaches
-                  </button>
-                  <Link href="/coming-soon" className="execfit-btn-secondary">
+                  <Link href="/coming-soon" className="execfit-btn-primary">
                     Book Free Consultation
                   </Link>
+                  <button onClick={() => scrollToSection("coaches")} className="execfit-btn-secondary">
+                    Meet Our Coaches
+                  </button>
                 </div>
               </div>
             </div>
@@ -560,7 +563,7 @@ export default function HomePage() {
                   <p className="execfit-coach-specialty">Physique/Strength Training/Mindset Coaching</p>
                   <p className="execfit-coach-bio">
                     "I'm Yosof, a certified trainer focused on helping clients build muscle, burn fat, and develop the
-                    mental discipline to sustain long-term results."
+                    mental discipline to sustain long-term results through proven methods."
                   </p>
                   <Link href="/coaches/yosof-abuhasan" className="execfit-coach-link">
                     View Profile <span className="execfit-arrow">→</span>

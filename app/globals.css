@@ -144,7 +144,7 @@ body {
 }
 
 .elevate-text::after {
-  content: "ELEVATE YOUR LIFESTYLE";
+  content: attr(data-text);
   position: absolute;
   top: 0;
   left: 0;
@@ -641,7 +641,7 @@ body {
 .execfit-definition-source {
   font-size: 0.8rem;
   color: rgba(255, 255, 255, 0.5) !important;
-  text-align: right;
+  text-align: center;
   margin-top: 15px;
   font-style: italic;
   font-family: var(--font-montserrat), sans-serif !important;
