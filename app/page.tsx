@@ -397,8 +397,8 @@ export default function HomePage() {
                 </div>
 
                 <p className="execfit-tagline execfit-raleway-text execfit-black-glow">
-                  Premium personal trainers delivered directly to your luxury apartment building. Experience elite
-                  fitness coaching in the comfort and convenience of your own home.
+                  We bring highly skilled coaches to your luxury apartment building. Experience top-tier coaching,
+                  conveniently brought to you.
                 </p>
                 <div className="execfit-buttons">
                   <Link href="/coming-soon" className="execfit-btn-primary">
