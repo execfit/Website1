@@ -401,8 +401,7 @@ export default function HomePage() {
                 </div>
 
                 <p className="execfit-tagline execfit-raleway-text execfit-black-glow">
-                  We bring highly skilled coaches to your luxury apartment building. Experience top-tier coaching,
-                  conveniently brought to you.
+                  We bring highly skilled coaches to luxury apartment buildings.
                 </p>
                 <div className="execfit-buttons">
                   <Link href="/coming-soon" className="execfit-btn-primary">
