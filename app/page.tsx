@@ -524,7 +524,7 @@ export default function HomePage() {
                     "Hi, I'm Gabriella! Life doesn't slow down for you, but that doesn't mean your goals should wait. I
                     help busy individuals build strength, confidence, and a body they're proud of!"
                   </p>
-                  <Link href="/coaches/gabriela-garcia" className="execfit-coach-link">
+                  <Link href="/coming-soon" className="execfit-coach-link">
                     View Profile <span className="execfit-arrow">→</span>
                   </Link>
                 </div>
@@ -547,7 +547,7 @@ export default function HomePage() {
                     "Hi, I'm Maddy! I specialize in building amazing bodies, good habits, and strength. Let's build up
                     confidence with a fun, balanced approach to fitness!"
                   </p>
-                  <Link href="/coaches/maddy-gold" className="execfit-coach-link">
+                  <Link href="/coming-soon" className="execfit-coach-link">
                     View Profile <span className="execfit-arrow">→</span>
                   </Link>
                 </div>
@@ -568,7 +568,7 @@ export default function HomePage() {
                     "I'm Yosof, a certified trainer focused on helping clients build muscle, burn fat, and develop the
                     mental discipline to sustain long-term results through proven methods."
                   </p>
-                  <Link href="/coaches/yosof-abuhasan" className="execfit-coach-link">
+                  <Link href="/coming-soon" className="execfit-coach-link">
                     View Profile <span className="execfit-arrow">→</span>
                   </Link>
                 </div>
