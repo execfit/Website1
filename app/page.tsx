@@ -23,7 +23,7 @@ export default function HomePage() {
       id: "gabriela",
       name: "Gabriela Garcia",
       specialty: "Certified Personal Trainer | Certified Nutrition Coach | B.S. in Biology",
-      bio: "Life doesn't slow down for you, but that doesn't mean your goals should wait. I help busy individuals build strength, confidence, and a body they're proud of!",
+      bio: "Life doesn't slow down for you, but that doesn't mean your goals should wait. I'll help you build strength, confidence, and a body you're proud of!",
       image: "/images/coach-gabriela.jpg",
       link: "/coaches/gabriela-garcia",
     },
