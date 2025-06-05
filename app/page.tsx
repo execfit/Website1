@@ -22,7 +22,7 @@ export default function HomePage() {
     {
       id: "gabriela",
       name: "Gabriela Garcia",
-      specialty: "Personal Trainer | Nutrition Coach",
+      specialty: "Certified Personal Trainer | Certified Nutrition Coach | B.S. in Biology",
       bio: "Life doesn't slow down for you, but that doesn't mean your goals should wait. I help busy individuals build strength, confidence, and a body they're proud of!",
       image: "/images/coach-gabriela.jpg",
       link: "/coaches/gabriela-garcia",
@@ -30,7 +30,7 @@ export default function HomePage() {
     {
       id: "maddy",
       name: "Maddy Gold",
-      specialty: "Certified Personal Trainer | PN1 Nutrition Coach",
+      specialty: "Certified Personal Trainer | PN1 Nutrition Coach | B.S. in Exercise Science",
       bio: "I specialize in building amazing bodies, good habits, and strength. Let's build up confidence with a fun, balanced approach to fitness!",
       image: "/images/coach-maddy.jpg",
       link: "/coaches/maddy-gold",
@@ -518,7 +518,7 @@ export default function HomePage() {
                   </div>
                   <h3 className="execfit-coach-name">Gabriela Garcia</h3>
                   <p className="execfit-coach-specialty">
-                    Personal Trainer | Nutrition Coach | B.S. in Biology | Pre-Script Certified
+                    Certified Personal Trainer | NASM Nutrition Coach | Pre-Script Certified Barbell Coach | B.S. in Biology
                   </p>
                   <p className="execfit-coach-bio">
                     "Hi, I'm Gabriella! Life doesn't slow down for you, but that doesn't mean your goals should wait. I
