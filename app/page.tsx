@@ -22,9 +22,9 @@ export default function HomePage() {
     {
       id: "gabriela",
       name: "Gabriela Garcia",
-      specialty: "Certified Personal Trainer | Certified Nutrition Coach | B.S. in Biology",
+      specialty: "Certified Personal Trainer | NASM Nutrition Coach | Pre-Script Barbell Coach | B.S. in Biology",
       bio: "Life doesn't slow down for you, but that doesn't mean your goals should wait. I'll help you build strength, confidence, and a body you're proud of!",
-      image: "/images/coach-gabriela.jpg",
+      image: "/images/coach-gabriela.jpg?v=2", // Add version parameter to force reload
       link: "/coaches/gabriela-garcia",
     },
     {
@@ -32,18 +32,28 @@ export default function HomePage() {
       name: "Maddy Gold",
       specialty: "Certified Personal Trainer | PN1 Nutrition Coach | B.S. in Exercise Science",
       bio: "I specialize in building amazing bodies, good habits, and strength. Let's build up confidence with a fun, balanced approach to fitness!",
-      image: "/images/coach-maddy.jpg",
+      image: "/images/coach-maddy.jpg?v=2", // Add version parameter to force reload
       link: "/coaches/maddy-gold",
     },
     {
-      id: "yosof",
-      name: "Yosof Abuhasan",
-      specialty: "Physique/Strength Training/Mindset Coaching",
-      bio: "I'm Yosof, a certified trainer focused on helping clients build muscle, burn fat, and develop the mental discipline to sustain long-term results through proven methods.",
+      id: "ali",
+      name: "Ali Salah",
+      specialty: "Certified Personal Trainer | PN1 Nutrition Coach | ISSA Corrective Exercise",
+      bio: "The most valuable thing we have is time, and I am passionate about helping you make that time long-lasting while you become stronger and healthier.",
       bioMobile:
-        "I'm focused on helping clients build muscle, burn fat, and develop mental discipline to sustain long-term results.",
-      image: "/images/coach-yosof.jpg",
-      link: "/coaches/yosof-abuhasan",
+        "I'm passionate about helping you make your time long-lasting while you become stronger and healthier.",
+      image: "/images/coach-ali.jpg?v=2", // Add version parameter to force reload
+      link: "/coaches/ali-salah",
+    },
+    {
+      id: "kimi",
+      name: "Kimiya Kim",
+      specialty: "Certified Personal Trainer | PN1 Nutrition Coach | Pre & Postnatal | ViPR 1",
+      bio: "I blend injury prevention, rehab, strength, and cardio to build confident, resilient bodies safely and effectively. Execute now with some results-driven training!",
+      bioMobile:
+        "I blend injury prevention, rehab, strength, and cardio to build confident, resilient bodies safely and effectively.",
+      image: "/images/coach-kimi.jpg?v=2", // Add version parameter to force reload
+      link: "/coaches/kimiya-kim",
     },
   ]
 
@@ -509,7 +519,7 @@ export default function HomePage() {
                 <div className="execfit-coach-card">
                   <div className="execfit-coach-image-container">
                     <Image
-                      src="/images/coach-gabriela.jpg"
+                      src="/images/coach-gabriela.jpg?v=2"
                       alt="Gabriela Garcia"
                       width={150}
                       height={150}
@@ -518,7 +528,7 @@ export default function HomePage() {
                   </div>
                   <h3 className="execfit-coach-name">Gabriela Garcia</h3>
                   <p className="execfit-coach-specialty">
-                    Certified Personal Trainer | NASM Nutrition Coach | Pre-Script Certified Barbell Coach | B.S. in Biology
+                    Certified Personal Trainer | NASM Nutrition Coach | Pre-Script Barbell Coach | B.S. in Biology
                   </p>
                   <p className="execfit-coach-bio">
                     "Hi, I'm Gabriella! Life doesn't slow down for you, but that doesn't mean your goals should wait. I
@@ -532,7 +542,7 @@ export default function HomePage() {
                 <div className="execfit-coach-card">
                   <div className="execfit-coach-image-container">
                     <Image
-                      src="/images/coach-maddy.jpg"
+                      src="/images/coach-maddy.jpg?v=2"
                       alt="Maddy Gold"
                       width={150}
                       height={150}
@@ -555,18 +565,42 @@ export default function HomePage() {
                 <div className="execfit-coach-card">
                   <div className="execfit-coach-image-container">
                     <Image
-                      src="/images/coach-yosof.jpg"
-                      alt="Yosof Abuhasan"
+                      src="/images/coach-ali.jpg?v=2"
+                      alt="Ali Salah"
                       width={150}
                       height={150}
                       className="execfit-coach-image"
                     />
                   </div>
-                  <h3 className="execfit-coach-name">Yosof Abuhasan</h3>
-                  <p className="execfit-coach-specialty">Physique/Strength Training/Mindset Coaching</p>
+                  <h3 className="execfit-coach-name">Ali Salah</h3>
+                  <p className="execfit-coach-specialty">
+                    Certified Personal Trainer | PN1 Nutrition Coach | ISSA Corrective Exercise
+                  </p>
                   <p className="execfit-coach-bio">
-                    "I'm Yosof, a certified trainer focused on helping clients build muscle, burn fat, and develop the
-                    mental discipline to sustain long-term results through proven methods."
+                    "The most valuable thing we have is time, and I am passionate about helping you make that time
+                    long-lasting while you become stronger and healthier."
+                  </p>
+                  <Link href="/coming-soon" className="execfit-coach-link">
+                    View Profile <span className="execfit-arrow">→</span>
+                  </Link>
+                </div>
+                <div className="execfit-coach-card">
+                  <div className="execfit-coach-image-container">
+                    <Image
+                      src="/images/coach-kimi.jpg?v=2"
+                      alt="Kimiya Kim"
+                      width={150}
+                      height={150}
+                      className="execfit-coach-image"
+                    />
+                  </div>
+                  <h3 className="execfit-coach-name">Kimiya Kim</h3>
+                  <p className="execfit-coach-specialty">
+                    Certified Personal Trainer | PN1 Nutrition Coach | Pre & Postnatal | ViPR 1
+                  </p>
+                  <p className="execfit-coach-bio">
+                    "I blend injury prevention, rehab, strength, and cardio to build confident, resilient bodies safely
+                    and effectively. Execute now with some results-driven training!"
                   </p>
                   <Link href="/coming-soon" className="execfit-coach-link">
                     View Profile <span className="execfit-arrow">→</span>
