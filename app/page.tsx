@@ -51,8 +51,8 @@ export default function HomePage() {
       specialty: "Certified Personal Trainer | PN1 Nutrition Coach | Pre & Postnatal | ViPR 1",
       bio: "I blend injury prevention, rehab, strength, and cardio to build confident, resilient bodies safely and effectively. Execute now and move with purpose!",
       bioMobile:
-        "I blend injury prevention, rehab, strength, and cardio to build confident, resilient bodies safely and effectively.",
-      image: "/images/coach-kimi.jpg?v=2", // Add version parameter to force reload
+        "I blend injury prevention, rehab, strength, and cardio to build confident, resilient bodies safely and effectively. Execute now and move with purpose!",
+      image: "/images/coach-kimi.jpg?v=2",
       link: "/coaches/kimiya-kim",
     },
   ]
@@ -244,16 +244,6 @@ export default function HomePage() {
           <p className="text-sm text-white/90 text-center leading-relaxed italic px-2">
             "{coach.bioMobile || coach.bio}"
           </p>
-        </div>
-
-        {/* View Profile Link */}
-        <div className="mt-4 pt-4 border-t border-white/20 flex-shrink-0">
-          <Link
-            href={coach.link}
-            className="block text-center text-white text-sm font-medium hover:text-white/80 transition-colors"
-          >
-            View Full Profile →
-          </Link>
         </div>
       </div>
     </div>
@@ -534,9 +524,6 @@ export default function HomePage() {
                     "Hi, I'm Gabriella! Life doesn't slow down for you, but that doesn't mean your goals should wait. I
                     help busy individuals build strength, confidence, and a body they're proud of!"
                   </p>
-                  <Link href="/coming-soon" className="execfit-coach-link">
-                    View Profile <span className="execfit-arrow">→</span>
-                  </Link>
                 </div>
 
                 <div className="execfit-coach-card">
@@ -557,9 +544,6 @@ export default function HomePage() {
                     "Hi, I'm Maddy! I specialize in building amazing bodies, good habits, and strength. Let's build up
                     confidence with a fun, balanced approach to fitness!"
                   </p>
-                  <Link href="/coming-soon" className="execfit-coach-link">
-                    View Profile <span className="execfit-arrow">→</span>
-                  </Link>
                 </div>
 
                 <div className="execfit-coach-card">
@@ -580,9 +564,6 @@ export default function HomePage() {
                     "The most valuable thing we have is time, and I am passionate about helping you make that time
                     long-lasting while you become stronger and healthier."
                   </p>
-                  <Link href="/coming-soon" className="execfit-coach-link">
-                    View Profile <span className="execfit-arrow">→</span>
-                  </Link>
                 </div>
                 <div className="execfit-coach-card">
                   <div className="execfit-coach-image-container">
@@ -600,11 +581,8 @@ export default function HomePage() {
                   </p>
                   <p className="execfit-coach-bio">
                     "I blend injury prevention, rehab, strength, and cardio to build confident, resilient bodies safely
-                    and effectively. Execute now with some results-driven training!"
+                    and effectively. Execute now and move with purpose!"
                   </p>
-                  <Link href="/coming-soon" className="execfit-coach-link">
-                    View Profile <span className="execfit-arrow">→</span>
-                  </Link>
                 </div>
               </div>
 
