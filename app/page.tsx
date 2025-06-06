@@ -49,7 +49,7 @@ export default function HomePage() {
       id: "kimi",
       name: "Kimiya Kim",
       specialty: "Certified Personal Trainer | PN1 Nutrition Coach | Pre & Postnatal | ViPR 1",
-      bio: "I blend injury prevention, rehab, strength, and cardio to build confident, resilient bodies safely and effectively. Execute now with some results-driven training!",
+      bio: "I blend injury prevention, rehab, strength, and cardio to build confident, resilient bodies safely and effectively. Execute now and move with purpose!",
       bioMobile:
         "I blend injury prevention, rehab, strength, and cardio to build confident, resilient bodies safely and effectively.",
       image: "/images/coach-kimi.jpg?v=2", // Add version parameter to force reload
