@@ -276,20 +276,16 @@ export default function HomePage() {
   const getCardOpacity = (position: "current" | "next" | "prev" | "hidden") => {
     if (position === "hidden") return 0
 
-    // During transitions, only show the two cards involved in the transition
+    // Set opacity to 0 immediately when swipe direction is determined for traveling cards
     if (swipeDirection) {
       if (swipeDirection === "left") {
-        // Only current (fading out) and next (fading in) should be visible
         if (position === "current") return Math.max(0.3, 1 - 0.7) // Fade out as it leaves
         if (position === "next") return 1 // Fade in as it becomes current
-        // ALL other cards should be completely hidden during left swipe
-        return 0
+        if (position === "prev") return 0 // Hide previous card immediately during cross-screen travel
       } else if (swipeDirection === "right") {
-        // Only current (fading out) and prev (fading in) should be visible
         if (position === "current") return Math.max(0.3, 1 - 0.7) // Fade out as it leaves
         if (position === "prev") return 1 // Fade in as it becomes current
-        // ALL other cards should be completely hidden during right swipe
-        return 0
+        if (position === "next") return 0 // Hide next card immediately during cross-screen travel
       }
     }
 
@@ -301,11 +297,9 @@ export default function HomePage() {
       } else if (position === "prev" && getDragOffset() > 50) {
         return 0.8
       }
-      // Hide all other cards during dragging
-      return 0
     }
 
-    // Default opacities when not transitioning
+    // Default opacities
     if (position === "current") return 1
     if (position === "next" || position === "prev") return 0.7
     return 0
@@ -696,20 +690,16 @@ export default function HomePage() {
                       const getCardOpacity = () => {
                         if (position === "hidden") return 0
 
-                        // During transitions, only show the two cards involved in the transition
+                        // Set opacity to 0 immediately when swipe direction is determined for traveling cards
                         if (swipeDirection) {
                           if (swipeDirection === "left") {
-                            // Only current (fading out) and next (fading in) should be visible
                             if (position === "current") return Math.max(0.3, 1 - 0.7) // Fade out as it leaves
                             if (position === "next") return 1 // Fade in as it becomes current
-                            // ALL other cards should be completely hidden during left swipe
-                            return 0
+                            if (position === "prev") return 0 // Hide previous card immediately during cross-screen travel
                           } else if (swipeDirection === "right") {
-                            // Only current (fading out) and prev (fading in) should be visible
                             if (position === "current") return Math.max(0.3, 1 - 0.7) // Fade out as it leaves
                             if (position === "prev") return 1 // Fade in as it becomes current
-                            // ALL other cards should be completely hidden during right swipe
-                            return 0
+                            if (position === "next") return 0 // Hide next card immediately during cross-screen travel
                           }
                         }
 
@@ -721,11 +711,9 @@ export default function HomePage() {
                           } else if (position === "prev" && getDragOffset() > 50) {
                             return 0.8
                           }
-                          // Hide all other cards during dragging
-                          return 0
                         }
 
-                        // Default opacities when not transitioning
+                        // Default opacities
                         if (position === "current") return 1
                         if (position === "next" || position === "prev") return 0.7
                         return 0
