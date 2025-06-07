@@ -51,6 +51,15 @@ export default function HomePage() {
       image: "/images/coach-kimi.jpg?v=2",
       link: "/coaches/kimiya-kim",
     },
+    {
+      id: "donatas",
+      name: "Donatas Petrus",
+      specialty:
+        "Certified Personal Trainer | PNL1 Nutrition Coach | M.S. in Medical Science | ISSA Transformation Specialist | ISSA Corrective Exercise",
+      bio: "Your schedule is packed, but your goals aren't waiting. Let's transform your mind and body, for good. Exceptional training, better living.",
+      image: "/images/coach-donatas.jpg",
+      link: "/coaches/donatas-petrus",
+    },
   ]
 
   useEffect(() => {
@@ -558,85 +567,119 @@ export default function HomePage() {
                 performance.
               </p>
 
-              {/* Desktop coaches grid */}
-              <div className="execfit-coaches-grid desktop-only">
-                <div className="execfit-coach-card">
-                  <div className="execfit-coach-image-container">
-                    <Image
-                      src="/images/coach-gabriela.jpg?v=2"
-                      alt="Gabriela Garcia"
-                      width={150}
-                      height={150}
-                      className="execfit-coach-image"
-                    />
+              {/* Desktop coaches grid - Custom layout with 3 in top row, 2 in bottom row */}
+              <div className="desktop-only">
+                {/* Top row - 3 coaches */}
+                <div className="grid grid-cols-3 gap-8 mb-8">
+                  <div className="execfit-coach-card">
+                    <div className="execfit-coach-image-container">
+                      <Image
+                        src="/images/coach-gabriela.jpg?v=2"
+                        alt="Gabriela Garcia"
+                        width={150}
+                        height={150}
+                        className="execfit-coach-image"
+                      />
+                    </div>
+                    <h3 className="execfit-coach-name">Gabriela Garcia</h3>
+                    <p className="execfit-coach-specialty">
+                      Certified Personal Trainer | NASM Nutrition Coach | Pre-Script Barbell Coach | B.S. in Biology
+                    </p>
+                    <p className="execfit-coach-bio">
+                      "Hi, I'm Gabriela! Life doesn't slow down for you, but that doesn't mean your goals should wait. I
+                      help busy individuals build strength, confidence, and a body they're proud of!"
+                    </p>
                   </div>
-                  <h3 className="execfit-coach-name">Gabriela Garcia</h3>
-                  <p className="execfit-coach-specialty">
-                    Certified Personal Trainer | NASM Nutrition Coach | Pre-Script Barbell Coach | B.S. in Biology
-                  </p>
-                  <p className="execfit-coach-bio">
-                    "Hi, I'm Gabriela! Life doesn't slow down for you, but that doesn't mean your goals should wait. I
-                    help busy individuals build strength, confidence, and a body they're proud of!"
-                  </p>
+
+                  <div className="execfit-coach-card">
+                    <div className="execfit-coach-image-container">
+                      <Image
+                        src="/images/coach-maddy.jpg?v=2"
+                        alt="Maddy Gold"
+                        width={150}
+                        height={150}
+                        className="execfit-coach-image"
+                      />
+                    </div>
+                    <h3 className="execfit-coach-name">Maddy Gold</h3>
+                    <p className="execfit-coach-specialty">
+                      Certified Personal Trainer | PN1 Nutrition Coach | B.S. in Exercise Science
+                    </p>
+                    <p className="execfit-coach-bio">
+                      "Hi, I'm Maddy! I specialize in building amazing bodies, good habits, and strength. Let's build up
+                      confidence with a fun, balanced approach to fitness!"
+                    </p>
+                  </div>
+
+                  <div className="execfit-coach-card">
+                    <div className="execfit-coach-image-container">
+                      <Image
+                        src="/images/coach-ali.jpg?v=2"
+                        alt="Ali Salah"
+                        width={150}
+                        height={150}
+                        className="execfit-coach-image"
+                      />
+                    </div>
+                    <h3 className="execfit-coach-name">Ali Salah</h3>
+                    <p className="execfit-coach-specialty">
+                      Certified Personal Trainer | PN1 Nutrition Coach | ISSA Corrective Exercise
+                    </p>
+                    <p className="execfit-coach-bio">
+                      "The most valuable thing we have is time, and I am passionate about helping you make that time
+                      long-lasting while you become stronger and healthier."
+                    </p>
+                  </div>
                 </div>
 
-                <div className="execfit-coach-card">
-                  <div className="execfit-coach-image-container">
-                    <Image
-                      src="/images/coach-maddy.jpg?v=2"
-                      alt="Maddy Gold"
-                      width={150}
-                      height={150}
-                      className="execfit-coach-image"
-                    />
+                {/* Bottom row - 2 coaches, centered with same size as top row */}
+                <div className="grid grid-cols-3 gap-8">
+                  <div className="flex justify-end">
+                    <div className="execfit-coach-card">
+                      <div className="execfit-coach-image-container">
+                        <Image
+                          src="/images/coach-kimi.jpg?v=2"
+                          alt="Kimiya Kim"
+                          width={150}
+                          height={150}
+                          className="execfit-coach-image"
+                        />
+                      </div>
+                      <h3 className="execfit-coach-name">Kimiya Kim</h3>
+                      <p className="execfit-coach-specialty">
+                        Certified Personal Trainer | PN1 Nutrition Coach | Pre & Postnatal | ViPR 1
+                      </p>
+                      <p className="execfit-coach-bio">
+                        "I blend injury prevention, rehab, strength, and cardio to build confident, resilient bodies
+                        safely and effectively. Execute now and move with purpose!"
+                      </p>
+                    </div>
                   </div>
-                  <h3 className="execfit-coach-name">Maddy Gold</h3>
-                  <p className="execfit-coach-specialty">
-                    Certified Personal Trainer | PN1 Nutrition Coach | B.S. in Exercise Science
-                  </p>
-                  <p className="execfit-coach-bio">
-                    "Hi, I'm Maddy! I specialize in building amazing bodies, good habits, and strength. Let's build up
-                    confidence with a fun, balanced approach to fitness!"
-                  </p>
-                </div>
 
-                <div className="execfit-coach-card">
-                  <div className="execfit-coach-image-container">
-                    <Image
-                      src="/images/coach-ali.jpg?v=2"
-                      alt="Ali Salah"
-                      width={150}
-                      height={150}
-                      className="execfit-coach-image"
-                    />
+                  <div></div>
+
+                  <div className="flex justify-start">
+                    <div className="execfit-coach-card">
+                      <div className="execfit-coach-image-container">
+                        <Image
+                          src="/images/coach-donatas.jpg"
+                          alt="Donatas Petrus"
+                          width={150}
+                          height={150}
+                          className="execfit-coach-image"
+                        />
+                      </div>
+                      <h3 className="execfit-coach-name">Donatas Petrus</h3>
+                      <p className="execfit-coach-specialty">
+                        Certified Personal Trainer | PNL1 Nutrition Coach | M.S. in Medical Science | ISSA
+                        Transformation Specialist | ISSA Corrective Exercise
+                      </p>
+                      <p className="execfit-coach-bio">
+                        "Your schedule is packed, but your goals aren't waiting. Let's transform your mind and body, for
+                        good. Exceptional training, better living."
+                      </p>
+                    </div>
                   </div>
-                  <h3 className="execfit-coach-name">Ali Salah</h3>
-                  <p className="execfit-coach-specialty">
-                    Certified Personal Trainer | PN1 Nutrition Coach | ISSA Corrective Exercise
-                  </p>
-                  <p className="execfit-coach-bio">
-                    "The most valuable thing we have is time, and I am passionate about helping you make that time
-                    long-lasting while you become stronger and healthier."
-                  </p>
-                </div>
-                <div className="execfit-coach-card">
-                  <div className="execfit-coach-image-container">
-                    <Image
-                      src="/images/coach-kimi.jpg?v=2"
-                      alt="Kimiya Kim"
-                      width={150}
-                      height={150}
-                      className="execfit-coach-image"
-                    />
-                  </div>
-                  <h3 className="execfit-coach-name">Kimiya Kim</h3>
-                  <p className="execfit-coach-specialty">
-                    Certified Personal Trainer | PN1 Nutrition Coach | Pre & Postnatal | ViPR 1
-                  </p>
-                  <p className="execfit-coach-bio">
-                    "I blend injury prevention, rehab, strength, and cardio to build confident, resilient bodies safely
-                    and effectively. Execute now and move with purpose!"
-                  </p>
                 </div>
               </div>
 
@@ -776,7 +819,7 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                {/* Enhanced Navigation Dots */}
+                {/* Enhanced Navigation Dots - Updated for 5 coaches */}
                 <div className="flex justify-center mb-4">
                   <div className="flex space-x-3 bg-black/40 backdrop-blur-sm rounded-full px-6 py-3 border border-white/20">
                     {coaches.map((_, index) => (
@@ -854,9 +897,9 @@ export default function HomePage() {
                   <Link href="/" className="execfit-footer-link">
                     Home
                   </Link>
-                  <button onClick={() => scrollToSection("services")} className="execfit-footer-link">
-                    Services
-                  </button>
+                  <Link href="/program-options" className="execfit-footer-link">
+                    Program Options
+                  </Link>
                   <button onClick={() => scrollToSection("about")} className="execfit-footer-link">
                     About
                   </button>
