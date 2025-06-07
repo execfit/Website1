@@ -272,23 +272,26 @@ export default function HomePage() {
     return 1
   }
 
-  // Calculate opacity for this specific card
+  // Calculate opacity based on actual position rather than logical position
   const getCardOpacity = (position: "current" | "next" | "prev" | "hidden") => {
-    if (position === "hidden") return 0
-
-    // Set opacity to 0 immediately when swipe direction is determined for traveling cards
-    if (swipeDirection) {
+    // During swipe transitions, handle opacity based on actual positions
+    if (swipeDirection && isTransitioning) {
       if (swipeDirection === "left") {
-        if (position === "current") return Math.max(0.3, 1 - 0.7) // Fade out as it leaves
-        if (position === "next") return 1 // Fade in as it becomes current
-        if (position === "prev") return 0 // Hide previous card immediately during cross-screen travel
+        // When swiping left:
+        if (position === "current") return Math.max(0.3, 1 - 0.7) // Current card fading out
+        if (position === "next") return 1 // Next card becoming current
+        if (position === "prev") return 0 // Card traveling to hidden position - invisible during journey
+        return 0 // Cards at hidden position (translateX(500px)) always invisible
       } else if (swipeDirection === "right") {
-        if (position === "current") return Math.max(0.3, 1 - 0.7) // Fade out as it leaves
-        if (position === "prev") return 1 // Fade in as it becomes current
-        if (position === "next") return 0 // Hide next card immediately during cross-screen travel
+        // When swiping right:
+        if (position === "current") return Math.max(0.3, 1 - 0.7) // Current card fading out
+        if (position === "prev") return 1 // Prev card becoming current
+        if (position === "next") return 0 // Card traveling to hidden position - invisible during journey
+        return 0 // Cards at hidden position (translateX(500px)) always invisible
       }
     }
 
+    // During dragging, hide cards that would be at hidden position
     if (isDragging) {
       if (position === "current") {
         return Math.max(0.8, 1 - Math.abs(getDragOffset()) * 0.001)
@@ -297,11 +300,19 @@ export default function HomePage() {
       } else if (position === "prev" && getDragOffset() > 50) {
         return 0.8
       }
+      // All other cards (including those at hidden position) invisible during dragging
+      return 0
     }
 
-    // Default opacities
+    // Default opacities based on position:
+    // Cards at translateX(500px) scale(0.9) [hidden position] = 0 opacity
+    // Cards at translateX(350px) scale(0.95) [next position] = 0.7 opacity (after 400ms delay)
+    // Cards at translateX(0px) scale(1) [current position] = 1 opacity
+    // Cards at translateX(-350px) scale(0.95) [prev position] = 0.7 opacity (after 400ms delay)
+
     if (position === "current") return 1
     if (position === "next" || position === "prev") return 0.7
+    if (position === "hidden") return 0 // Cards at translateX(500px) always invisible
     return 0
   }
 
@@ -686,53 +697,33 @@ export default function HomePage() {
                         return "translateX(500px) scale(0.9)" // Hidden cards far off-screen
                       }
 
-                      // Calculate opacity for this specific card
-                      const getCardOpacity = () => {
-                        if (position === "hidden") return 0
-
-                        // Set opacity to 0 immediately when swipe direction is determined for traveling cards
-                        if (swipeDirection) {
-                          if (swipeDirection === "left") {
-                            if (position === "current") return Math.max(0.3, 1 - 0.7) // Fade out as it leaves
-                            if (position === "next") return 1 // Fade in as it becomes current
-                            if (position === "prev") return 0 // Hide previous card immediately during cross-screen travel
-                          } else if (swipeDirection === "right") {
-                            if (position === "current") return Math.max(0.3, 1 - 0.7) // Fade out as it leaves
-                            if (position === "prev") return 1 // Fade in as it becomes current
-                            if (position === "next") return 0 // Hide next card immediately during cross-screen travel
-                          }
-                        }
-
-                        if (isDragging) {
-                          if (position === "current") {
-                            return Math.max(0.8, 1 - Math.abs(getDragOffset()) * 0.001)
-                          } else if (position === "next" && getDragOffset() < -50) {
-                            return 0.8
-                          } else if (position === "prev" && getDragOffset() > 50) {
-                            return 0.8
-                          }
-                        }
-
-                        // Default opacities
-                        if (position === "current") return 1
-                        if (position === "next" || position === "prev") return 0.7
-                        return 0
-                      }
-
                       return (
                         <div
-                          key={`coach-${coach.id}`} // Stable key based on coach ID
+                          key={`coach-${coach.id}`}
                           className="absolute inset-0"
                           style={{
                             transform: getCardSpecificTransform(),
-                            opacity: getCardOpacity(),
+                            opacity: getCardOpacity(position),
                             zIndex: getCardZIndex(position),
-                            transition: isTransitioning
-                              ? "transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.4s ease-out" // Removed z-index from transition
-                              : isDragging
-                                ? "none"
-                                : "transform 0.2s ease-out, opacity 0.2s ease-out", // Removed z-index from transition
+                            transition:
+                              position === "hidden" ||
+                              (isTransitioning && swipeDirection === "left" && position === "prev") ||
+                              (isTransitioning && swipeDirection === "right" && position === "next")
+                                ? "transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)" // Transform only, no opacity transition for traveling cards
+                                : isTransitioning
+                                  ? "transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.4s ease-out"
+                                  : isDragging
+                                    ? "none"
+                                    : position === "next" || position === "prev"
+                                      ? "transform 0.2s ease-out, opacity 0.4s ease-out 0.4s" // 400ms delay for opacity when reaching next/prev position
+                                      : "transform 0.2s ease-out, opacity 0.2s ease-out",
                             pointerEvents: position === "current" && !isTransitioning ? "auto" : "none",
+                            // Force cards traveling to prev position AND hidden cards to be invisible
+                            ...((isTransitioning && swipeDirection === "left" && position === "prev") ||
+                            (isTransitioning && swipeDirection === "right" && position === "next") ||
+                            position === "hidden"
+                              ? { visibility: "hidden" }
+                              : {}),
                           }}
                         >
                           {renderCoachCard(coach)}
