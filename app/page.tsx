@@ -632,7 +632,7 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                {/* Bottom row - 2 coaches, centered with same size as top row */}
+                {/* Bottom row - 2 coaches with CTA in center */}
                 <div className="grid grid-cols-3 gap-8">
                   <div className="flex justify-end">
                     <div className="execfit-coach-card">
@@ -656,7 +656,13 @@ export default function HomePage() {
                     </div>
                   </div>
 
-                  <div></div>
+                  <div className="flex justify-center items-center">
+                    <div className="text-center">
+                      <Link href="/coming-soon" className="execfit-btn-primary execfit-btn-large">
+                        Schedule Free Consultation
+                      </Link>
+                    </div>
+                  </div>
 
                   <div className="flex justify-start">
                     <div className="execfit-coach-card">
@@ -856,29 +862,10 @@ export default function HomePage() {
                   </div>
                 </div>
               </div>
-
-              <div className="execfit-coaches-cta">
-                <Link href="/coaches" className="execfit-btn-secondary">
-                  View All Coaches
-                </Link>
-              </div>
             </div>
           </section>
 
           {/* CTA Section */}
-          <section id="contact" className="execfit-cta-section pt-16">
-            <div className="execfit-container">
-              <div className="execfit-cta-content">
-                <h2 className="execfit-cta-title execfit-title-glow">Ready to Transform Your Fitness?</h2>
-                <p className="execfit-cta-text">
-                  Join the elite professionals who have elevated their performance both in and out of the gym.
-                </p>
-                <Link href="/coming-soon" className="execfit-btn-primary execfit-btn-large">
-                  Schedule a Free Consultation
-                </Link>
-              </div>
-            </div>
-          </section>
 
           {/* Footer */}
           <footer className="execfit-site-footer">
