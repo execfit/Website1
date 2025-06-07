@@ -30,33 +30,17 @@ export default function Header() {
               Home
             </Link>
             <Link
+              href="/program-options"
+              className="text-white/80 hover:text-white transition-colors font-medium tracking-wide"
+            >
+              Program Options
+            </Link>
+            <Link
               href="/cookbooks"
               className="text-white/80 hover:text-white transition-colors font-medium tracking-wide"
             >
               Free Cookbooks
             </Link>
-            <button
-              onClick={() => {
-                const element = document.getElementById("services")
-                if (element) {
-                  element.scrollIntoView({ behavior: "smooth" })
-                }
-              }}
-              className="text-white/80 hover:text-white transition-colors font-medium tracking-wide"
-            >
-              Services
-            </button>
-            <button
-              onClick={() => {
-                const element = document.getElementById("coaches")
-                if (element) {
-                  element.scrollIntoView({ behavior: "smooth" })
-                }
-              }}
-              className="text-white/80 hover:text-white transition-colors font-medium tracking-wide"
-            >
-              Coaches
-            </button>
             <button
               onClick={() => {
                 const element = document.getElementById("contact")
@@ -110,36 +94,19 @@ export default function Header() {
                 Home
               </Link>
               <Link
+                href="/program-options"
+                className="block px-3 py-2 text-white/80 hover:text-white transition-colors font-medium tracking-wide"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Program Options
+              </Link>
+              <Link
                 href="/cookbooks"
                 className="block px-3 py-2 text-white/80 hover:text-white transition-colors font-medium tracking-wide"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Free Cookbooks
               </Link>
-              <button
-                onClick={() => {
-                  const element = document.getElementById("services")
-                  if (element) {
-                    element.scrollIntoView({ behavior: "smooth" })
-                  }
-                  setIsMenuOpen(false)
-                }}
-                className="block w-full text-left px-3 py-2 text-white/80 hover:text-white transition-colors font-medium tracking-wide"
-              >
-                Services
-              </button>
-              <button
-                onClick={() => {
-                  const element = document.getElementById("coaches")
-                  if (element) {
-                    element.scrollIntoView({ behavior: "smooth" })
-                  }
-                  setIsMenuOpen(false)
-                }}
-                className="block w-full text-left px-3 py-2 text-white/80 hover:text-white transition-colors font-medium tracking-wide"
-              >
-                Coaches
-              </button>
               <button
                 onClick={() => {
                   const element = document.getElementById("contact")

@@ -23,7 +23,7 @@ export default function HomePage() {
       id: "gabriela",
       name: "Gabriela Garcia",
       specialty: "Certified Personal Trainer | NASM Nutrition Coach | Pre-Script Barbell Coach | B.S. in Biology",
-      bio: "Life doesn't slow down for you, but that doesn't mean your goals should wait. I'll help you build strength, confidence, and a body you're proud of!",
+      bio: "Hi, I'm Gabriela! Life doesn't slow down for you, but that doesn't mean your goals should wait. I help busy individuals build strength, confidence, and a body they're proud of!",
       image: "/images/coach-gabriela.jpg?v=2", // Add version parameter to force reload
       link: "/coaches/gabriela-garcia",
     },
@@ -31,7 +31,7 @@ export default function HomePage() {
       id: "maddy",
       name: "Maddy Gold",
       specialty: "Certified Personal Trainer | PN1 Nutrition Coach | B.S. in Exercise Science",
-      bio: "I specialize in building amazing bodies, good habits, and strength. Let's build up confidence with a fun, balanced approach to fitness!",
+      bio: "Hi, I'm Maddy! I specialize in building amazing bodies, good habits, and strength. Let's build up confidence with a fun, balanced approach to fitness!",
       image: "/images/coach-maddy.jpg?v=2", // Add version parameter to force reload
       link: "/coaches/maddy-gold",
     },
@@ -40,9 +40,7 @@ export default function HomePage() {
       name: "Ali Salah",
       specialty: "Certified Personal Trainer | PN1 Nutrition Coach | ISSA Corrective Exercise",
       bio: "The most valuable thing we have is time, and I am passionate about helping you make that time long-lasting while you become stronger and healthier.",
-      bioMobile:
-        "I'm passionate about helping you make your time long-lasting while you become stronger and healthier.",
-      image: "/images/coach-ali.jpg?v=2", // Add version parameter to force reload
+      image: "/images/coach-ali.jpg?v=2",
       link: "/coaches/ali-salah",
     },
     {
@@ -50,8 +48,6 @@ export default function HomePage() {
       name: "Kimiya Kim",
       specialty: "Certified Personal Trainer | PN1 Nutrition Coach | Pre & Postnatal | ViPR 1",
       bio: "I blend injury prevention, rehab, strength, and cardio to build confident, resilient bodies safely and effectively. Execute now and move with purpose!",
-      bioMobile:
-        "I blend injury prevention, rehab, strength, and cardio to build confident, resilient bodies safely and effectively. Execute now and move with purpose!",
       image: "/images/coach-kimi.jpg?v=2",
       link: "/coaches/kimiya-kim",
     },
@@ -100,6 +96,55 @@ export default function HomePage() {
 
     return () => {
       window.removeEventListener("resize", setCanvasDimensions)
+    }
+  }, [])
+
+  // Force scroll to top on page load/refresh - Enhanced version
+  useEffect(() => {
+    // Immediate scroll to top
+    window.scrollTo(0, 0)
+
+    // Also set scroll restoration to manual to prevent browser auto-restoration
+    if ("scrollRestoration" in history) {
+      history.scrollRestoration = "manual"
+    }
+
+    // Additional scroll to top after a brief delay to override any browser restoration
+    const timeoutId = setTimeout(() => {
+      window.scrollTo(0, 0)
+    }, 0)
+
+    // Handle page visibility change (when user comes back to tab)
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        window.scrollTo(0, 0)
+      }
+    }
+
+    // Handle browser back/forward navigation
+    const handlePopState = () => {
+      window.scrollTo(0, 0)
+    }
+
+    // Handle page focus
+    const handleFocus = () => {
+      window.scrollTo(0, 0)
+    }
+
+    document.addEventListener("visibilitychange", handleVisibilityChange)
+    window.addEventListener("popstate", handlePopState)
+    window.addEventListener("focus", handleFocus)
+
+    return () => {
+      clearTimeout(timeoutId)
+      document.removeEventListener("visibilitychange", handleVisibilityChange)
+      window.removeEventListener("popstate", handlePopState)
+      window.removeEventListener("focus", handleFocus)
+
+      // Restore default scroll restoration when component unmounts
+      if ("scrollRestoration" in history) {
+        history.scrollRestoration = "auto"
+      }
     }
   }, [])
 
@@ -241,9 +286,7 @@ export default function HomePage() {
         <p className="text-xs text-white/80 text-center mb-4 leading-relaxed font-medium">{coach.specialty}</p>
 
         <div className="flex-1 flex items-center justify-center">
-          <p className="text-sm text-white/90 text-center leading-relaxed italic px-2">
-            "{coach.bioMobile || coach.bio}"
-          </p>
+          <p className="text-sm text-white/90 text-center leading-relaxed italic px-2">"{coach.bio}"</p>
         </div>
       </div>
     </div>
@@ -532,7 +575,7 @@ export default function HomePage() {
                     Certified Personal Trainer | NASM Nutrition Coach | Pre-Script Barbell Coach | B.S. in Biology
                   </p>
                   <p className="execfit-coach-bio">
-                    "Hi, I'm Gabriella! Life doesn't slow down for you, but that doesn't mean your goals should wait. I
+                    "Hi, I'm Gabriela! Life doesn't slow down for you, but that doesn't mean your goals should wait. I
                     help busy individuals build strength, confidence, and a body they're proud of!"
                   </p>
                 </div>
