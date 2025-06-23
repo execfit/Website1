@@ -432,11 +432,48 @@ export default function HomePage() {
         </div>
 
         <div className="tagline-container">
-          <h2 className="elevate-text" data-text="EXECUTE NOW.">
-            EXECUTE NOW.
-          </h2>
+          <h2 className="text-3xl font-bold text-white text-center tracking-widest">EXECUTE NOW.</h2>
         </div>
       </div>
+
+      {/* New Hero Content Section */}
+      <section className="hero-content-section">
+        <div className="execfit-container">
+          <div className="hero-content-wrapper">
+            {/* Main Headline */}
+            <h1 className="hero-main-headline" style={{ fontSize: "2.2rem" }}>
+              Elite Concierge Training for Boston's Luxury Residences
+            </h1>
+
+            {/* Subheadline */}
+            <p className="hero-subheadline execfit-raleway-text execfit-black-glow" style={{ fontSize: "1.1rem" }}>
+              Private in-building personal training for high-performing professionals. We help you move better, feel
+              stronger, and stay accountable — all without ever leaving home.
+            </p>
+
+            {/* CTA */}
+            <div className="hero-cta-container">
+              <p className="hero-cta-text execfit-raleway-text execfit-black-glow">
+                Get 1 FREE consultation and complimentary session
+                <br />
+                Text <span className="execute-highlight">"EXECUTE"</span> to 617-863-6189
+              </p>
+            </div>
+
+            {/* Support Bullets */}
+            <div className="hero-support-bullets">
+              <div className="support-bullet execfit-raleway-text execfit-black-glow">
+                <span className="bullet-icon">✓</span>
+                Certified, on-brand, and punctual coaches
+              </div>
+              <div className="support-bullet execfit-raleway-text execfit-black-glow">
+                <span className="bullet-icon">✓</span>
+                Available in select Back Bay, Seaport & South End buildings
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Main homepage content */}
       <div className="main-content">
@@ -445,28 +482,7 @@ export default function HomePage() {
           <section className="execfit-intro-section pt-0">
             <div className="execfit-container">
               <div className="execfit-intro-content">
-                {/* Dictionary Definition */}
-                <div
-                  className="execfit-dictionary-definition execfit-dictionary-definition-compact"
-                  style={{ boxShadow: "0 0 20px rgba(255, 255, 255, 0.3), 0 0 40px rgba(255, 255, 255, 0.2)" }}
-                >
-                  <div className="execfit-definition-content text-center">
-                    <div className="def-flex justify-center">
-                      <span className="execfit-term">SPECIAL OFFER</span>
-                    </div>
-                    <div className="def-flex def-flex-align-top justify-center">
-                      <span className="execfit-definition-text font-bold">
-                        Your first personal training session is completely FREE
-                      </span>
-                    </div>
-                    <div className="execfit-definition-source text-center">No commitment required</div>
-                  </div>
-                </div>
-
-                <p className="execfit-tagline execfit-raleway-text execfit-black-glow">
-                  We bring highly skilled coaches to luxury apartment buildings.
-                </p>
-                <div className="execfit-buttons">
+                <div className="execfit-buttons execfit-buttons-override-gap">
                   <Link href="/coming-soon" className="execfit-btn-primary">
                     Book Free Consultation
                   </Link>
