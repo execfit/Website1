@@ -17,9 +17,9 @@ export async function GET(request: NextRequest) {
 
     // Map cookbook IDs to file names
     const fileMap: Record<string, string> = {
-      "executive-physique": "execute-physique.pdf",
-      "lo-carb-hi-results": "lo-carb-hi-results.pdf",
-      "vegan-exec": "vegan-exec.pdf",
+      "executive-physique": "ExecPerformanceCookbook.pdf",
+      "lo-carb-hi-results": "Lo-Carb Cookbook.pdf",
+      "vegan-exec": "VeganExec Cookbook.pdf",
     }
 
     const fileName = fileMap[cookbookId]
@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
     console.log("File read successfully, size:", fileBuffer.length)
 
     // Create a more user-friendly filename
-    const downloadFileName = fileName.replace(/-/g, " ").replace(/\.pdf$/, " - ExecFit.pdf")
+    const downloadFileName = fileName.replace(/-/g, " ")
     console.log("Download filename:", downloadFileName)
 
     // Enhanced headers for better mobile compatibility

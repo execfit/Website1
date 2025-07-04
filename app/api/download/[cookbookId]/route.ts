@@ -8,9 +8,9 @@ export async function GET(request: NextRequest, { params }: { params: { cookbook
 
     // Map cookbook IDs to file names
     const fileMap: Record<string, string> = {
-      "executive-physique": "execute-physique.pdf",
-      "lo-carb-hi-results": "lo-carb-hi-results.pdf",
-      "vegan-exec": "vegan-exec.pdf",
+      "executive-physique": "ExecPerformanceCookbook.pdf",
+      "lo-carb-hi-results": "Lo-Carb Cookbook.pdf",
+      "vegan-exec": "VeganExec Cookbook.pdf",
     }
 
     const fileName = fileMap[cookbookId]

@@ -17,11 +17,11 @@ export default function CookbookDistribution() {
   const cookbooks = [
     {
       id: "executive-physique",
-      title: "Execute Physique Cookbook",
-      description: "Premium nutrition for peak performance with high-protein recipes designed for busy executives",
+      title: "Execute Performance Cookbook",
+      description: "Premium nutrition for absolute potential with high-protein recipes designed for busy executives",
       pages: 17,
       color: "bg-black/40 border-white/10 hover:border-white/20",
-      image: "/images/execute-physique-cropped.jpg",
+      image: "/images/execute-performance-cropped.jpg",
       originalImage: "/images/execute-physique-cookbook-cover.png",
       highlights: ["Power Protein Pancakes", "Mediterranean Protein Bowl", "Recovery Salmon Bowl", "Performance Pasta"],
     },
