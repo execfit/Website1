@@ -66,7 +66,7 @@ export default function Header() {
               </svg>
             </a>
             <Link
-              href="/coming-soon"
+              href="/start"
               className="bg-white text-black px-4 py-2 rounded-lg font-medium hover:bg-white/90 transition-colors"
             >
               Book Free Consultation
@@ -142,7 +142,7 @@ export default function Header() {
                 Follow @execfitnow
               </a>
               <Link
-                href="/coming-soon"
+                href="/start"
                 className="block mx-3 my-2 bg-white text-black px-4 py-2 rounded-lg font-medium hover:bg-white/90 transition-colors text-center"
                 onClick={() => setIsMenuOpen(false)}
               >

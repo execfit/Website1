@@ -483,7 +483,7 @@ export default function HomePage() {
             <div className="execfit-container">
               <div className="execfit-intro-content">
                 <div className="execfit-buttons execfit-buttons-override-gap">
-                  <Link href="/coming-soon" className="execfit-btn-primary">
+                  <Link href="/start" className="execfit-btn-primary">
                     Book Free Consultation
                   </Link>
                   <button onClick={() => scrollToSection("coaches")} className="execfit-btn-secondary">
@@ -565,8 +565,8 @@ export default function HomePage() {
                     ExecFit delivers results through personalized programming, accountability systems, and data-driven
                     progress tracking—all designed to maximize efficiency and effectiveness.
                   </p>
-                  <Link href="/coming-soon" className="execfit-text-link">
-                    Schedule your free consultation <span className="execfit-arrow">→</span>
+                  <Link href="/start" className="execfit-text-link">
+                    Book your free consultation <span className="execfit-arrow">→</span>
                   </Link>
                 </div>
               </div>
@@ -674,8 +674,8 @@ export default function HomePage() {
 
                   <div className="flex justify-center items-center">
                     <div className="text-center">
-                      <Link href="/coming-soon" className="execfit-btn-primary execfit-btn-large">
-                        Schedule Free Consultation
+                      <Link href="/start" className="execfit-btn-primary execfit-btn-large">
+                        Book Free Consultation
                       </Link>
                     </div>
                   </div>
