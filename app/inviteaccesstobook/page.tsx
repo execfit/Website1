@@ -110,10 +110,10 @@ export default function InviteAccessToBookPage() {
       {/* Main Content */}
       <div className="main-content">
         <div className="execfit-homepage">
-          <section className="py-20">
+          <section className="py-8 md:py-20">
             <div className="execfit-container">
               {/* Page Header */}
-              <div className="text-center mb-16">
+              <div className="text-center mb-8 md:mb-16">
                 <h1 className="execfit-section-title execfit-title-glow text-4xl md:text-5xl mb-6">
                   Book Your Free Consultation
                 </h1>
