@@ -13,7 +13,7 @@ export default function InviteAccessToBookPage() {
     {
       id: "chris-white",
       name: "Chris White",
-      title: "Founder & Lead Coach",
+      title: "Founder | ExecFit",
       specialty: "ACE Certified Personal Trainer | PN1 Nutrition Coach",
       image: "/images/chris-headshot.jpg",
       embedUrl:
@@ -26,7 +26,7 @@ export default function InviteAccessToBookPage() {
       specialty: "PN1 Nutrition Coach | B.S. in Exercise Science",
       image: "/images/maddy-headshot.jpg",
       embedUrl:
-        "https://start.execfitnow.com/a/booking/?serviceId=22790&staffId=2290067&embedded=true&iframe=true&web_embed=true",
+        "https://start.execfitnow.com/a/booking/?serviceId=PLACEHOLDER&staffId=PLACEHOLDER&embedded=true&iframe=true&web_embed=true",
     },
     {
       id: "donatas",
@@ -36,7 +36,7 @@ export default function InviteAccessToBookPage() {
         "PN1 Nutrition Coach | M.S. in Medical Science | ISSA Transformation Specialist | ISSA Corrective Exercise",
       image: "/images/donatas-headshot.jpg",
       embedUrl:
-        "https://start.execfitnow.com/a/booking/?serviceId=22790&staffId=2289084&embedded=true&iframe=true&web_embed=true",
+        "https://start.execfitnow.com/a/booking/?serviceId=PLACEHOLDER&staffId=PLACEHOLDER&embedded=true&iframe=true&web_embed=true",
     },
     {
       id: "kimi",
@@ -45,7 +45,7 @@ export default function InviteAccessToBookPage() {
       specialty: "PN1 Nutrition Coach | Pre & Postnatal | ViPR 1",
       image: "/images/kimi-headshot.jpg",
       embedUrl:
-        "https://start.execfitnow.com/a/booking/?serviceId=22790&staffId=2275183&embedded=true&iframe=true&web_embed=true",
+        "https://start.execfitnow.com/a/booking/?serviceId=PLACEHOLDER&staffId=PLACEHOLDER&embedded=true&iframe=true&web_embed=true",
     },
     {
       id: "ali",
@@ -54,7 +54,7 @@ export default function InviteAccessToBookPage() {
       specialty: "PN1 Nutrition Coach | ISSA Corrective Exercise",
       image: "/images/ali-headshot.jpg",
       embedUrl:
-        "https://start.execfitnow.com/a/booking/?serviceId=22790&staffId=2293435&embedded=true&iframe=true&web_embed=true",
+        "https://start.execfitnow.com/a/booking/?serviceId=PLACEHOLDER&staffId=PLACEHOLDER&embedded=true&iframe=true&web_embed=true",
     },
   ]
 
@@ -130,18 +130,18 @@ export default function InviteAccessToBookPage() {
                     {/* Coach Card */}
                     <div
                       className={`
-                        bg-gradient-to-br from-black/80 to-black/60 backdrop-blur-md 
-                        border border-white/20 rounded-xl p-6 cursor-pointer 
-                        transition-all duration-300 hover:border-white/40 hover:shadow-2xl
-                        ${expandedCoach === coach.id ? "border-white/40 shadow-2xl" : ""}
-                        ${index === 0 ? "ring-2 ring-white/30" : ""}
-                      `}
+  relative bg-gradient-to-br from-black/80 to-black/60 backdrop-blur-md 
+  border border-white/20 rounded-xl p-4 md:p-6 cursor-pointer 
+  transition-all duration-300 hover:border-white/40 hover:shadow-2xl
+  min-h-[120px] md:min-h-[140px]
+  ${expandedCoach === coach.id ? "border-white/40 shadow-2xl" : ""}
+`}
                       onClick={() => toggleCoach(coach.id)}
                     >
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-6">
+                        <div className="flex items-center space-x-4 md:space-x-6 w-full">
                           {/* Coach Image */}
-                          <div className="w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden border-2 border-white/30 shadow-lg flex-shrink-0">
+                          <div className="w-16 h-16 md:w-24 md:h-24 rounded-full overflow-hidden border-2 border-white/30 shadow-lg flex-shrink-0">
                             <Image
                               src={coach.image || "/placeholder.svg"}
                               alt={coach.name}
@@ -153,26 +153,35 @@ export default function InviteAccessToBookPage() {
                           </div>
 
                           {/* Coach Info */}
-                          <div className="flex-1">
-                            <div className="flex items-center space-x-3 mb-2">
-                              <h3 className="text-xl md:text-2xl font-bold text-white">{coach.name}</h3>
-                              {index === 0 && (
-                                <span className="bg-white/20 text-white text-xs px-2 py-1 rounded-full font-medium">
-                                  FOUNDER
-                                </span>
-                              )}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center space-x-3 mb-1 md:mb-2">
+                              <h3 className="text-lg md:text-xl lg:text-2xl font-bold text-white truncate">
+                                {coach.name}
+                              </h3>
                             </div>
-                            <p className="text-white/90 font-medium mb-1">{coach.title}</p>
-                            <p className="text-white/70 text-sm">{coach.specialty}</p>
+                            <p className="text-white/90 font-medium mb-1 text-sm md:text-base">{coach.title}</p>
+                            <p className="text-white/70 text-xs md:text-sm leading-tight">
+                              {/* Mobile-specific text for Donatas - remove ISSA Transformation Specialist */}
+                              {coach.id === "donatas" ? (
+                                <>
+                                  <span className="md:hidden">
+                                    PN1 Nutrition Coach | M.S. in Medical Science | ISSA Corrective Exercise
+                                  </span>
+                                  <span className="hidden md:inline">{coach.specialty}</span>
+                                </>
+                              ) : (
+                                coach.specialty
+                              )}
+                            </p>
                           </div>
                         </div>
 
                         {/* Expand/Collapse Icon */}
-                        <div className="flex-shrink-0 ml-4">
+                        <div className="flex-shrink-0 ml-2 md:ml-4">
                           {expandedCoach === coach.id ? (
-                            <ChevronUp className="w-6 h-6 text-white/80" />
+                            <ChevronUp className="w-5 h-5 md:w-6 md:h-6 text-white/80" />
                           ) : (
-                            <ChevronDown className="w-6 h-6 text-white/80" />
+                            <ChevronDown className="w-5 h-5 md:w-6 md:h-6 text-white/80" />
                           )}
                         </div>
                       </div>
