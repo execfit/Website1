@@ -26,7 +26,7 @@ export default function InviteAccessToBookPage() {
       specialty: "PN1 Nutrition Coach | B.S. in Exercise Science",
       image: "/images/maddy-headshot.jpg",
       embedUrl:
-        "https://start.execfitnow.com/a/booking/?serviceId=PLACEHOLDER&staffId=PLACEHOLDER&embedded=true&iframe=true&web_embed=true",
+        "https://start.execfitnow.com/a/booking/?serviceId=22790&staffId=2290067&embedded=true&iframe=true&web_embed=true",
     },
     {
       id: "donatas",
@@ -36,7 +36,7 @@ export default function InviteAccessToBookPage() {
         "PN1 Nutrition Coach | M.S. in Medical Science | ISSA Transformation Specialist | ISSA Corrective Exercise",
       image: "/images/donatas-headshot.jpg",
       embedUrl:
-        "https://start.execfitnow.com/a/booking/?serviceId=PLACEHOLDER&staffId=PLACEHOLDER&embedded=true&iframe=true&web_embed=true",
+        "https://start.execfitnow.com/a/booking/?serviceId=22790&staffId=2289084&embedded=true&iframe=true&web_embed=true",
     },
     {
       id: "kimi",
@@ -45,7 +45,7 @@ export default function InviteAccessToBookPage() {
       specialty: "PN1 Nutrition Coach | Pre & Postnatal | ViPR 1",
       image: "/images/kimi-headshot.jpg",
       embedUrl:
-        "https://start.execfitnow.com/a/booking/?serviceId=PLACEHOLDER&staffId=PLACEHOLDER&embedded=true&iframe=true&web_embed=true",
+        "https://start.execfitnow.com/a/booking/?serviceId=22790&staffId=2275183&embedded=true&iframe=true&web_embed=true",
     },
     {
       id: "ali",
@@ -54,7 +54,7 @@ export default function InviteAccessToBookPage() {
       specialty: "PN1 Nutrition Coach | ISSA Corrective Exercise",
       image: "/images/ali-headshot.jpg",
       embedUrl:
-        "https://start.execfitnow.com/a/booking/?serviceId=PLACEHOLDER&staffId=PLACEHOLDER&embedded=true&iframe=true&web_embed=true",
+        "https://start.execfitnow.com/a/booking/?serviceId=22790&staffId=2293435&embedded=true&iframe=true&web_embed=true",
     },
   ]
 
