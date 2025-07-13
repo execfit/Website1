@@ -20,6 +20,15 @@ export default function InviteAccessToBookPage() {
         "https://start.execfitnow.com/a/booking/?serviceId=22790&staffId=2240915&embedded=true&iframe=true&web_embed=true",
     },
     {
+      id: "ali",
+      name: "Ali Salah",
+      title: "Certified Personal Trainer",
+      specialty: "PN1 Nutrition Coach | ISSA Corrective Exercise",
+      image: "/images/ali-headshot.jpg",
+      embedUrl:
+        "https://start.execfitnow.com/a/booking/?serviceId=22790&staffId=2293435&embedded=true&iframe=true&web_embed=true",
+    },    
+    {
       id: "maddy",
       name: "Maddy Gold",
       title: "Certified Personal Trainer",
@@ -46,15 +55,6 @@ export default function InviteAccessToBookPage() {
       image: "/images/kimi-headshot.jpg",
       embedUrl:
         "https://start.execfitnow.com/a/booking/?serviceId=22790&staffId=2275183&embedded=true&iframe=true&web_embed=true",
-    },
-    {
-      id: "ali",
-      name: "Ali Salah",
-      title: "Certified Personal Trainer",
-      specialty: "PN1 Nutrition Coach | ISSA Corrective Exercise",
-      image: "/images/ali-headshot.jpg",
-      embedUrl:
-        "https://start.execfitnow.com/a/booking/?serviceId=22790&staffId=2293435&embedded=true&iframe=true&web_embed=true",
     },
   ]
 
@@ -220,6 +220,19 @@ export default function InviteAccessToBookPage() {
                   </div>
                 ))}
               </div>
+
+              {/* Footer Information Section */}
+              <div className="mt-12 md:mt-16 max-w-4xl mx-auto">
+                <div className="bg-gradient-to-br from-black/60 to-black/40 backdrop-blur-md border border-white/20 rounded-xl p-6 md:p-8">
+                  <div className="text-center">
+                    <h3 className="text-xl md:text-2xl font-bold text-white mb-4 execfit-title-glow">What to Expect</h3>
+                    <p className="execfit-raleway-text execfit-black-glow text-base md:text-lg leading-relaxed max-w-3xl mx-auto">
+                      Your coach will meet you in the lobby of your building to discuss your goals, exercise history,
+                      prior injuries, and provide some actionable steps you can execute right now.
+                    </p>
+                  </div>
+                </div>
+              </div>              
             </div>
           </section>
         </div>
