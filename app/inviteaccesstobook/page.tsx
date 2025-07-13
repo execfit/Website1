@@ -1,12 +1,74 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import Header from "@/components/header"
 import { ChevronDown, ChevronUp } from "lucide-react"
 
 export default function InviteAccessToBookPage() {
   const [expandedCoach, setExpandedCoach] = useState<string | null>(null)
+
+  // Force scroll to top on page load/refresh - Enhanced version for Safari
+  useEffect(() => {
+    // Immediate scroll to top
+    window.scrollTo(0, 0)
+
+    // Also set scroll restoration to manual to prevent browser auto-restoration
+    if ("scrollRestoration" in history) {
+      history.scrollRestoration = "manual"
+    }
+
+    // Additional scroll to top after a brief delay to override any browser restoration
+    const timeoutId = setTimeout(() => {
+      window.scrollTo(0, 0)
+    }, 0)
+
+    // Safari-specific: Additional delay for Safari's scroll restoration
+    const safariTimeoutId = setTimeout(() => {
+      window.scrollTo(0, 0)
+    }, 100)
+
+    // Handle page visibility change (when user comes back to tab)
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        window.scrollTo(0, 0)
+      }
+    }
+
+    // Handle browser back/forward navigation
+    const handlePopState = () => {
+      window.scrollTo(0, 0)
+    }
+
+    // Handle page focus
+    const handleFocus = () => {
+      window.scrollTo(0, 0)
+    }
+
+    // Handle page show event (Safari specific)
+    const handlePageShow = () => {
+      window.scrollTo(0, 0)
+    }
+
+    document.addEventListener("visibilitychange", handleVisibilityChange)
+    window.addEventListener("popstate", handlePopState)
+    window.addEventListener("focus", handleFocus)
+    window.addEventListener("pageshow", handlePageShow)
+
+    return () => {
+      clearTimeout(timeoutId)
+      clearTimeout(safariTimeoutId)
+      document.removeEventListener("visibilitychange", handleVisibilityChange)
+      window.removeEventListener("popstate", handlePopState)
+      window.removeEventListener("focus", handleFocus)
+      window.removeEventListener("pageshow", handlePageShow)
+
+      // Restore default scroll restoration when component unmounts
+      if ("scrollRestoration" in history) {
+        history.scrollRestoration = "auto"
+      }
+    }
+  }, [])
 
   // Coaches list with Chris White first
   const coaches = [
