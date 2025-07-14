@@ -3,71 +3,14 @@
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import Header from "@/components/header"
-import { ChevronDown, ChevronUp } from "lucide-react"
+import { ChevronDown, ChevronUp, ExternalLink } from "lucide-react"
 
 export default function InviteAccessToBookPage() {
   const [expandedCoach, setExpandedCoach] = useState<string | null>(null)
 
-  // Force scroll to top on page load/refresh - Enhanced version for Safari
+  // Simple scroll to top on page load only
   useEffect(() => {
-    // Immediate scroll to top
     window.scrollTo(0, 0)
-
-    // Also set scroll restoration to manual to prevent browser auto-restoration
-    if ("scrollRestoration" in history) {
-      history.scrollRestoration = "manual"
-    }
-
-    // Additional scroll to top after a brief delay to override any browser restoration
-    const timeoutId = setTimeout(() => {
-      window.scrollTo(0, 0)
-    }, 0)
-
-    // Safari-specific: Additional delay for Safari's scroll restoration
-    const safariTimeoutId = setTimeout(() => {
-      window.scrollTo(0, 0)
-    }, 100)
-
-    // Handle page visibility change (when user comes back to tab)
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        window.scrollTo(0, 0)
-      }
-    }
-
-    // Handle browser back/forward navigation
-    const handlePopState = () => {
-      window.scrollTo(0, 0)
-    }
-
-    // Handle page focus
-    const handleFocus = () => {
-      window.scrollTo(0, 0)
-    }
-
-    // Handle page show event (Safari specific)
-    const handlePageShow = () => {
-      window.scrollTo(0, 0)
-    }
-
-    document.addEventListener("visibilitychange", handleVisibilityChange)
-    window.addEventListener("popstate", handlePopState)
-    window.addEventListener("focus", handleFocus)
-    window.addEventListener("pageshow", handlePageShow)
-
-    return () => {
-      clearTimeout(timeoutId)
-      clearTimeout(safariTimeoutId)
-      document.removeEventListener("visibilitychange", handleVisibilityChange)
-      window.removeEventListener("popstate", handlePopState)
-      window.removeEventListener("focus", handleFocus)
-      window.removeEventListener("pageshow", handlePageShow)
-
-      // Restore default scroll restoration when component unmounts
-      if ("scrollRestoration" in history) {
-        history.scrollRestoration = "auto"
-      }
-    }
   }, [])
 
   // Coaches list with Chris White first
@@ -78,8 +21,7 @@ export default function InviteAccessToBookPage() {
       title: "Founder | ExecFit",
       specialty: "ACE Certified Personal Trainer | PN1 Nutrition Coach",
       image: "/images/chris-headshot.jpg",
-      embedUrl:
-        "https://start.execfitnow.com/a/booking/?serviceId=22790&staffId=2240915&embedded=true&iframe=true&web_embed=true",
+      bookingUrl: "https://start.execfitnow.com/a/booking/?serviceId=22790&staffId=2240915",
     },
     {
       id: "ali",
@@ -87,17 +29,15 @@ export default function InviteAccessToBookPage() {
       title: "Certified Personal Trainer",
       specialty: "PN1 Nutrition Coach | ISSA Corrective Exercise",
       image: "/images/ali-headshot.jpg",
-      embedUrl:
-        "https://start.execfitnow.com/a/booking/?serviceId=22790&staffId=2293435&embedded=true&iframe=true&web_embed=true",
-    },    
+      bookingUrl: "https://start.execfitnow.com/a/booking/?serviceId=22790&staffId=2293435",
+    },
     {
       id: "maddy",
       name: "Maddy Gold",
       title: "Certified Personal Trainer",
       specialty: "PN1 Nutrition Coach | B.S. in Exercise Science",
       image: "/images/maddy-headshot.jpg",
-      embedUrl:
-        "https://start.execfitnow.com/a/booking/?serviceId=22790&staffId=2290067&embedded=true&iframe=true&web_embed=true",
+      bookingUrl: "https://start.execfitnow.com/a/booking/?serviceId=22790&staffId=2290067",
     },
     {
       id: "donatas",
@@ -106,8 +46,7 @@ export default function InviteAccessToBookPage() {
       specialty:
         "PN1 Nutrition Coach | M.S. in Medical Science | ISSA Transformation Specialist | ISSA Corrective Exercise",
       image: "/images/donatas-headshot.jpg",
-      embedUrl:
-        "https://start.execfitnow.com/a/booking/?serviceId=22790&staffId=2289084&embedded=true&iframe=true&web_embed=true",
+      bookingUrl: "https://start.execfitnow.com/a/booking/?serviceId=22790&staffId=2289084",
     },
     {
       id: "kimi",
@@ -115,13 +54,16 @@ export default function InviteAccessToBookPage() {
       title: "Certified Personal Trainer",
       specialty: "PN1 Nutrition Coach | Pre & Postnatal | ViPR 1",
       image: "/images/kimi-headshot.jpg",
-      embedUrl:
-        "https://start.execfitnow.com/a/booking/?serviceId=22790&staffId=2275183&embedded=true&iframe=true&web_embed=true",
+      bookingUrl: "https://start.execfitnow.com/a/booking/?serviceId=22790&staffId=2275183",
     },
   ]
 
   const toggleCoach = (coachId: string) => {
     setExpandedCoach(expandedCoach === coachId ? null : coachId)
+  }
+
+  const openBooking = (coach: (typeof coaches)[0]) => {
+    window.open(coach.bookingUrl, "_blank", "noopener,noreferrer")
   }
 
   return (
@@ -181,7 +123,7 @@ export default function InviteAccessToBookPage() {
                 </h1>
                 <p className="execfit-raleway-text execfit-black-glow text-lg md:text-xl max-w-3xl mx-auto">
                   Choose your preferred coach and schedule your complimentary consultation session. Click on any coach
-                  below to access their calendar.
+                  below to book your appointment.
                 </p>
               </div>
 
@@ -249,33 +191,26 @@ export default function InviteAccessToBookPage() {
                       </div>
                     </div>
 
-                    {/* Embedded Booking Calendar */}
+                    {/* Booking Button */}
                     {expandedCoach === coach.id && (
-                      <div className="mt-4 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl overflow-hidden">
-                        <div className="p-4 border-b border-white/10">
-                          <h4 className="text-white font-medium text-center">Schedule with {coach.name}</h4>
-                        </div>
-                        <div className="relative">
-                          {coach.embedUrl.includes("PLACEHOLDER") ? (
-                            <div className="h-96 flex items-center justify-center bg-black/40">
-                              <div className="text-center">
-                                <p className="text-white/60 mb-2">Booking calendar coming soon</p>
-                                <p className="text-white/40 text-sm">
-                                  Contact us directly to schedule with {coach.name}
-                                </p>
-                              </div>
-                            </div>
-                          ) : (
-                            <iframe
-                              src={coach.embedUrl}
-                              width="100%"
-                              height="600"
-                              frameBorder="0"
-                              scrolling="yes"
-                              className="w-full"
-                              title={`Book consultation with ${coach.name}`}
-                            />
-                          )}
+                      <div className="mt-4 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-6">
+                        <div className="text-center">
+                          <h4 className="text-white font-medium mb-4">Ready to book with {coach.name}?</h4>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              openBooking(coach)
+                            }}
+                            className="inline-flex items-center justify-center space-x-2 bg-white text-black 
+                                     hover:bg-white/90 rounded-lg py-3 px-8 transition-all duration-300
+                                     font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105"
+                          >
+                            <span>Book with {coach.name}</span>
+                            <ExternalLink className="w-5 h-5" />
+                          </button>
+                          <p className="text-white/60 text-sm mt-3">
+                            Opens in a new tab for the best booking experience
+                          </p>
                         </div>
                       </div>
                     )}
@@ -294,7 +229,7 @@ export default function InviteAccessToBookPage() {
                     </p>
                   </div>
                 </div>
-              </div>              
+              </div>
             </div>
           </section>
         </div>
